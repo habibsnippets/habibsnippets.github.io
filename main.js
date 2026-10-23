@@ -733,13 +733,45 @@
     function drawMouseBox() {
       if (!mouse.active) return;
 
-      // Find closest target hovered by mouse (with generous padding for comfortable interaction)
+      var canvasRect = canvas.getBoundingClientRect();
+      var wordSeeEl = document.getElementById("wordSee");
+      var wordReasonEl = document.getElementById("wordReason");
+
+      var wordTargets = [];
+      if (wordSeeEl) {
+        var rS = wordSeeEl.getBoundingClientRect();
+        wordTargets.push({
+          label: "see",
+          baseConf: 0.98,
+          x: rS.left - canvasRect.left,
+          y: rS.top - canvasRect.top,
+          bw: rS.width,
+          bh: rS.height,
+          isH1Word: true
+        });
+      }
+      if (wordReasonEl) {
+        var rR = wordReasonEl.getBoundingClientRect();
+        wordTargets.push({
+          label: "reason",
+          baseConf: 0.98,
+          x: rR.left - canvasRect.left,
+          y: rR.top - canvasRect.top,
+          bw: rR.width,
+          bh: rR.height,
+          isH1Word: true
+        });
+      }
+
+      // Check all targets + heading words
+      var allTargets = targets.concat(wordTargets);
       var hoveredTarget = null;
       var minDist = Infinity;
-      for (var i = 0; i < targets.length; i++) {
-        var trg = targets[i];
-        if (mouse.x >= trg.x - 22 && mouse.x <= trg.x + trg.bw + 22 &&
-            mouse.y >= trg.y - 22 && mouse.y <= trg.y + trg.bh + 22) {
+      for (var i = 0; i < allTargets.length; i++) {
+        var trg = allTargets[i];
+        var pad = trg.isH1Word ? 14 : 22;
+        if (mouse.x >= trg.x - pad && mouse.x <= trg.x + trg.bw + pad &&
+            mouse.y >= trg.y - pad && mouse.y <= trg.y + trg.bh + pad) {
           var cx = trg.x + trg.bw / 2, cy = trg.y + trg.bh / 2;
           var d = Math.hypot(mouse.x - cx, mouse.y - cy);
           if (d < minDist) {

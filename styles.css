@@ -455,6 +455,139 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .grad-a { background: var(--grad-a) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent; }
 .grad-b { background: var(--grad-b) !important; -webkit-background-clip: text !important; background-clip: text !important; color: transparent; }
 
+/* ── Interactive H1 Words ("see" -> blinking eye, "reason" -> brain) ── */
+.h1-interactive {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  vertical-align: baseline;
+  padding: 0 4px;
+}
+
+.h1-interactive .word-text {
+  display: inline-block;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.h1-interactive .word-icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.65);
+  pointer-events: none;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+}
+
+.h1-interactive:hover .word-text,
+.h1-interactive.is-active .word-text {
+  opacity: 0;
+  transform: scale(0.65);
+}
+
+.h1-interactive:hover .word-icon,
+.h1-interactive.is-active .word-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Bounding box reticle around the word */
+.h1-interactive::before {
+  content: "";
+  position: absolute;
+  inset: -3px -6px;
+  border: 1.5px solid var(--sky);
+  border-radius: 4px;
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  pointer-events: none;
+}
+.h1-interactive::after {
+  content: "see 0.99";
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: -6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 6px;
+  background: var(--bg);
+  border: 1px solid var(--sky);
+  color: var(--sky);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  pointer-events: none;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+#wordSee { color: var(--sky); }
+#wordSee::before { border-color: var(--sky); }
+#wordSee::after {
+  content: "see 0.99";
+  border-color: var(--sky);
+  color: var(--sky);
+}
+
+#wordReason { color: var(--violet); }
+#wordReason::before { border-color: var(--violet); }
+#wordReason::after {
+  content: "reason 0.99";
+  border-color: var(--violet);
+  color: var(--violet);
+}
+
+.h1-interactive:hover::before,
+.h1-interactive.is-active::before {
+  opacity: 1;
+  transform: scale(1);
+}
+.h1-interactive:hover::after,
+.h1-interactive.is-active::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Eye Blinking Animation */
+@keyframes eyeBlink {
+  0%, 82%, 100% {
+    transform: scaleY(1);
+  }
+  86%, 92% {
+    transform: scaleY(0.08);
+  }
+}
+.h1-eye-svg {
+  color: var(--sky);
+  filter: drop-shadow(0 0 8px rgba(125, 211, 252, 0.5));
+  animation: eyeBlink 2.6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+/* Brain Pulse Animation */
+@keyframes brainPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px rgba(196, 181, 253, 0.4));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(196, 181, 253, 0.8));
+  }
+}
+.h1-brain-svg {
+  color: var(--violet);
+  animation: brainPulse 2s infinite ease-in-out;
+  transform-origin: center;
+}
+
 .lede {
   font-size: clamp(1rem, 1.35vw, 1.125rem);
   line-height: 1.72;
