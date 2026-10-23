@@ -686,7 +686,7 @@
         ctx.restore();
 
         // Confidence score badge: "cat 0.98", "person 0.96", etc.
-        ctx.font = "500 11px 'IBM Plex Mono', ui-monospace, monospace";
+        ctx.font = "500 11px 'JetBrains Mono', ui-monospace, monospace";
         var confVal = (b.conf + Math.sin(t * 0.003 + b.phase) * 0.008).toFixed(2);
         var text = b.label + " " + confVal;
         var tw = ctx.measureText(text).width;
@@ -719,7 +719,7 @@
         corner(x + bw, y + bh, len, -1, -1);
 
         // Scanning hint
-        ctx.font = "10px 'IBM Plex Mono', ui-monospace, monospace";
+        ctx.font = "10px 'JetBrains Mono', ui-monospace, monospace";
         var scanText = "scanning…";
         var stw = ctx.measureText(scanText).width;
         var sly = y > 22 ? y - 5 : y + bh + 14;
@@ -806,7 +806,7 @@
         ctx.lineTo(hx + hw - 2, hy + hh * mscan);
         ctx.stroke();
 
-        ctx.font = "500 11px 'IBM Plex Mono', ui-monospace, monospace";
+        ctx.font = "500 11px 'JetBrains Mono', ui-monospace, monospace";
         var mconf = (hoveredTarget.baseConf + 0.01).toFixed(2);
         var mtext = hoveredTarget.label + " " + mconf;
         var mtw = ctx.measureText(mtext).width;
@@ -828,7 +828,7 @@
         ctx.lineWidth = 1;
         ctx.strokeRect(mx + 0.5, my + 0.5, bw, bh);
 
-        ctx.font = "10px 'IBM Plex Mono', ui-monospace, monospace";
+        ctx.font = "10px 'JetBrains Mono', ui-monospace, monospace";
         var text = "cursor 0.99";
         var tw = ctx.measureText(text).width;
         ctx.fillStyle = C.labelBg;
