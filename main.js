@@ -340,6 +340,133 @@
       ctx.restore();
     }
 
+    function drawCar(ctx, x, y, bw, bh, isDetected, isDark, t) {
+      ctx.save();
+      ctx.translate(x, y);
+      var strokeColor = isDetected
+        ? (isDark ? "rgba(56, 189, 248, 0.95)" : "rgba(2, 132, 199, 0.95)")
+        : (isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(30, 41, 59, 0.38)");
+      var fillColor = isDetected
+        ? (isDark ? "rgba(56, 189, 248, 0.16)" : "rgba(2, 132, 199, 0.10)")
+        : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(30, 41, 59, 0.07)");
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = fillColor;
+      ctx.lineWidth = isDetected ? 1.8 : 1.3;
+
+      var wheelR = 8.5;
+      var wheelY = bh - 6;
+      var frontWheelX = bw - 24;
+      var backWheelX = 26;
+
+      // Car body silhouette
+      ctx.beginPath();
+      ctx.moveTo(6, bh - 10);
+      ctx.lineTo(6, bh - 22);
+      ctx.bezierCurveTo(10, bh - 26, 16, bh - 27, 24, bh - 27);
+      ctx.lineTo(38, 12);
+      ctx.lineTo(bw - 42, 12);
+      ctx.lineTo(bw - 24, bh - 25);
+      ctx.lineTo(bw - 6, bh - 24);
+      ctx.bezierCurveTo(bw - 4, bh - 18, bw - 4, bh - 12, bw - 6, bh - 10);
+      ctx.lineTo(frontWheelX + wheelR + 3, bh - 10);
+      ctx.arc(frontWheelX, wheelY, wheelR + 3, 0, Math.PI, true);
+      ctx.lineTo(backWheelX + wheelR + 3, bh - 10);
+      ctx.arc(backWheelX, wheelY, wheelR + 3, 0, Math.PI, true);
+      ctx.lineTo(6, bh - 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Wheels
+      ctx.fillStyle = isDark ? "#18181b" : "#475569";
+      ctx.beginPath();
+      ctx.arc(frontWheelX, wheelY, wheelR, 0, Math.PI * 2);
+      ctx.arc(backWheelX, wheelY, wheelR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Hubcaps
+      ctx.fillStyle = strokeColor;
+      ctx.beginPath();
+      ctx.arc(frontWheelX, wheelY, 3, 0, Math.PI * 2);
+      ctx.arc(backWheelX, wheelY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Windows
+      ctx.beginPath();
+      ctx.moveTo(39, 15);
+      ctx.lineTo(54, 15);
+      ctx.lineTo(54, bh - 25);
+      ctx.lineTo(27, bh - 25);
+      ctx.closePath();
+      ctx.moveTo(58, 15);
+      ctx.lineTo(bw - 44, 15);
+      ctx.lineTo(bw - 28, bh - 25);
+      ctx.lineTo(58, bh - 25);
+      ctx.closePath();
+      ctx.stroke();
+
+      if (isDetected) {
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(bw - 8, bh - 18, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#f43f5e";
+        ctx.beginPath();
+        ctx.arc(8, bh - 19, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawBird(ctx, x, y, bw, bh, isDetected, isDark, t) {
+      ctx.save();
+      ctx.translate(x, y);
+      var strokeColor = isDetected
+        ? (isDark ? "rgba(244, 114, 182, 0.95)" : "rgba(219, 39, 119, 0.95)")
+        : (isDark ? "rgba(255, 255, 255, 0.35)" : "rgba(30, 41, 59, 0.38)");
+      var fillColor = isDetected
+        ? (isDark ? "rgba(244, 114, 182, 0.16)" : "rgba(219, 39, 119, 0.10)")
+        : (isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(30, 41, 59, 0.07)");
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = fillColor;
+      ctx.lineWidth = isDetected ? 1.8 : 1.3;
+
+      var flap = Math.sin(t * 0.005) * 4;
+
+      ctx.beginPath();
+      ctx.moveTo(bw - 4, 16);
+      ctx.lineTo(bw - 11, 13);
+      ctx.bezierCurveTo(bw - 13, 8, bw - 20, 8, bw - 24, 14);
+      ctx.bezierCurveTo(bw - 30, 20, 18, 26, 6, 36);
+      ctx.lineTo(4, 40);
+      ctx.lineTo(12, 36);
+      ctx.lineTo(16, 33);
+      ctx.lineTo(18, bh - 3);
+      ctx.lineTo(24, bh - 3);
+      ctx.lineTo(25, 31);
+      ctx.bezierCurveTo(bw - 16, 32, bw - 10, 26, bw - 11, 18);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(bw - 20, 17);
+      ctx.bezierCurveTo(bw - 28, 16 + flap, 14, 23 + flap, 10, 31);
+      ctx.bezierCurveTo(18, 28, bw - 16, 26, bw - 20, 17);
+      ctx.fill();
+      ctx.stroke();
+
+      var eyeColor = isDetected ? (isDark ? "#f472b6" : "#db2777") : strokeColor;
+      ctx.fillStyle = eyeColor;
+      ctx.beginPath();
+      ctx.arc(bw - 16, 14, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
     function drawDog(ctx, x, y, bw, bh, isDetected, isDark, t) {
       ctx.save();
       ctx.translate(x, y);
@@ -402,11 +529,33 @@
         {
           type: "person",
           label: "person",
-          baseConf: 0.96,
-          bw: 64,
-          bh: 138,
-          x: isWide ? w * 0.65 : w * 0.55,
-          y: Math.max(70, h * 0.18),
+          baseConf: 0.97,
+          bw: 62,
+          bh: 136,
+          x: isWide ? w * 0.54 : w * 0.48,
+          y: Math.max(60, h * 0.16),
+          detectedByBox: false,
+          detectedByMouse: false
+        },
+        {
+          type: "bird",
+          label: "bird",
+          baseConf: 0.94,
+          bw: 50,
+          bh: 44,
+          x: isWide ? w * 0.73 : w * 0.68,
+          y: Math.max(50, h * 0.12),
+          detectedByBox: false,
+          detectedByMouse: false
+        },
+        {
+          type: "car",
+          label: "car",
+          baseConf: 0.95,
+          bw: 114,
+          bh: 54,
+          x: isWide ? w * 0.70 : w * 0.62,
+          y: Math.max(130, h * 0.38),
           detectedByBox: false,
           detectedByMouse: false
         },
@@ -416,19 +565,19 @@
           baseConf: 0.98,
           bw: 68,
           bh: 72,
-          x: isWide ? w * 0.83 : w * 0.72,
-          y: Math.max(120, h * 0.48),
+          x: isWide ? w * 0.85 : w * 0.75,
+          y: Math.max(180, h * 0.60),
           detectedByBox: false,
           detectedByMouse: false
         },
         {
           type: "cat_walking",
           label: "cat",
-          baseConf: 0.95,
+          baseConf: 0.96,
           bw: 84,
           bh: 56,
-          x: isWide ? w * 0.58 : w * 0.40,
-          y: Math.max(180, h * 0.68),
+          x: isWide ? w * 0.54 : w * 0.38,
+          y: Math.max(220, h * 0.70),
           detectedByBox: false,
           detectedByMouse: false
         }
@@ -441,8 +590,8 @@
           baseConf: 0.93,
           bw: 76,
           bh: 68,
-          x: w * 0.85,
-          y: Math.max(80, h * 0.16),
+          x: w * 0.86,
+          y: Math.max(70, h * 0.18),
           detectedByBox: false,
           detectedByMouse: false
         });
@@ -584,20 +733,25 @@
     function drawMouseBox() {
       if (!mouse.active) return;
 
-      // Check if mouse hovers over any target
+      // Find closest target hovered by mouse (with generous padding for comfortable interaction)
       var hoveredTarget = null;
+      var minDist = Infinity;
       for (var i = 0; i < targets.length; i++) {
         var trg = targets[i];
-        if (mouse.x >= trg.x - 15 && mouse.x <= trg.x + trg.bw + 15 &&
-            mouse.y >= trg.y - 15 && mouse.y <= trg.y + trg.bh + 15) {
-          hoveredTarget = trg;
-          trg.detectedByMouse = true;
-          break;
+        if (mouse.x >= trg.x - 22 && mouse.x <= trg.x + trg.bw + 22 &&
+            mouse.y >= trg.y - 22 && mouse.y <= trg.y + trg.bh + 22) {
+          var cx = trg.x + trg.bw / 2, cy = trg.y + trg.bh / 2;
+          var d = Math.hypot(mouse.x - cx, mouse.y - cy);
+          if (d < minDist) {
+            minDist = d;
+            hoveredTarget = trg;
+          }
         }
       }
 
       ctx.save();
       if (hoveredTarget) {
+        hoveredTarget.detectedByMouse = true;
         var hx = hoveredTarget.x - 10, hy = hoveredTarget.y - 10;
         var hw = hoveredTarget.bw + 20, hh = hoveredTarget.bh + 20;
 
@@ -611,15 +765,28 @@
         corner(hx, hy + hh, mlen, 1, -1);
         corner(hx + hw, hy + hh, mlen, -1, -1);
 
+        // Scan beam
+        var mscan = ((Date.now() * 0.002) % 1);
+        ctx.strokeStyle = C.isDark ? "rgba(196, 181, 253, 0.4)" : "rgba(124, 58, 237, 0.35)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(hx + 2, hy + hh * mscan);
+        ctx.lineTo(hx + hw - 2, hy + hh * mscan);
+        ctx.stroke();
+
         ctx.font = "500 11px 'IBM Plex Mono', ui-monospace, monospace";
-        var mtext = hoveredTarget.label + " 0.99";
+        var mconf = (hoveredTarget.baseConf + 0.01).toFixed(2);
+        var mtext = hoveredTarget.label + " " + mconf;
         var mtw = ctx.measureText(mtext).width;
+        var mly = hy > 24 ? hy - 6 : hy + hh + 16;
+
         ctx.fillStyle = C.labelBg;
-        ctx.fillRect(hx, hy + hh + 4, mtw + 10, 16);
+        ctx.fillRect(hx, mly - 12, mtw + 12, 16);
         ctx.strokeStyle = C.cursor;
-        ctx.strokeRect(hx, hy + hh + 4, mtw + 10, 16);
+        ctx.lineWidth = 0.8;
+        ctx.strokeRect(hx, mly - 12, mtw + 12, 16);
         ctx.fillStyle = C.cursorLabel;
-        ctx.fillText(mtext, hx + 5, hy + hh + 16);
+        ctx.fillText(mtext, hx + 5, mly);
       } else {
         var bw = 140, bh = 104;
         var mx = mouse.x - bw / 2, my = mouse.y - bh / 2;
@@ -767,7 +934,7 @@
       // First draw Mouse Box detection (which sets detectedByMouse)
       drawMouseBox();
 
-      // Render Targets (Cats, Person, Dog)
+      // Render Targets (Cats, Person, Car, Bird, Dog)
       for (var k = 0; k < targets.length; k++) {
         var tObj = targets[k];
         var isDet = tObj.detectedByBox || tObj.detectedByMouse;
@@ -778,6 +945,10 @@
           drawCatSitting(ctx, tObj.x, tObj.y, tObj.bw, tObj.bh, isDet, C.isDark, t);
         } else if (tObj.type === "cat_walking") {
           drawCatWalking(ctx, tObj.x, tObj.y, tObj.bw, tObj.bh, isDet, C.isDark, t);
+        } else if (tObj.type === "car") {
+          drawCar(ctx, tObj.x, tObj.y, tObj.bw, tObj.bh, isDet, C.isDark, t);
+        } else if (tObj.type === "bird") {
+          drawBird(ctx, tObj.x, tObj.y, tObj.bw, tObj.bh, isDet, C.isDark, t);
         } else if (tObj.type === "dog") {
           drawDog(ctx, tObj.x, tObj.y, tObj.bw, tObj.bh, isDet, C.isDark, t);
         }
