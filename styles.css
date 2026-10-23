@@ -727,6 +727,32 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   background: var(--teal);
 }
 
+.timeline-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+.timeline-head h3 { margin-bottom: 3px; }
+.timeline-head .timeline-org { margin-bottom: 0; }
+
+.org-logo {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--panel-hi);
+  box-shadow: var(--card-shadow);
+}
+.org-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .timeline-body h3 {
   font-size: 19px;
   letter-spacing: -0.025em;
@@ -1248,6 +1274,38 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 [data-reveal].is-in {
   opacity: 1;
   transform: none;
+}
+
+/* ── Theme switch ──────────────────────────────────────────── */
+/* Fallback for engines without View Transitions: cross-fade the
+   colour-bearing properties for the duration of the swap. */
+html.is-theming,
+html.is-theming *,
+html.is-theming *::before,
+html.is-theming *::after {
+  transition:
+    background-color 0.42s var(--ease),
+    color 0.42s var(--ease),
+    border-color 0.42s var(--ease),
+    box-shadow 0.42s var(--ease),
+    fill 0.42s var(--ease),
+    stroke 0.42s var(--ease) !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.42s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 /* ── Responsive ────────────────────────────────────────────── */

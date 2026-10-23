@@ -76,6 +76,30 @@
       }
     }
 
+    var themeTimer;
+
+    /* View Transitions gives a real cross-fade (gradients included);
+       otherwise fall back to transitioning the colour properties. */
+    function commit(next) {
+      /* Reduced motion: swap instantly, no cross-fade at all. */
+      if (reduced) {
+        apply(next, true);
+        return;
+      }
+      if (typeof document.startViewTransition === "function") {
+        document.startViewTransition(function () { apply(next, true); });
+        return;
+      }
+      root.classList.add("is-theming");
+      apply(next, true);
+      clearTimeout(themeTimer);
+      themeTimer = setTimeout(function () {
+        root.classList.remove("is-theming");
+        /* Force a recalc so the final colours are committed cleanly. */
+        void root.offsetWidth;
+      }, 480);
+    }
+
     var stored = null;
     try { stored = localStorage.getItem("theme"); } catch (e) {}
     apply(stored === "dark" ? "dark" : "light", false);
@@ -84,7 +108,7 @@
     document.addEventListener("click", function (e) {
       var trigger = e.target && e.target.closest ? e.target.closest("#themeToggle") : null;
       if (!trigger) return;
-      apply(root.getAttribute("data-theme") === "light" ? "dark" : "light", true);
+      commit(root.getAttribute("data-theme") === "light" ? "dark" : "light");
     });
   })();
 

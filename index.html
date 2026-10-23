@@ -31,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=3">
+<link rel="stylesheet" href="styles.css?v=4">
 
 <script type="application/ld+json">
 {
@@ -186,8 +186,13 @@
             <span class="when-now"><span class="dot-live" aria-hidden="true"></span>current</span>
           </div>
           <div class="timeline-body">
-            <h3>Machine Learning Engineer, Computer Vision</h3>
-            <p class="timeline-org">RNT Health Insights <span class="sep">·</span> On-site</p>
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/rnt-insights.jpg" alt="neo by RNT Health Insights" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Machine Learning Engineer, Computer Vision</h3>
+                <p class="timeline-org">neo by RNT Health Insights <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
             <ul class="bullets">
               <li>Migrated GI endoscopy detection from RT-DETR to RF-DETR to get the accuracy/throughput balance that live decision support during a procedure actually demands.</li>
               <li>Deployed a fully on-device speech-to-report pipeline (MedASR + Qwen) on a Jetson AGX Orin — clinical documentation automated with patient data never leaving the machine.</li>
@@ -200,8 +205,13 @@
         <li class="timeline-item" data-reveal style="--i:1">
           <div class="timeline-when"><span>May 2025 — May 2026</span></div>
           <div class="timeline-body">
-            <h3>Deep Learning Engineer</h3>
-            <p class="timeline-org">Flux Auto <span class="sep">·</span> YC S21 <span class="sep">·</span> On-site</p>
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/flux-auto.jpg" alt="Flux Auto" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Deep Learning Engineer</h3>
+                <p class="timeline-org">Flux Auto <span class="sep">·</span> YC S21 <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
             <ul class="bullets">
               <li>Integrated 3D LiDAR models (PointNet, PointNet++, Point Transformer) into the autonomous vehicle stack for object detection where camera-only perception failed under variable lighting.</li>
               <li>Designed a Progressive Morphological Filter ground-removal pipeline to separate true obstacles from road noise — preventing false positives before they reached braking decisions.</li>
@@ -213,8 +223,13 @@
         <li class="timeline-item" data-reveal style="--i:2">
           <div class="timeline-when"><span>Dec 2023 — Feb 2024</span></div>
           <div class="timeline-body">
-            <h3>Research Intern</h3>
-            <p class="timeline-org">SMSS Lab <span class="sep">·</span> IIT Kanpur <span class="sep">·</span> On-site</p>
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/smss-lab.png" alt="SMSS Lab, IIT Kanpur" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Research Intern</h3>
+                <p class="timeline-org">SMSS Lab <span class="sep">·</span> IIT Kanpur <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
             <ul class="bullets">
               <li>Built computer vision algorithms on a robotic platform to autonomously detect and read physical gauges in hazardous field environments.</li>
               <li>Fine-tuned a YOLO keypoint + object detection model on a curated field dataset to localise gauge parameters in real time.</li>
@@ -492,6 +507,6 @@
 </footer>
 
 
-<script src="main.js?v=3"></script>
+<script src="main.js?v=4"></script>
 </body>
 </html>
