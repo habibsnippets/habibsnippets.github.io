@@ -1,3 +1,12 @@
+@font-face {
+  font-family: "Virgil";
+  src: url("assets/Virgil.woff2") format("woff2"),
+       url("https://excalidraw.com/Virgil.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================================
    Habeeb — portfolio
    Two themes, one type system. No frameworks.
@@ -264,32 +273,25 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   align-items: center;
   gap: 10px;
   font-family: var(--virgil);
-  font-size: 16px;
-  letter-spacing: -0.02em;
+  font-size: 19px;
+  letter-spacing: -0.01em;
   color: var(--fg);
   font-weight: 400;
+  text-decoration: none;
 }
 .brand-dot { color: var(--sky); }
 
-.brand-mark {
-  position: relative;
-  width: 20px;
-  height: 16px;
-  display: inline-block;
+.brand-logo {
+  display: block;
+  width: 30px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.45));
+  transition: transform 0.25s var(--ease), filter 0.25s var(--ease);
 }
-.brand-mark span {
-  position: absolute;
-  width: 11px;
-  height: 9px;
-  border: 1.4px solid var(--sky);
-  border-radius: 2px;
-}
-.brand-mark span:first-child { top: 0; left: 0; opacity: 0.85; }
-.brand-mark span:last-child {
-  bottom: 0;
-  right: 0;
-  border-color: var(--violet);
-  opacity: 0.85;
+.brand:hover .brand-logo {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.75));
 }
 
 .nav-links {
@@ -300,9 +302,10 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 }
 .nav-links a {
   position: relative;
-  padding: 7px 11px;
+  padding: 6px 12px;
   font-family: var(--virgil);
-  font-size: 14.5px;
+  font-size: 16px;
+  letter-spacing: 0.01em;
   color: var(--fg-dim);
   border-radius: 7px;
   transition: color 0.2s var(--ease), background 0.2s var(--ease);
@@ -329,8 +332,8 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--fg-faint);
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--virgil);
+  font-size: 14px;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 }
@@ -747,12 +750,16 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   border: 1px solid var(--line);
   background: #ffffff;
   box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
 }
 .org-logo img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .timeline-body h3 {
@@ -793,31 +800,27 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .toolkit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
-  margin-top: 44px;
-  padding-top: 32px;
+  margin-top: 48px;
+  padding-top: 36px;
   border-top: 1px solid var(--line);
 }
 
 .toolkit-card {
-  padding: 22px 24px 20px;
+  padding: 26px 26px 24px;
 }
 .toolkit-card:hover { transform: translateY(-3px); }
 
-.toolkit-card h4 {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fg-faint);
-  margin: 0 0 10px;
+.toolkit-card h3 {
+  font-size: 17.5px;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+  color: var(--fg);
 }
-.toolkit-card p {
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--fg-dim);
+
+.toolkit-card .mini-tags {
+  margin-top: 0;
 }
 
 

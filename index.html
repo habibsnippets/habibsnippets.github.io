@@ -34,13 +34,14 @@
 <style>
   @font-face {
     font-family: "Virgil";
-    src: url("https://excalidraw.com/Virgil.woff2") format("woff2");
+    src: url("assets/Virgil.woff2") format("woff2"),
+         url("https://excalidraw.com/Virgil.woff2") format("woff2");
     font-weight: 400;
     font-style: normal;
     font-display: swap;
   }
 </style>
-<link rel="stylesheet" href="styles.css?v=5">
+<link rel="stylesheet" href="styles.css?v=6">
 
 <script type="application/ld+json">
 {
@@ -65,9 +66,7 @@
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a class="brand" href="#top" aria-label="Home">
-      <span class="brand-mark" aria-hidden="true">
-        <span></span><span></span>
-      </span>
+      <img class="brand-logo" src="assets/brand-logo.png" alt="Logo" width="28" height="16">
       Habeeb
     </a>
 
@@ -247,25 +246,54 @@
       </ol>
 
       <div class="toolkit-grid" data-reveal>
-        <article class="card toolkit-card">
-          <h4>Languages</h4>
-          <p>Python · C++ · C</p>
+        <article class="card focus-card toolkit-card" style="--i:0">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Languages</h3>
+          <ul class="mini-tags">
+            <li>Python</li><li>C++</li><li>C</li>
+          </ul>
         </article>
-        <article class="card toolkit-card">
-          <h4>Vision &amp; DL</h4>
-          <p>PyTorch · Hugging Face · RT-DETR · RF-DETR · YOLO · ResNet · ViT · DINO · OpenCV · timm</p>
+
+        <article class="card focus-card toolkit-card" style="--i:1">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Vision &amp; DL</h3>
+          <ul class="mini-tags">
+            <li>PyTorch</li><li>Hugging Face</li><li>RT-DETR</li><li>RF-DETR</li><li>YOLO</li><li>ResNet</li><li>ViT</li><li>DINO</li><li>OpenCV</li><li>timm</li>
+          </ul>
         </article>
-        <article class="card toolkit-card">
-          <h4>3D &amp; LiDAR</h4>
-          <p>PointNet · PointNet++ · Point Transformer · LiDAR processing · PCL</p>
+
+        <article class="card focus-card toolkit-card" style="--i:2">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>3D &amp; LiDAR</h3>
+          <ul class="mini-tags">
+            <li>PointNet</li><li>PointNet++</li><li>Point Transformer</li><li>LiDAR processing</li><li>PCL</li>
+          </ul>
         </article>
-        <article class="card toolkit-card">
-          <h4>LLMs &amp; GenAI</h4>
-          <p>Llama · Qwen · LangChain · RLHF · GRPO · LoRA / QLoRA / DoRA · SDXL</p>
+
+        <article class="card focus-card toolkit-card" style="--i:3">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3v3M18.5 5.5l-2.2 2.2M21 12h-3M18.5 18.5l-2.2-2.2M12 21v-3M5.5 18.5l2.2-2.2M3 12h3M5.5 5.5l2.2 2.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </div>
+          <h3>LLMs &amp; GenAI</h3>
+          <ul class="mini-tags">
+            <li>Llama</li><li>Qwen</li><li>LangChain</li><li>RLHF</li><li>GRPO</li><li>LoRA / QLoRA / DoRA</li><li>SDXL</li>
+          </ul>
         </article>
-        <article class="card toolkit-card">
-          <h4>Edge &amp; MLOps</h4>
-          <p>Jetson AGX Orin · CUDA · TensorRT · ONNX · Docker · W&amp;B · Linux</p>
+
+        <article class="card focus-card toolkit-card" style="--i:4">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="9" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Edge &amp; MLOps</h3>
+          <ul class="mini-tags">
+            <li>Jetson AGX Orin</li><li>CUDA</li><li>TensorRT</li><li>ONNX</li><li>Docker</li><li>W&amp;B</li><li>Linux</li>
+          </ul>
         </article>
       </div>
 
@@ -515,6 +543,6 @@
 </footer>
 
 
-<script src="main.js?v=4"></script>
+<script src="main.js?v=6"></script>
 </body>
 </html>
