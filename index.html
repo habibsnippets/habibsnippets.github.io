@@ -3,18 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Habeeb Chisti — Computer Vision Engineer</title>
+<title>Habeeb — Computer Vision Engineer</title>
 <meta name="description" content="Computer vision engineer with 1.5 years in industry. Detection, segmentation and deployment — now working on vision-language models and post-training.">
 <meta name="theme-color" content="#08080a">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="dark light">
+<script>
+  /* Apply the saved theme before first paint, so light mode never flashes dark. */
+  (function () {
+    try {
+      var t = localStorage.getItem("theme");
+      document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark");
+    } catch (e) {
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
+  })();
+</script>
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Habeeb Chisti — Computer Vision Engineer">
+<meta property="og:title" content="Habeeb — Computer Vision Engineer">
 <meta property="og:description" content="Vision systems that see. Models that reason. Projects, essays and notes on computer vision, VLMs and post-training.">
 <meta property="og:url" content="https://habibsnippets.github.io/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@habeebstwt">
-<meta name="twitter:title" content="Habeeb Chisti — Computer Vision Engineer">
+<meta name="twitter:title" content="Habeeb — Computer Vision Engineer">
 <meta name="twitter:description" content="Vision systems that see. Models that reason.">
 
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2308080a'/><rect x='22' y='26' width='36' height='30' rx='3' fill='none' stroke='%237dd3fc' stroke-width='5'/><rect x='42' y='44' width='36' height='30' rx='3' fill='none' stroke='%23c4b5fd' stroke-width='5'/></svg>">
@@ -27,10 +38,9 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Habeeb Chisti",
-  "jobTitle": "Computer Vision Engineer",    "url": "https://habibsnippets.github.io/",
-  "email": "habeebchishti@gmail.com",
+  "@type": "Person",  "name": "Habeeb",
+  "jobTitle": "Computer Vision Engineer",
+  "url": "https://habibsnippets.github.io/",
   "sameAs": [
     "https://github.com/habibsnippets",
     "https://x.com/habeebstwt",
@@ -51,7 +61,7 @@
       <span class="brand-mark" aria-hidden="true">
         <span></span><span></span>
       </span>
-      habeeb<span class="brand-dot">.</span>
+      Habeeb
     </a>
 
     <nav class="nav-links" aria-label="Sections">
@@ -66,6 +76,11 @@
 
     <button class="search-hint" id="searchHint" type="button" aria-label="Search writing">
       <kbd>/</kbd><span>search</span>
+    </button>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
     </button>
   </div>
 </header>
@@ -110,7 +125,7 @@
 
       <dl class="stats">
         <div><dt>Industry</dt><dd>1.5 yrs</dd></div>
-        <div><dt>Projects</dt><dd>13</dd></div>
+        <div><dt>Projects</dt><dd>4</dd></div>
         <div><dt>Essays</dt><dd>29</dd></div>
         <div><dt>Articles</dt><dd>9</dd></div>
       </dl>
@@ -237,13 +252,6 @@
         </div>
       </div>
 
-      <div class="edu-row" data-reveal>
-        <div>
-          <h3>National Institute of Technology, Srinagar</h3>
-          <p>B.Tech <span class="sep">·</span> 2021 — 2025</p>
-        </div>
-        <div class="edu-gpa"><span>GPA</span>8.31 / 10</div>
-      </div>
     </div>
   </section>
 
@@ -253,100 +261,13 @@
       <header class="section-head" data-reveal>
         <p class="label"><span class="label-line" aria-hidden="true"></span>03 — Selected work</p>
         <h2>Projects, and what each one was actually about.</h2>
-        <p class="section-sub">Everything links straight to the source on GitHub. Filter by what you're curious about.</p>
+        <p class="section-sub">The four builds worth showing — each links straight to the source on GitHub.</p>
       </header>
 
-      <div class="chips" role="group" aria-label="Filter projects" data-reveal>
-        <button class="chip is-active" data-filter="all" type="button">All <span class="chip-count">13</span></button>
-        <button class="chip" data-filter="vision" type="button">Computer vision</button>
-        <button class="chip" data-filter="multimodal" type="button">Multimodal</button>
-        <button class="chip" data-filter="post-training" type="button">Post-training</button>
-        <button class="chip" data-filter="systems" type="button">Systems</button>
-      </div>
 
       <div class="work-grid" id="workGrid">
 
-        <a class="card work-card" href="https://github.com/habibsnippets/StenUNet" target="_blank" rel="noopener" data-cat="vision" data-reveal style="--i:0">
-          <div class="work-top">
-            <span class="tag">Computer vision</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>StenUNet</h3>
-          <p>Stenosis detection and segmentation on coronary angiograms — finding narrowings in vessels that are low-contrast, branching, and never nicely centred.</p>
-          <div class="work-foot"><span>U-Net</span><span>Medical imaging</span><span>Python</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/AngioPy-WebApp" target="_blank" rel="noopener" data-cat="vision" data-reveal style="--i:1">
-          <div class="work-top">
-            <span class="tag">Computer vision</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>AngioPy Web App</h3>
-          <p>A customised AngioPy interface for coronary artery segmentation — taking a research pipeline and putting a clickable front-end on it.</p>
-          <div class="work-foot"><span>Segmentation</span><span>Web UI</span><span>Jupyter</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/aruco_pose_estimation" target="_blank" rel="noopener" data-cat="vision" data-reveal style="--i:2">
-          <div class="work-top">
-            <span class="tag">Computer vision</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>ArUco Pose Estimation</h3>
-          <p>A ROS package that serves marker detection over a video stream and returns 6-DoF pose — the service-oriented version of a camera calibration demo.</p>
-          <div class="work-foot"><span>C++</span><span>ROS</span><span>6-DoF pose</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/3D-PCL-GS" target="_blank" rel="noopener" data-cat="vision" data-reveal style="--i:3">
-          <div class="work-top">
-            <span class="tag">Computer vision</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Point-cloud Ground Segmentation</h3>
-          <p>Splitting ground from everything else in 3D point clouds — the preprocessing step every LiDAR perception stack quietly depends on.</p>
-          <div class="work-foot"><span>PCL</span><span>Point clouds</span><span>C++</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/Attention_Graded_Contrastive_Decoding" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:4">
-          <div class="work-top">
-            <span class="tag">Multimodal</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Attention-Graded Contrastive Decoding</h3>
-          <p>Detects hallucination in vision–language models and mitigates it during generation, rather than after the fact. Decoding-time intervention, no retraining.</p>
-          <div class="work-foot"><span>VLM</span><span>Decoding</span><span>Hallucination</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/effective-multimodality" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:5">
-          <div class="work-top">
-            <span class="tag">Multimodal</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Effective Multimodality</h3>
-          <p>Inference-time diagnostics for vision–language models: probes that show whether the model is really looking at the image or just guessing from the prompt.</p>
-          <div class="work-foot"><span>Evaluation</span><span>Diagnostics</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/Rasengan-XL" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:6">
-          <div class="work-top">
-            <span class="tag">Multimodal</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Rasengan-XL</h3>
-          <p>PEFT fine-tune of SDXL 1.0 — LoRA, QLoRA and DoRA — fitting a 2.6B-parameter model on a single 16 GB T4 with 4-bit NF4 and gradient checkpointing, so style transfer runs without enterprise GPUs.</p>
-          <div class="work-foot"><span>SDXL</span><span>LoRA</span><span>Diffusion</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/pixtune_ai" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:7">
-          <div class="work-top">
-            <span class="tag">Multimodal</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>pixtune.ai</h3>
-          <p>A multimodal recommender: read an image, infer the mood, and suggest songs that fit it. An excuse to wire vision into a product loop.</p>
-          <div class="work-foot"><span>Vision</span><span>Recommendation</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/mathguard" target="_blank" rel="noopener" data-cat="post-training" data-reveal style="--i:8">
+        <a class="card work-card" href="https://github.com/habibsnippets/mathguard" target="_blank" rel="noopener" data-cat="post-training" data-reveal style="--i:0">
           <div class="work-top">
             <span class="tag">Post-training</span>
             <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -356,37 +277,27 @@
           <div class="work-foot"><span>Safety</span><span>Fine-tuning</span><span>Evals</span></div>
         </a>
 
-        <a class="card work-card" href="https://github.com/habibsnippets/littleRL" target="_blank" rel="noopener" data-cat="post-training" data-reveal style="--i:9">
+        <a class="card work-card" href="https://github.com/habibsnippets/Rasengan-XL" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:1">
           <div class="work-top">
-            <span class="tag">Post-training</span>
+            <span class="tag">Multimodal</span>
             <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h3>littleRL</h3>
-          <p>Notes and small implementations from working through RL for post-training LLMs — reward models, PPO clipping, advantage normalisation, all rebuilt by hand.</p>
-          <div class="work-foot"><span>PPO</span><span>RLHF</span><span>Notes</span></div>
+          <h3>Rasengan-XL</h3>
+          <p>PEFT fine-tune of SDXL 1.0 — LoRA, QLoRA and DoRA — fitting a 2.6B-parameter model on a single 16 GB T4 with 4-bit NF4 and gradient checkpointing, so style transfer runs without enterprise GPUs.</p>
+          <div class="work-foot"><span>SDXL</span><span>LoRA</span><span>Diffusion</span></div>
         </a>
 
-        <a class="card work-card" href="https://github.com/habibsnippets/Continual-Learning" target="_blank" rel="noopener" data-cat="post-training" data-reveal style="--i:10">
-          <div class="work-top">
-            <span class="tag">Post-training</span>
-            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-          <h3>Continual Learning</h3>
-          <p>Class-incremental experiments on CIFAR-100 with a ViT-Tiny: how badly catastrophic forgetting hits, and which mitigation tricks claw accuracy back.</p>
-          <div class="work-foot"><span>Catastrophic forgetting</span><span>ViT</span><span>T4</span></div>
-        </a>
-
-        <a class="card work-card" href="https://github.com/habibsnippets/nano-pub-sub" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:11">
+        <a class="card work-card" href="https://github.com/habibsnippets/SocioPostGenerator" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:2">
           <div class="work-top">
             <span class="tag">Systems</span>
             <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h3>nano-pub-sub</h3>
-          <p>Building ROS 2 pub/sub from scratch, from the wire up, to understand why it reaches for DDS in the first place.</p>
-          <div class="work-foot"><span>ROS 2</span><span>DDS</span><span>Python</span></div>
+          <h3>Socio Post Generator</h3>
+          <p>PostGen: a few-shot post generator. It reads existing posts, extracts their style, tags and language, then asks an LLM to write new ones in the same voice.</p>
+          <div class="work-foot"><span>Few-shot</span><span>Groq API</span><span>Python</span></div>
         </a>
 
-        <a class="card work-card" href="https://github.com/habibsnippets/PDF2Podcast" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:12">
+        <a class="card work-card" href="https://github.com/habibsnippets/PDF2Podcast" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:3">
           <div class="work-top">
             <span class="tag">Systems</span>
             <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -398,7 +309,6 @@
 
       </div>
 
-      <p class="grid-empty" id="workEmpty" hidden>No projects in that filter.</p>
 
       <a class="more-link" href="https://github.com/habibsnippets?tab=repositories" target="_blank" rel="noopener" data-reveal>
         All repositories on GitHub
@@ -552,19 +462,10 @@
       <header class="section-head" data-reveal>
         <p class="label"><span class="label-line" aria-hidden="true"></span>07 — Contact</p>
         <h2>Let's talk vision, post-training, or anything adjacent.</h2>
-        <p class="section-sub">Best reached by email. I read everything, and I answer the interesting ones.</p>
+        <p class="section-sub">Best reached on X or GitHub. I read everything, and I answer the interesting ones.</p>
       </header>
 
       <div class="contact-grid" data-reveal>
-        <button class="contact-primary" id="copyEmail" type="button" data-email="habeebchishti@gmail.com">
-          <span class="contact-label">Email</span>
-          <span class="contact-value" id="emailText">habeebchishti@gmail.com</span>
-          <span class="contact-hint" id="copyHint">
-            <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
-            Click to copy
-          </span>
-        </button>
-
         <a class="contact-tile" href="https://github.com/habibsnippets" target="_blank" rel="noopener">
           <span class="contact-label">GitHub</span>
           <span class="contact-value">@habibsnippets</span>
@@ -590,13 +491,12 @@
 
 <footer class="footer">
   <div class="container footer-inner">
-    <p>© <span id="year">2026</span> Habeeb Chisti</p>
+    <p>© <span id="year">2026</span> Habeeb</p>
     <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
     <a href="#top" class="footer-top">Back to top ↑</a>
   </div>
 </footer>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="main.js"></script>
 </body>

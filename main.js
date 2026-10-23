@@ -1,11 +1,12 @@
 /* ============================================================
    Portfolio interactions
    ------------------------------------------------------------
-   1. Hero canvas: drifting feature points + live "detections"
-   2. Scroll reveal, nav state, reading progress
-   3. Project filters
+   1. Theme switch (persisted, drives the canvas palette too)
+   2. Hero canvas: drifting feature points + live "detections"
+   3. Scroll reveal, nav state, reading progress
    4. Writing: search, tag filter, progressive disclosure
-   5. Copy email, card spotlight, keyboard shortcuts
+   5. Card spotlight, keyboard shortcuts
+   6. Résumé link, footer year
    ============================================================ */
 
 (function () {
@@ -49,7 +50,37 @@
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
-  /* ── 1. Hero canvas ─────────────────────────────────────── */
+  /* ── 1. Theme ───────────────────────────────────────────── */
+  (function theme() {
+    var root = document.documentElement;
+    var btn = document.getElementById("themeToggle");
+    var meta = document.querySelector('meta[name="theme-color"]');
+
+    function apply(name, persist) {
+      root.setAttribute("data-theme", name);
+      if (meta) meta.setAttribute("content", name === "light" ? "#faf4e6" : "#08080a");
+      if (btn) {
+        btn.setAttribute("aria-pressed", name === "light" ? "true" : "false");
+        btn.setAttribute("aria-label", name === "light" ? "Switch to dark theme" : "Switch to light theme");
+      }
+      if (persist) {
+        try { localStorage.setItem("theme", name); } catch (e) {}
+      }
+      document.dispatchEvent(new CustomEvent("themechange", { detail: name }));
+    }
+
+    var stored = null;
+    try { stored = localStorage.getItem("theme"); } catch (e) {}
+    apply(stored === "light" ? "light" : "dark", false);
+
+    if (btn) {
+      btn.addEventListener("click", function () {
+        apply(root.getAttribute("data-theme") === "light" ? "dark" : "light", true);
+      });
+    }
+  })();
+
+  /* ── 2. Hero canvas ─────────────────────────────────────── */
   (function heroCanvas() {
     var canvas = document.getElementById("viz");
     if (!canvas || reduced) return;
@@ -59,6 +90,24 @@
 
     var w = 0, h = 0, dpr = 1;
     var points = [], boxes = [];
+    var C = {};
+
+    function readColors() {
+      var cs = getComputedStyle(document.documentElement);
+      function get(name) { return cs.getPropertyValue(name).trim(); }
+      C = {
+        dot: get("--viz-dot"),
+        line: get("--viz-line"),
+        box: get("--viz-box"),
+        boxStrong: get("--viz-box-strong"),
+        label: get("--viz-label"),
+        labelBg: get("--viz-label-bg"),
+        cursor: get("--viz-cursor"),
+        cursorLabel: get("--viz-cursor-label")
+      };
+    }
+    readColors();
+    document.addEventListener("themechange", readColors);
     var mouse = { x: -9999, y: -9999, active: false };
     var raf = null, running = false;
 
@@ -118,12 +167,12 @@
       y = Math.max(8, Math.min(h - bh - 8, y));
 
       // frame
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.30)";
+      ctx.strokeStyle = C.box;
       ctx.lineWidth = 1;
       ctx.strokeRect(x + 0.5, y + 0.5, bw, bh);
 
       // corner ticks
-      ctx.strokeStyle = "rgba(125, 211, 252, 0.85)";
+      ctx.strokeStyle = C.boxStrong;
       ctx.lineWidth = 1.6;
       var len = 12;
       corner(x, y, len, 1, 1);
@@ -137,9 +186,9 @@
       var tw = ctx.measureText(text).width;
       var ly = y > 20 ? y - 6 : y + bh + 14;
 
-      ctx.fillStyle = "rgba(8, 8, 10, 0.72)";
+      ctx.fillStyle = C.labelBg;
       ctx.fillRect(x - 0.5, ly - 11, tw + 10, 15);
-      ctx.fillStyle = "rgba(125, 211, 252, 0.82)";
+      ctx.fillStyle = C.label;
       ctx.fillText(text, x + 4, ly);
     }
 
@@ -150,7 +199,7 @@
 
       ctx.save();
       ctx.setLineDash([4, 5]);
-      ctx.strokeStyle = "rgba(196, 181, 253, 0.55)";
+      ctx.strokeStyle = C.cursor;
       ctx.lineWidth = 1;
       ctx.strokeRect(x + 0.5, y + 0.5, bw, bh);
       ctx.restore();
@@ -158,9 +207,9 @@
       ctx.font = "10px 'IBM Plex Mono', ui-monospace, monospace";
       var text = "you 0.99";
       var tw = ctx.measureText(text).width;
-      ctx.fillStyle = "rgba(8, 8, 10, 0.72)";
+      ctx.fillStyle = C.labelBg;
       ctx.fillRect(x, y + bh + 3, tw + 10, 15);
-      ctx.fillStyle = "rgba(196, 181, 253, 0.9)";
+      ctx.fillStyle = C.cursorLabel;
       ctx.fillText(text, x + 4, y + bh + 14);
     }
 
@@ -176,7 +225,7 @@
           var d2 = dx * dx + dy * dy;
           if (d2 < 15600) {
             var a = (1 - d2 / 15600) * 0.16;
-            ctx.strokeStyle = "rgba(148, 197, 255, " + a.toFixed(3) + ")";
+            ctx.strokeStyle = "rgba(" + C.line + ", " + a.toFixed(3) + ")";
             ctx.lineWidth = 0.7;
             ctx.beginPath();
             ctx.moveTo(p.x, p.y);
@@ -215,7 +264,7 @@
         if (s.y < -10) s.y = h + 10;
         if (s.y > h + 10) s.y = -10;
 
-        ctx.fillStyle = "rgba(180, 214, 255, 0.42)";
+        ctx.fillStyle = C.dot;
         ctx.fillRect(s.x, s.y, s.r, s.r);
       }
 
@@ -274,7 +323,7 @@
     start();
   })();
 
-  /* ── 2. Scroll reveal, nav, progress ────────────────────── */
+  /* ── 3. Scroll reveal, nav, progress ────────────────────── */
   (function scrollChrome() {
     var revealables = $$("[data-reveal]");
 
@@ -328,36 +377,6 @@
     onScroll();
   })();
 
-  /* ── 3. Project filters ─────────────────────────────────── */
-  (function workFilters() {
-    var chips = $$("[data-filter]");
-    var cards = $$("#workGrid .work-card");
-    var empty = document.getElementById("workEmpty");
-    if (!chips.length) return;
-
-    function setPressed(group, active) {
-      group.forEach(function (c) {
-        c.setAttribute("aria-pressed", c === active ? "true" : "false");
-      });
-    }
-    setPressed(chips, chips[0]);
-
-    chips.forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        var filter = chip.getAttribute("data-filter");
-        chips.forEach(function (c) { c.classList.toggle("is-active", c === chip); });
-        setPressed(chips, chip);
-
-        var shown = 0;
-        cards.forEach(function (card) {
-          var match = filter === "all" || card.getAttribute("data-cat") === filter;
-          card.classList.toggle("is-hidden", !match);
-          if (match) shown++;
-        });
-        if (empty) empty.hidden = shown !== 0;
-      });
-    });
-  })();
 
   /* ── 4. Writing list ────────────────────────────────────── */
   (function writing() {
@@ -495,59 +514,8 @@
     }
   })();
 
-  /* ── 5. Copy email ──────────────────────────────────────── */
-  (function copyEmail() {
-    var btn = document.getElementById("copyEmail");
-    var hint = document.getElementById("copyHint");
-    var toast = document.getElementById("toast");
-    if (!btn) return;
 
-    var email = btn.getAttribute("data-email");
-    var toastTimer;
-
-    function showToast(msg) {
-      if (!toast) return;
-      toast.textContent = msg;
-      toast.classList.add("is-visible");
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(function () {
-        toast.classList.remove("is-visible");
-      }, 2100);
-    }
-
-    btn.addEventListener("click", function () {
-      var done = function () {
-        showToast("Copied " + email);
-        if (hint) hint.textContent = "Copied to clipboard";
-        setTimeout(function () {
-          if (hint) {
-            hint.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Click to copy';
-          }
-        }, 2200);
-      };
-
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(email).then(done, fallback);
-      } else {
-        fallback();
-      }
-
-      function fallback() {
-        var ta = document.createElement("textarea");
-        ta.value = email;
-        ta.setAttribute("readonly", "");
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand("copy"); done(); }
-        catch (err) { showToast("Copy failed — email is " + email); }
-        document.body.removeChild(ta);
-      }
-    });
-  })();
-
-  /* ── 6. Cursor spotlight on cards ───────────────────────── */
+  /* ── 5. Cursor spotlight on cards ───────────────────────── */
   (function spotlight() {
     if (reduced || !window.matchMedia("(hover: hover)").matches) return;
     var cards = $$(".card, .contact-tile, .contact-primary, .notes-card");
@@ -561,7 +529,7 @@
     });
   })();
 
-  /* ── 7. Résumé: only link it if the PDF exists ───────────── */
+  /* ── 6. Résumé: only link it if the PDF exists ───────────── */
   (function resume() {
     var btn = document.getElementById("resumeBtn");
     if (!btn) return;
@@ -577,7 +545,7 @@
       });
   })();
 
-  /* ── 8. Footer year ─────────────────────────────────────── */
+  /* ── 7. Footer year ─────────────────────────────────────── */
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 })();
