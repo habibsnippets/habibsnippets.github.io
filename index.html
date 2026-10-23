@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=8">
+<link rel="stylesheet" href="styles.css?v=9">
 
 <script type="application/ld+json">
 {
@@ -138,31 +138,139 @@
       </header>
 
       <div class="focus-grid">
-        <article class="card focus-card" data-reveal style="--i:0">
-          <div class="focus-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:0">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Computer Vision</h3>
+            <p>Detection, segmentation, pose estimation and 3D perception — plus the unglamorous half: latency budgets, quantisation and models that actually survive a real input.</p>
+            <ul class="mini-tags"><li>Detection</li><li>Segmentation</li><li>Pose</li><li>Deployment</li></ul>
           </div>
-          <h3>Computer Vision</h3>
-          <p>Detection, segmentation, pose estimation and 3D perception — plus the unglamorous half: latency budgets, quantisation and models that actually survive a real input.</p>
-          <ul class="mini-tags"><li>Detection</li><li>Segmentation</li><li>Pose</li><li>Deployment</li></ul>
+          <div class="card-anim anim-cv" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>CV DETECTOR</span>
+              <span class="anim-telemetry">RT-DETR · 82 FPS</span>
+            </div>
+            <div class="cv-viewport">
+              <div class="cv-grid"></div>
+              <div class="cv-scanline"></div>
+              <!-- Person Box -->
+              <div class="cv-box cv-person">
+                <span class="cv-tag">person 0.98</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+                <svg class="cv-skel" viewBox="0 0 24 40">
+                  <circle cx="12" cy="6" r="3.2"/>
+                  <line x1="12" y1="9.2" x2="12" y2="24"/>
+                  <line x1="12" y1="13" x2="5" y2="20"/>
+                  <line x1="12" y1="13" x2="19" y2="20"/>
+                  <line x1="12" y1="24" x2="6" y2="36"/>
+                  <line x1="12" y1="24" x2="18" y2="36"/>
+                </svg>
+              </div>
+              <!-- Vehicle Box -->
+              <div class="cv-box cv-vehicle">
+                <span class="cv-tag">vehicle 0.94</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+              </div>
+              <!-- Cat Box -->
+              <div class="cv-box cv-cat">
+                <span class="cv-tag">cat 0.97</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>LATENCY: 12.1ms</span>
+              <span>OBJECTS: 3 DETECTED</span>
+            </div>
+          </div>
         </article>
 
-        <article class="card focus-card" data-reveal style="--i:1">
-          <div class="focus-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 20h10M12 17v3M7.5 9.5h3M13 7.5h3.5M7.5 13h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:1">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 20h10M12 17v3M7.5 9.5h3M13 7.5h3.5M7.5 13h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Vision–Language Models</h3>
+            <p>Where grounding breaks, why VLMs hallucinate so confidently, and whether inference-time signals can catch it before a downstream system trusts it.</p>
+            <ul class="mini-tags"><li>Grounding</li><li>Hallucination</li><li>Evaluation</li></ul>
           </div>
-          <h3>Vision–Language Models</h3>
-          <p>Where grounding breaks, why VLMs hallucinate so confidently, and whether inference-time signals can catch it before a downstream system trusts it.</p>
-          <ul class="mini-tags"><li>Grounding</li><li>Hallucination</li><li>Evaluation</li></ul>
+          <div class="card-anim anim-vlm" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>VISION–LANGUAGE</span>
+              <span class="anim-telemetry">Qwen2.5-VL · Grounded</span>
+            </div>
+            <div class="vlm-viewport">
+              <div class="vlm-patches">
+                <span class="vlm-patch"></span><span class="vlm-patch active"></span><span class="vlm-patch"></span>
+                <span class="vlm-patch"></span><span class="vlm-patch active"></span><span class="vlm-patch"></span>
+              </div>
+              <div class="vlm-connector">
+                <svg viewBox="0 0 160 30" class="vlm-rays">
+                  <path d="M25 2 Q 80 15, 35 28" class="ray-line r1"/>
+                  <path d="M80 2 Q 80 15, 80 28" class="ray-line r2"/>
+                  <path d="M135 2 Q 80 15, 125 28" class="ray-line r3"/>
+                </svg>
+                <span class="vlm-cross-attn">Cross-Attention · 0.98</span>
+              </div>
+              <div class="vlm-tokens">
+                <span class="vlm-tok">&lt;image&gt;</span>
+                <span class="vlm-tok">"cat"</span>
+                <span class="vlm-tok hl">"on mat"</span>
+                <span class="vlm-tok">[0.42, 0.88]</span>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>ALIGNMENT: 98.4%</span>
+              <span>GROUNDING: LOCKED</span>
+            </div>
+          </div>
         </article>
 
-        <article class="card focus-card" data-reveal style="--i:2">
-          <div class="focus-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 18V9M10 18V5M16 18v-6M22 18V8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 21h20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:2">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 18V9M10 18V5M16 18v-6M22 18V8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 21h20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Post-Training</h3>
+            <p>SFT, preference optimisation and RL — the part that turns a capable base model into one that behaves, refuses what it should, and stays honest about what it saw.</p>
+            <ul class="mini-tags"><li>SFT</li><li>RLHF / PPO</li><li>DPO</li><li>Evals</li></ul>
           </div>
-          <h3>Post-Training</h3>
-          <p>SFT, preference optimisation and RL — the part that turns a capable base model into one that behaves, refuses what it should, and stays honest about what it saw.</p>
-          <ul class="mini-tags"><li>SFT</li><li>RLHF / PPO</li><li>DPO</li><li>Evals</li></ul>
+          <div class="card-anim anim-post" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>POST-TRAINING</span>
+              <span class="anim-telemetry">DPO / GRPO · Align</span>
+            </div>
+            <div class="post-viewport">
+              <div class="post-pairs">
+                <div class="post-pair chosen">
+                  <span class="pair-status">✓ chosen</span>
+                  <span class="pair-reward">+0.94</span>
+                </div>
+                <div class="post-pair rejected">
+                  <span class="pair-status">✕ rejected</span>
+                  <span class="pair-reward">-0.48</span>
+                </div>
+              </div>
+              <div class="post-chart">
+                <svg viewBox="0 0 200 48" class="post-svg">
+                  <line x1="0" y1="12" x2="200" y2="12" stroke="currentColor" stroke-opacity="0.1" stroke-dasharray="2 3"/>
+                  <line x1="0" y1="36" x2="200" y2="36" stroke="currentColor" stroke-opacity="0.1" stroke-dasharray="2 3"/>
+                  <path d="M0 6 Q 60 10, 110 30 T 200 42" class="chart-loss"/>
+                  <path d="M0 42 Q 60 38, 110 16 T 200 6" class="chart-reward"/>
+                  <circle cx="160" cy="9" r="3.2" class="chart-dot"/>
+                </svg>
+                <div class="chart-legend">
+                  <span class="leg-loss">Loss: 0.082 ↘</span>
+                  <span class="leg-reward">Reward: +0.94 ↗</span>
+                </div>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>KL-DIV: 0.021</span>
+              <span>STATUS: CONVERGED</span>
+            </div>
+          </div>
         </article>
       </div>
     </div>

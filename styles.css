@@ -806,6 +806,348 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   border-radius: 5px;
 }
 
+/* ── Focus Interactive Cards with Hover Animations ── */
+.focus-card-interactive {
+  position: relative;
+  overflow: hidden;
+  min-height: 290px;
+}
+
+.focus-card-interactive .card-content {
+  transition: opacity 0.3s var(--ease), transform 0.3s var(--ease);
+}
+
+.focus-card-interactive .card-anim {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease);
+  overflow: hidden;
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 24px;
+  background: var(--panel-hi);
+  z-index: 2;
+}
+
+.focus-card-interactive:hover .card-content {
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+.focus-card-interactive:hover .card-anim {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Common Anim Header & Footer */
+.anim-head, .anim-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.anim-head { margin-bottom: 12px; }
+.anim-foot {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  color: var(--fg-faint);
+  font-size: 9.5px;
+}
+.anim-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--fg);
+  font-weight: 600;
+}
+.anim-telemetry { color: var(--fg-dim); }
+
+/* ── 1. Computer Vision Detection Animation ── */
+.cv-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 140px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--wash-soft);
+  overflow: hidden;
+}
+.cv-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.5;
+}
+@keyframes scanSweep {
+  0% { top: 0%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+.cv-scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--sky), transparent);
+  box-shadow: 0 0 8px var(--sky);
+  animation: scanSweep 2.2s infinite ease-in-out;
+}
+.cv-box {
+  position: absolute;
+  border: 1.5px solid var(--sky);
+  border-radius: 2px;
+  transition: transform 0.2s;
+}
+.cv-box .cv-tag {
+  position: absolute;
+  top: -16px;
+  left: -1px;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  background: var(--bg);
+  border: 1px solid var(--sky);
+  color: var(--sky);
+  padding: 1px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+.cv-box .cv-reticle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border: 1.5px solid var(--sky);
+}
+.cv-reticle.tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+.cv-reticle.tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+.cv-reticle.bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+.cv-reticle.br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+
+@keyframes boxJitter1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -3px); }
+}
+@keyframes boxJitter2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-3px, 2px); }
+}
+@keyframes boxJitter3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(1px, 2px); }
+}
+.cv-person {
+  left: 12%;
+  top: 18%;
+  width: 44px;
+  height: 72px;
+  animation: boxJitter1 3s infinite ease-in-out;
+}
+.cv-skel {
+  width: 100%;
+  height: 100%;
+  stroke: var(--sky);
+  fill: none;
+  stroke-width: 1.6;
+  opacity: 0.85;
+}
+.cv-vehicle {
+  left: 44%;
+  top: 24%;
+  width: 72px;
+  height: 42px;
+  border-color: var(--teal);
+  animation: boxJitter2 3.5s infinite ease-in-out;
+}
+.cv-vehicle .cv-tag, .cv-vehicle .cv-reticle {
+  border-color: var(--teal);
+  color: var(--teal);
+}
+.cv-cat {
+  right: 10%;
+  bottom: 12%;
+  width: 36px;
+  height: 32px;
+  border-color: var(--amber);
+  animation: boxJitter3 2.8s infinite ease-in-out;
+}
+.cv-cat .cv-tag, .cv-cat .cv-reticle {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+/* ── 2. Vision-Language Models Animation ── */
+.vlm-viewport {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--wash-soft);
+  padding: 10px 14px;
+  overflow: hidden;
+}
+.vlm-patches {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.vlm-patch {
+  width: 32px;
+  height: 22px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+.vlm-patch.active {
+  border-color: var(--violet);
+  background: color-mix(in srgb, var(--violet) 18%, transparent);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--violet) 35%, transparent);
+}
+.vlm-connector {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2px 0;
+}
+.vlm-rays {
+  width: 100%;
+  height: 26px;
+}
+@keyframes rayDash {
+  to { stroke-dashoffset: -20; }
+}
+.ray-line {
+  stroke: var(--violet);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  fill: none;
+  animation: rayDash 1s infinite linear;
+}
+.ray-line.r1 { animation-delay: 0s; }
+.ray-line.r2 { animation-delay: 0.3s; }
+.ray-line.r3 { animation-delay: 0.6s; }
+.vlm-cross-attn {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  color: var(--violet);
+  letter-spacing: 0.08em;
+}
+.vlm-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.vlm-tok {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  padding: 3px 7px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--fg-dim);
+}
+.vlm-tok.hl {
+  border-color: var(--violet);
+  color: var(--fg);
+  background: color-mix(in srgb, var(--violet) 16%, transparent);
+  font-weight: 600;
+}
+
+/* ── 3. Post-Training Animation ── */
+.post-viewport {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  background: var(--wash-soft);
+  padding: 10px 14px;
+  overflow: hidden;
+}
+.post-pairs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.post-pair {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 500;
+}
+.post-pair.chosen {
+  background: rgba(94, 234, 212, 0.1);
+  border: 1px solid var(--teal);
+  color: var(--teal);
+}
+.post-pair.rejected {
+  background: rgba(244, 63, 94, 0.1);
+  border: 1px solid rgba(244, 63, 94, 0.6);
+  color: #f43f5e;
+}
+.post-chart {
+  position: relative;
+  margin-top: 4px;
+}
+.post-svg {
+  width: 100%;
+  height: 44px;
+  overflow: visible;
+}
+.chart-loss {
+  fill: none;
+  stroke: #f43f5e;
+  stroke-width: 1.8;
+}
+.chart-reward {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px var(--teal));
+}
+@keyframes pulseDot {
+  0%, 100% { r: 3.2; opacity: 1; }
+  50% { r: 4.8; opacity: 0.7; }
+}
+.chart-dot {
+  fill: var(--teal);
+  animation: pulseDot 1.4s infinite ease-in-out;
+}
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 9px;
+  margin-top: 4px;
+}
+.leg-loss { color: #f43f5e; }
+.leg-reward { color: var(--teal); }
+
 /* ── Experience ────────────────────────────────────────────── */
 .timeline {
   position: relative;
