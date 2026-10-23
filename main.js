@@ -6,7 +6,7 @@
    3. Scroll reveal, nav state, reading progress
    4. Writing: search, tag filter, progressive disclosure
    5. Card spotlight, keyboard shortcuts
-   6. Résumé link, footer year
+   6. Footer year
    ============================================================ */
 
 (function () {
@@ -62,22 +62,30 @@
       if (btn) {
         btn.setAttribute("aria-pressed", name === "light" ? "true" : "false");
         btn.setAttribute("aria-label", name === "light" ? "Switch to dark theme" : "Switch to light theme");
+        btn.setAttribute("title", name === "light" ? "Switch to dark theme" : "Switch to light theme");
       }
       if (persist) {
         try { localStorage.setItem("theme", name); } catch (e) {}
       }
-      document.dispatchEvent(new CustomEvent("themechange", { detail: name }));
+      try {
+        document.dispatchEvent(new CustomEvent("themechange", { detail: name }));
+      } catch (e) {
+        var evt = document.createEvent("Event");
+        evt.initEvent("themechange", true, true);
+        document.dispatchEvent(evt);
+      }
     }
 
     var stored = null;
     try { stored = localStorage.getItem("theme"); } catch (e) {}
-    apply(stored === "light" ? "light" : "dark", false);
+    apply(stored === "dark" ? "dark" : "light", false);
 
-    if (btn) {
-      btn.addEventListener("click", function () {
-        apply(root.getAttribute("data-theme") === "light" ? "dark" : "light", true);
-      });
-    }
+    /* Delegated so the handler survives any re-render of the button. */
+    document.addEventListener("click", function (e) {
+      var trigger = e.target && e.target.closest ? e.target.closest("#themeToggle") : null;
+      if (!trigger) return;
+      apply(root.getAttribute("data-theme") === "light" ? "dark" : "light", true);
+    });
   })();
 
   /* ── 2. Hero canvas ─────────────────────────────────────── */
@@ -518,7 +526,7 @@
   /* ── 5. Cursor spotlight on cards ───────────────────────── */
   (function spotlight() {
     if (reduced || !window.matchMedia("(hover: hover)").matches) return;
-    var cards = $$(".card, .contact-tile, .contact-primary, .notes-card");
+    var cards = $$(".card, .contact-tile, .notes-card");
 
     cards.forEach(function (card) {
       card.addEventListener("pointermove", function (e) {
@@ -529,23 +537,7 @@
     });
   })();
 
-  /* ── 6. Résumé: only link it if the PDF exists ───────────── */
-  (function resume() {
-    var btn = document.getElementById("resumeBtn");
-    if (!btn) return;
-    if (location.protocol === "file:") return;
-
-    fetch(btn.getAttribute("href"), { method: "HEAD", cache: "no-store" })
-      .then(function (res) {
-        if (!res.ok) btn.hidden = true;
-        else btn.hidden = false;
-      })
-      .catch(function () {
-        btn.hidden = false;
-      });
-  })();
-
-  /* ── 7. Footer year ─────────────────────────────────────── */
+  /* ── 6. Footer year ─────────────────────────────────────── */
   var year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
 })();

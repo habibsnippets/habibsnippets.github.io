@@ -5,17 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Habeeb — Computer Vision Engineer</title>
 <meta name="description" content="Computer vision engineer with 1.5 years in industry. Detection, segmentation and deployment — now working on vision-language models and post-training.">
-<meta name="theme-color" content="#08080a">
-<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
 <script>
-  /* Apply the saved theme before first paint, so light mode never flashes dark. */
+  /* Light is the default; an explicit "dark" choice is what persists.
+     Runs before first paint so the wrong theme never flashes. */
   (function () {
-    try {
-      var t = localStorage.getItem("theme");
-      document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark");
-    } catch (e) {
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
   })();
 </script>
 
@@ -33,7 +31,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=3">
 
 <script type="application/ld+json">
 {
@@ -117,10 +115,6 @@
           <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a class="btn" href="#writing">Read the writing</a>
-        <a class="btn btn-quiet" id="resumeBtn" href="resume.pdf" target="_blank" rel="noopener">
-          Résumé
-          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
       </div>
 
       <dl class="stats">
@@ -498,6 +492,6 @@
 </footer>
 
 
-<script src="main.js"></script>
+<script src="main.js?v=3"></script>
 </body>
 </html>
