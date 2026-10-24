@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Idea of Chaining — Habeeb</title>
+<meta name="description" content="DBSCAN (and connected components, which is basically the same mechanism) never asks &quot;are these two images actually similar?&quot; It only ever asks &quot;is there a…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/the-idea-of-chaining/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Idea of Chaining">
+<meta property="og:description" content="DBSCAN (and connected components, which is basically the same mechanism) never asks &quot;are these two images actually similar?&quot; It only ever asks &quot;is there a…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/the-idea-of-chaining/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2026-07-13">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="The Idea of Chaining">
+<meta name="twitter:description" content="DBSCAN (and connected components, which is basically the same mechanism) never asks &quot;are these two images actually similar?&quot; It only ever asks &quot;is there a…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The Idea of Chaining",
+  "description": "DBSCAN (and connected components, which is basically the same mechanism) never asks \"are these two images actually similar?\" It only ever asks \"is there a…",
+  "datePublished": "2026-07-13",
+  "url": "https://habibsnippets.github.io/writing/the-idea-of-chaining/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>The Idea of Chaining</h1>
+      <p class="post-meta">
+        <time datetime="2026-07-13">13 Jul, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h3 id=the-core-idea-of-chaining>The core idea of chaining</h3><p>DBSCAN (and connected components, which is basically the same mechanism) never asks "are these two images actually similar?" It only ever asks "is there a path of small, similar steps connecting them?" Think of stepping stones across a river. I only ever check that the next stone is within reach, never that the far bank resembles the near bank. If frame 1 is close to frame 2, frame 2 is close to frame 3, and so on for a hundred frames, the algorithm links all hundred into one group, even if frame 1 and frame 100 look nothing alike. No single comparison ever directly checked frame 1 against frame 100. The link is purely transitive.</p>
+<h3 id=why-my-data-was-the-perfect-condition-for-this-to-go-wrong>Why my data was the perfect condition for this to go wrong</h3><p>Medical video is a slow, continuous walk through embedding space. The scope moves a little, the embedding moves a little, frame after frame. That is exactly the "river of stepping stones" scenario. Every consecutive step is small and safe on its own, but a long enough run of small steps can drift the endpoints very far apart without any single step ever looking risky.</p>
+<h3 id=how-i-proved-it-in-three-independent-ways>How I proved it, in three independent ways</h3><p><strong>1. A direct numeric proof on my real 10 frame matrix.</strong> Frame 1 vs. frame 10 similarity was 0.931, clearly below any threshold I was considering (0.95). Directly compared, nobody would call them duplicates. But connected components at threshold 0.95 still merged all 10 into one group because the chain in between never broke: 1→6 (0.955), 6→7 (0.989), 7→8 (0.983), 8→9 (0.982), 9→10 (0.993). Every single link cleared the bar. The merge happened entirely through intermediate stones, never through a real comparison of the two ends.</p>
+<p><strong>2. A numeric signature in my real 9,013 image sweep.</strong> Going from <code>eps=0.01</code> to <code>eps=0.02</code>, the number of distinct clusters barely moved, from 711 to 754, only a 6% increase. But the largest cluster nearly doubled, from 76 to 155, a 104% increase. That was the tell. DBSCAN was not discovering new duplicate groups as the threshold loosened. It was swallowing more frames into groups that already existed. That is chaining showing up as a number, not just an argument.</p>
+<p><strong>3. Visual confirmation in the UMAP plots.</strong> Distinctive looking content, such as a clear fold or a specific angle, formed tight, isolated trails that filled in early (<code>eps≈0.01</code>) and then simply stopped changing. They were well behaved and self contained. But the crowded central region, almost certainly the bland, generic frames with the least distinguishing visual signal, stayed mostly unclustered until <code>eps</code> pushed past 0.015, then rapidly fused together in exactly the same window where the largest cluster exploded. I could actually see chaining happening and identify exactly where it occurred. It was not in the clean content but in the ambiguous, low signal content that had the least visual structure to anchor it.</p>
+<h3 id=why-this-makes-dbscan-structurally-wrong-for-this-problem-not-just-mistuned>Why this makes DBSCAN structurally wrong for this problem, not just mistuned</h3><p>The deeper lesson was not that I picked a bad <code>eps</code>. It was that no single global <code>eps</code> can work because the two regions of my data need opposite things. The clean, distinctive trails need a looser threshold to fully saturate their legitimate duplicate runs. The bland, ambiguous region needs a stricter threshold to avoid false merges across genuinely unrelated moments. One global number is forced to compromise between two contradictory requirements, and my sweep showed that compromise breaking down visibly in exactly the region I would expect, where the content is least distinctive and stepping stones are easiest to find.</p>
+<h3 id=what-i-learned-to-replace-it-with>What I learned to replace it with</h3><p>The fix was not a better clustering algorithm. It was abandoning the "path of small steps" logic entirely. The greedy walk I moved to only ever compares a new candidate against the actual set of frames already kept, never through a chain of intermediate dropped frames. On the same 10 frame example, it kept three representatives, frames 1, 7, and 10, instead of collapsing everything to frame 1. It correctly preserved the real drift in the run instead of erasing it. That is the practical difference. Chaining silently collapses information through transitivity. Direct comparison against what is actually retained does not allow that to happen.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/continual-learning/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Continual Learning</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/dataloaders-part-1/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">dataloaders part 1</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

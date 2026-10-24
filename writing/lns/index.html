@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log Number System for Low Precision Training — Habeeb</title>
+<meta name="description" content="Ok first things first, what is LNS? LNS stands for &quot;Logarithmic Number System&quot; . So how does it store numbers and what makes it different than storing…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/lns/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Log Number System for Low Precision Training">
+<meta property="og:description" content="Ok first things first, what is LNS? LNS stands for &quot;Logarithmic Number System&quot; . So how does it store numbers and what makes it different than storing…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/lns/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/lns/01-Screenshot-from-2025-10-09-12-34-41.png">
+<meta property="article:published_time" content="2025-10-09">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Log Number System for Low Precision Training">
+<meta name="twitter:description" content="Ok first things first, what is LNS? LNS stands for &quot;Logarithmic Number System&quot; . So how does it store numbers and what makes it different than storing…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Log Number System for Low Precision Training",
+  "description": "Ok first things first, what is LNS? LNS stands for \"Logarithmic Number System\" . So how does it store numbers and what makes it different than storing…",
+  "datePublished": "2025-10-09",
+  "url": "https://habibsnippets.github.io/writing/lns/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/writing/lns/01-Screenshot-from-2025-10-09-12-34-41.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Log Number System for Low Precision Training</h1>
+      <p class="post-meta">
+        <time datetime="2025-10-09">09 Oct, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>9 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h3 id=introduction>Introduction</h3><p>Ok first things first, what is LNS?<br />
+LNS stands for <strong>"Logarithmic Number System"</strong>. So how does it store numbers and what makes it different than storing numbers in FP32?</p>
+<p>Think of FP32 as a standard ruler where the markings and the distance between them is same throughout.<br />
+The distance between 1 and 2 will be same as the distance between 10 and 11.</p>
+<p>But on the other side, LNS is like a <strong>slide ruler</strong> where for smaller numbers the markings are extremely close and they get much further apart for large numbers.<br />
+In this way the precision is high for numbers that are closer to 0 and it keeps on decreasing for numbers as they get bigger.</p>
+<hr />
+<h4 id=example>Example</h4><p>Let us store <strong>9.5</strong> in FP32.</p>
+<p>The number is broken down into 3 parts:</p>
+<ul>
+<li><strong>Sign:</strong> Positive or negative</li>
+<li><strong>Mantissa:</strong> These are the significant digits of the number. The binary of 9.5 is <code>1001.1</code>.<br />
+In scientific notation this is written as <code>1.0011 * 2^3</code>.<br />
+The mantissa stores the <code>0011</code> part.</li>
+<li><strong>Exponent:</strong> This tells you how far you are supposed to float the binary point — here the exponent is 3.</li>
+</ul>
+<hr />
+<h4 id=now-let-us-store-it-in-lns>Now let us store it in LNS</h4><p>It is way more direct.<br />
+It also stores the sign but stores the <strong>log of the number's absolute value</strong>.</p>
+<ul>
+<li><strong>Sign:</strong> Is it positive or negative.</li>
+<li><strong>Logarithm:</strong> Calculates the base-2 log of the number.</li>
+</ul>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>log</mi><mn>2</mn></msub><mo stretchy="false">&#x00028;</mo><mn>9.5</mn><mo stretchy="false">&#x00029;</mo><mo>&#x02248;</mo><mn>3.248</mn></mrow></math><p>So the LNS system stores the sign and the single value <code>3.248</code> and the number is represented as:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>sign</mtext><mi>&#x000D7;</mi><msup><mn>2</mn><mrow><mtext>LogValue</mtext></mrow></msup></mrow></math><hr />
+<h4 id=why-is-this-representation-useful>Why is this representation useful?</h4><p>Now where does the difference lie?<br />
+Like what did we accomplish by representing numbers differently? Is there any benefit?</p>
+<p><strong>Yes!</strong> Speaking in terms of computational efficiency, there is a lot of difference.</p>
+<hr />
+<h4 id=multiplication-in-fp32>Multiplication in FP32</h4><p>Let’s say we want to multiply 8 by 16.</p>
+<p>Represent 8: <code>1.0 × 2^3</code><br />
+Represent 16: <code>1.0 × 2^4</code></p>
+<p>To multiply:<br />
+Multiply the mantissas: <code>1.0 × 1.0 = 1.0</code><br />
+Add the exponents: <code>3 + 4 = 7</code><br />
+Result: <code>1.0 × 2^7 = 128</code></p>
+<p>This requires a <strong>dedicated, complex multiplication circuit</strong>.</p>
+<hr />
+<h4 id=multiplication-in-lns>Multiplication in LNS</h4><p>Represent 8: <code>log₂(8) = 3</code><br />
+Represent 16: <code>log₂(16) = 4</code></p>
+<p>To multiply: You just <strong>add</strong> the logarithmic values.</p>
+<p><code>3 + 4 = 7</code></p>
+<p>To get the result, you calculate <code>2^7 = 128</code>.</p>
+<p>The core operation is just an <strong>addition</strong>, which is much faster and more energy-efficient in hardware than multiplication.</p>
+<hr />
+<h3 id=the-bigger-picture>The Bigger Picture</h3><p>Ok done with the basics, let us dig deep into this paper.</p>
+<p>So if LNS is that good, why aren't we using it right?<br />
+Why isn't it the go-to choice for all AI hardware stuff?<br />
+Well, the answer is in the <strong>training of neural networks</strong> — specifically in the part of updating weights!</p>
+<p>As mentioned earlier there is difference in the markings on the LNS scale right?<br />
+This ever-widening space between the numbers is called the <strong>quantization gap</strong>.</p>
+<hr />
+<h4 id=imagine-training-an-algorithm-like-sgd>Imagine training an algorithm like SGD</h4><p><strong>Stochastic Gradient Descent (SGD):</strong> randomly pick one data point → calculate error slope → step opposite direction → repeat many times.<br />
+Update weights little by little. Faster than full data. Can jump out of traps (local minima). Gets model closer to best solution.</p>
+<p>So in a nutshell, we make tiny changes to the weights of the model based on the errors we find.</p>
+<p>For a small weight, the markings on our LNS scale are very close and precise so we will be able to register those easily without any problem.<br />
+But for larger weights the markings are miles apart and the system will be forced to choose the nearest available value — sometimes leading to <strong>no change at all</strong>!</p>
+<hr />
+<p><img src="/assets/writing/lns/01-Screenshot-from-2025-10-09-12-34-41.png" alt="Updating weights" width="328" height="187" loading="lazy" decoding="async"></p>
+<p>This is the main crucial insight of the paper which states that</p>
+<blockquote>
+<p>“updates generated by stochastic gradient descent (SGD) are disregarded more frequently by LNS when the weights become larger”.</p>
+</blockquote>
+<hr />
+<h4 id=the-solution>The Solution</h4><p>Earlier methods used a weird hack — keeping a second high precision FP32 copy of the weight just for the updates — but this is <strong>inefficient</strong>, as it doubles the memory cost.</p>
+<p>So the paper introduces a new framework to solve the above issue.<br />
+In this, both the <strong>number system</strong> and the <strong>learning algorithm</strong> are built to work around this problem.</p>
+<hr />
+<h3 id=a-better-multi-base-lns>A Better "Multi Base" LNS</h3><p>Instead of having a fixed pattern of markings, the LNS-Madam team used <strong>"Multi-Base" LNS</strong>.</p>
+<p>A low base gives you high precision for smaller numbers and vice versa.<br />
+Instead of choosing just one base, LNS-Madam allows us to choose the <strong>best base for the job</strong>.</p>
+<p>This flexibility allows us to fine-tune the precision of the system according to our needs, ensuring that the quantization gaps are as small as possible where it matters the most.</p>
+<hr />
+<h3 id=a-smart-optimizer-the-madam-optimizer>A Smart Optimizer — The "Madam" Optimizer</h3><p>They basically went and replaced SGD with a more powerful tool: the <strong>Madam optimizer</strong>.</p>
+<p>So what is the difference?<br />
+It is a <strong>multiplicative optimizer</strong>.<br />
+Instead of updating the weights by increasing or decreasing them by 0.1, it makes them change by <strong>1%</strong>.</p>
+<p>This change is absolutely genius because it <strong>solves our main problem entirely</strong>.</p>
+<p>For a small weight change (e.g., 0.5) of 1%, the reduction is tiny (-0.005) and the LNS tool is precise to handle it.<br />
+But for a large weight (e.g., 128), the 1% reduction is still significant (-1.28), enough to cross the quantization gap.<br />
+It doesn’t get rounded away and gets applied successfully.</p>
+<hr />
+<h3 id=deep-into-the-maths-of-it>Deep into the Maths of It</h3><h4 id=multi-base-log-representation>Multi-base Log Representation</h4><p>Ok let us try to break the maths.<br />
+Let us say we want to represent some number and let us call it <strong>‘Actual Number’</strong>.</p>
+<p>So according to the paper:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Actual&#x000A0;Number</mtext><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mtext>Stored&#x000A0;Integer</mtext><mo>&#x0002F;</mo><mi>&#x003B3;</mi><mo stretchy="false">&#x00029;</mo></mrow></msup></mrow></math><p>Where <code>Stored Integer</code> is the only number our computer stores in its memory — it’s just a simple integer.<br />
+γ (gamma) is the special turning knob that allows us to control the precision and range of our system.</p>
+<hr />
+<h4 id=example-1>Example</h4><p>Let γ = 4<br />
+The number we want to represent = 16</p>
+<ol>
+<li>We need to find the stored integer for 16.</li>
+<li>Formula is <code>16 = 2^(stored_integer / 4)</code></li>
+<li>We know that 16 = 2⁴</li>
+<li>So when bases are same, we can equate our exponents as <code>4 = stored_integer / 4</code></li>
+<li>Solving for stored_integer we get stored_integer = 16</li>
+</ol>
+<p>So in our system, whenever we want to use the number 16, our computer just stores the number <strong>16</strong>.</p>
+<hr />
+<p>Let the actual number be 5 with γ = 4.</p>
+<p>We know that <code>5 = 2^2.3219</code>,<br />
+which means <code>2.3219 = stored_integer / 4</code> and hence stored_integer on solving comes out as <strong>9</strong>.</p>
+<hr />
+<h4 id=example-1-smaller-2>🧮 Example 1 — Smaller γ (γ = 2)</h4><p>Let’s pick γ = 2 and say our Stored_Integer = 6</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Actual&#x000A0;Number</mtext><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>6</mn><mo>&#x0002F;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mn>3</mn></msup><mo>&#x0003D;</mo><mn>8</mn></mrow></math><p>If we increase Stored_Integer to 7:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Actual&#x000A0;Number</mtext><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>7</mn><mo>&#x0002F;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mn>3.5</mn></mrow></msup><mo>&#x0003D;</mo><mn>11.31</mn></mrow></math><p>Notice how just increasing by 1 in stored integer made a big jump (from 8 → 11.3).<br />
+That means <strong>low γ → coarse precision but wide jumps in value.</strong></p>
+<hr />
+<h4 id=example-2-larger-8>Example 2 — Larger γ (γ = 8)</h4><p>Now set γ = 8 and keep Stored_Integer = 6 again.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Actual&#x000A0;Number</mtext><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>6</mn><mo>&#x0002F;</mo><mn>8</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mn>0.75</mn></mrow></msup><mo>&#x0003D;</mo><mn>1.68</mn></mrow></math><p>Increase Stored_Integer by 1 → (7/8):</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>7</mn><mo>&#x0002F;</mo><mn>8</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><mn>1.83</mn></mrow></math><p>This time, increasing by 1 in stored integer made a tiny change (1.68 → 1.83).<br />
+So <strong>higher γ → finer precision (markings closer together).</strong></p>
+<hr />
+<h4 id=arithmetic-operation-in-lns-the-real-deal>Arithmetic Operation in LNS — The Real Deal</h4><p>Let us say we want to multiply two numbers: <strong>16 and 8</strong>.</p>
+<ol>
+<li><p>Find the stored_integer representation of both numbers by keeping γ = 4</p>
+<ul>
+<li>For 16 → stored_integer = 16</li>
+<li>For 8 → stored_integer = 12</li>
+</ul>
+</li>
+<li><p>Perform the multiplication by just adding the integers:<br />
+<code>16 + 12 = 28</code></p>
+</li>
+<li><p>Convert back to the actual number:</p>
+</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Actual&#x000A0;Result</mtext><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>28</mn><mo>&#x0002F;</mo><mn>4</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mn>7</mn></msup><mo>&#x0003D;</mo><mn>128</mn></mrow></math><p>And just like that, we correctly calculated that <strong>16 × 8 = 128</strong> by only performing a simple addition!</p>
+<hr />
+<h4 id=problem-of-adding-numbers>Problem of Adding Numbers</h4><p>The system works fine for multiplication, but what if we need to <strong>add numbers</strong>?</p>
+<p>Take an example of numbers in dot product like this:<br />
+<code>a*b + c*d + ...</code></p>
+<p>The <code>(a*b)</code> part is easy. In LNS, we just add the stored integers:<br />
+<code>Stored_Integer_a + Stored_Integer_b</code> → call this Log_Result_1.</p>
+<p>The <code>(c*d)</code> part is also easy:<br />
+<code>Stored_Integer_c + Stored_Integer_d</code> → call this Log_Result_2.</p>
+<p>Now we have a problem.<br />
+The next step is to add these two results together: <code>(a*b) + (c*d)</code></p>
+<p>However, we are in the <strong>logarithmic world</strong>.<br />
+We have Log_Result_1 and Log_Result_2.<br />
+There is <strong>no simple logarithmic rule for addition</strong>.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>log</mi><mo stretchy="false">&#x00028;</mo><mi>X</mi><mo>&#x0002B;</mo><mi>Y</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02260;</mo><mi>log</mi><mo stretchy="false">&#x00028;</mo><mi>X</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><mi>log</mi><mo stretchy="false">&#x00028;</mo><mi>Y</mi><mo stretchy="false">&#x00029;</mo></mrow></math><hr />
+<h4 id=the-solution-1>The Solution</h4><p>Convert them back to the original numbers.<br />
+Let’s use an example to illustrate this.</p>
+<p>Let γ = 4, and after some LNS multiplication, we end up with a new stored_integer = 23.<br />
+We need to convert this back to its actual number.</p>
+<p><strong>Step 1:</strong> Split the stored integer<br />
+<code>23 ÷ 4</code> → quotient = 5, remainder = 3</p>
+<p><strong>Step 2:</strong> Rewrite the math using the split</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>23</mn><mo>&#x0002F;</mo><mn>4</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><mo stretchy="false">&#x00028;</mo><mn>5</mn><mo>&#x0002B;</mo><mn>3</mn><mo>&#x0002F;</mo><mn>4</mn><mo stretchy="false">&#x00029;</mo></mrow></msup><mo>&#x0003D;</mo><mo stretchy="false">&#x00028;</mo><msup><mn>2</mn><mn>5</mn></msup><mo stretchy="false">&#x00029;</mo><mi>&#x000D7;</mi><mo stretchy="false">&#x00028;</mo><msup><mn>2</mn><mrow><mn>3</mn><mo>&#x0002F;</mo><mn>4</mn></mrow></msup><mo stretchy="false">&#x00029;</mo></mrow></math><p><strong>Step 3:</strong> Attack the two simple pieces separately</p>
+<ul>
+<li>For the <code>(2^5)</code> part: This is the quotient part. Raising 2 to an integer power is a <strong>bit-shift operation</strong>, extremely fast — the digital equivalent of adding zeros.</li>
+<li>For the <code>(2^(3/4))</code> part: This is the remainder part.<br />
+Since γ is 4, possible remainders are 0, 1, 2, or 3.<br />
+The answers are pre-calculated and stored in a small <strong>Look-Up Table (LUT)</strong>.</li>
+</ul>
+<p>So the computer is left with one final multiplication — and that’s it!</p>
+<hr />
+<p>In the paper, the equation looks like this:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mn>2</mn><mrow><mover><mrow><mi>&#x003C0;</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mo>&#x0002F;</mo><mi>&#x003B3;</mi></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><msub><mover><mrow><mi>&#x003C0;</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mi>q</mi></msub><mo>&#x0002B;</mo><msub><mover><mrow><mi>&#x003C0;</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mi>r</mi></msub><mo>&#x0002F;</mo><mi>&#x003B3;</mi></mrow></msup><mo>&#x0003D;</mo><msup><mn>2</mn><mrow><msub><mover><mrow><mi>&#x003C0;</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mi>q</mi></msub></mrow></msup><mi>&#x000B7;</mi><msup><mn>2</mn><mrow><msub><mover><mrow><mi>&#x003C0;</mi></mrow><mo stretchy="false">&#x0007E;</mo></mover><mi>r</mi></msub><mo>&#x0002F;</mo><mi>&#x003B3;</mi></mrow></msup></mrow></math><hr />
+<h4 id=making-the-conversion-even-cheaper>Making the Conversion Even Cheaper!</h4><p>When γ = 4, our LUT had 4 entries.<br />
+But what if we have a bigger γ, like γ = 256?<br />
+Now we need 256 entries, which takes up more memory.</p>
+<p>The paper introduces a simple math shortcut called <strong>Mitchell’s Approximation</strong> to shrink the LUT without losing much accuracy.</p>
+<hr />
+<h4 id=mitchells-approximation>Mitchell’s Approximation</h4><p>Take a small number, x = 0.1<br />
+Compute: <code>2^x = 2^0.1 = 1.0717...</code></p>
+<p>The approximation states that if a number (x) is very small then:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mn>2</mn><mi>x</mi></msup><mo>&#x02248;</mo><mn>1</mn><mo>&#x0002B;</mo><mi>x</mi></mrow></math><p>Now let’s apply this:<br />
+<code>1 + 0.1 = 1.1</code> which is approximately equal to <code>1.0717</code>.</p>
+<p>But this works <strong>only if x is small</strong>.</p>
+<hr />
+<h4 id=hybrid-approach>Hybrid Approach</h4><p>Since approximation couldn’t be used for everything, the authors went for a <strong>hybrid approach</strong> combining a small, accurate LUT with the cheap approximation.</p>
+<p>Let’s say we need to calculate the remainder part of <code>2^(13/16)</code>.</p>
+<p><strong>Step 1:</strong> Split the remainder<br />
+Binary of 13 → <code>1101</code></p>
+<p>Split into:</p>
+<ul>
+<li><strong>MSB Component (Most Significant Bits):</strong> 1100 (decimal 12)</li>
+<li><strong>LSB Component (Least Significant Bits):</strong> 0001 (decimal 1)</li>
+</ul>
+<p>So the problem becomes:<br />
+<code>2^((12+1)/16)</code> = <code>2^(12/16) * 2^(1/16)</code></p>
+<p>Now for the <code>2^(12/16)</code> (MSB) part — it has a big effect and must be accurate → use LUT.<br />
+Since MSB can only take a few values (0, 4, 8, 12), we only need a <strong>4-entry LUT</strong> instead of 16.</p>
+<p>For the <code>2^(1/16)</code> (LSB) part, since <code>1/16</code> is small, we use <strong>Mitchell’s Approximation</strong>.</p>
+<p>At the end, simply combine the results — and you’re good to go!</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/sdxl-something/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">SDXL something</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/automatic-differentiation/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Automatic Differentiation</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

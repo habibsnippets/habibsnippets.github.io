@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Points to Token: A 3D Learning Log - Part 1 — Habeeb</title>
+<meta name="description" content="will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/from-points-to-token-a-3d-learning-log/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="From Points to Token: A 3D Learning Log - Part 1">
+<meta property="og:description" content="will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/from-points-to-token-a-3d-learning-log/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/from-points-to-token-a-3d-learning-log/01-Screenshot-from-2026-01-05-15-43-47.png">
+<meta property="article:published_time" content="2026-01-05">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="From Points to Token: A 3D Learning Log - Part 1">
+<meta name="twitter:description" content="will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "From Points to Token: A 3D Learning Log - Part 1",
+  "description": "will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)",
+  "datePublished": "2026-01-05",
+  "url": "https://habibsnippets.github.io/writing/from-points-to-token-a-3d-learning-log/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/writing/from-points-to-token-a-3d-learning-log/01-Screenshot-from-2026-01-05-15-43-47.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>From Points to Token: A 3D Learning Log - Part 1</h1>
+      <p class="post-meta">
+        <time datetime="2026-01-05">05 Jan, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>22 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=deep-learning-on-3d-point-clouds-pointnet-and-pointnet>Deep Learning on 3D Point Clouds: PointNet and PointNet++</h2><p><em>will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)</em></p>
+<h3 id=pointnet>PointNet</h3><p><img src="/assets/writing/from-points-to-token-a-3d-learning-log/01-Screenshot-from-2026-01-05-15-43-47.png" alt="architecture" width="840" height="299" loading="lazy" decoding="async"></p>
+<h3 id=1motivation-and-intuition>1.Motivation and Intuition:</h3><p>The domain of computer vision was primarily dominated by the processing of regular, grid based data structures like images (composed of pixels). But in reality the physical world around is three dimensional - and with the use of 3D sensors in fields like robotics, autonomous mobility etc., we need to develop DL architectures for interpreting this 3D geometry. Now, we have enough data when it comes to 3D, but the problem does not lie in the availability of the data, but instead it lies in the representation of it. Unlike images which have a structured and a regular representation, 3D point clouds are inherently irregular, unordered and sparse.</p>
+<h4 id=11-challenge-of-unstructured-data>1.1 Challenge of unstructured data</h4><p>Point cloud data is a set of vectors P = {P1,P2,...Pn} where each Pi represents a coordinate (x y z). This representation presents many computational hurdles that the traditional CNNs cannot handle directly.</p>
+<ul>
+<li><p>Permutation Invariance: Point cloud is a set, not a sequence. Set {A,B,C} is same as set {B,A,C}. Thus if we have a scan containing N number of points then the total number of possible permutations will be N!. So the model needs to treat all of these permutations as the same geometric object. Standard CNNs which rely on specific input or grid structures, fail to satisfy this invariance.</p>
+</li>
+<li><p>Transformation Invariance: The semantic classification of 3D objects should be invariant to the rigid transformations. For instance a chair, if rotated by 45 degrees, still remains a chair.</p>
+</li>
+<li><p>Sparsity and Volume: If we go with the volumetric approach we usually face this problem where the point clouds are converted into 3D grids and vast majority of these grids represent an empty space leading to inefficient memory usage and unnecessary compute.</p>
+</li>
+</ul>
+<h4 id=12-historical-context>1.2 Historical Context:</h4><ul>
+<li><p>Volumetric CNNs: Transform points into occupancy grids. While intuitive it introduces quantization artifacts and high memory overhead.</p>
+</li>
+<li><p>Multi-View CNNs (MVCNN): Rendering 3D object into a collection of 2D images from various viewpoints and processing them with standard 2D CNNs. It obscures intrinsic 3D geometric relationships and complicates the task like 3D segmentation.</p>
+</li>
+</ul>
+<h4 id=13-the-pointnet-intuition>1.3 The PointNet Intuition:</h4><p><a href='https://www.alphaxiv.org/abs/1612.00593'>PointNet Paper</a>
+The core intuition of the architecture was to consume the raw point directly. It was designed in such a way that it treated each point individually and independently in the initial stages - extracting features for every geometric coordinate and then aggregating them using a symmetric function (Max Pooling) that eventually destroys the ordering information thereby achieving the permutation invariance. The design also ignores all the noise and learns to select the "critical points" that defines the skeletal shape of the object.</p>
+<h3 id=2-the-pointnet-architecture>2. The PointNet Architecture:</h3><p>So by now we have discussed the problem with point cloud data right? So if we feed a Conv2D network a shuffled image, it breaks. If we feed a MLP a shuffled feature vector, different shuffles will lead to different outputs! Which is actually really bad for us. By 2016, most researchers were using this idea in which they were converting the point clouds into voxel grids or multi-view images which kinda worked but made the representation 100x bigger. So ain't worth it.</p>
+<h4 id=21-symmetric-functions>2.1 Symmetric Functions:</h4><p>What are symmetric functions?</p>
+<p>A function is symmetric any change in the ordering of the input does not change the output. Simple example can be that of addition or multiplication or finding the mean of 2 or more than two numbers.</p>
+<p>eg., a+b is same as b+a! No matter the order of the input the output will remain the same.</p>
+<p>Why point clouds need symmetry?
+Well point clouds are stored as sets and not sequences so if I have a point cloud describing an object as <code>{(1,2,3),(4,5,6)}</code>, it will be same as <code>{(4,5,6),(1,2,3)}</code>. The network must produce identical outputs for both orderings.</p>
+<p>In the paper there are three strategies that are discussed to handle this.</p>
+<p><em>Strategy 1</em>: Sort into canonical order:</p>
+<p>Idea: sort points by x, then by y and then finally by z before you feed them into the network.</p>
+<p>Problem: in high dimensions, no stable sorting exists!</p>
+<p>Why? it's simple, we want to project something that is in 3D into 1D while preserving all the distance relationships, which if you think about is practically impossible without distorting any distance!</p>
+<p><em>Strategy 2</em>: RNN with permutation augmentation:</p>
+<p>Idea: treat points as a sequence and then train a RNN on many random orderings.</p>
+<p>Problem:</p>
+<ul>
+<li>RNNs are order-dependent by design because they are specifically designed to process sequential data where the order of elements significantly influences the output.</li>
+</ul>
+<p>Read more <a href='https://medium.com/@piyushkashyap045/understanding-recurrent-neural-networks-rnns-in-deep-learning-36188e55a33d'>here</a></p>
+<ul>
+<li>Thousands of points will lead to a very long sequence and RNNs struggle with long sequences.</li>
+</ul>
+<blockquote>
+<p>RNNs can be limited in their ability to process long sequences. This is because the gradients of the loss function can become very small or very large as they propagate through time, making it difficult for the RNN to learn long-term dependencies.</p>
+</blockquote>
+<p>Above taken from article that can be found
+<a href='https://medium.com/@indrajitbarat9/recurrent-neural-networks-rnns-challenges-and-limitations-4534b25a394c'>here</a></p>
+<p><em>Strategy 3:</em> Symmetric Functions - used in PointNet's architecture</p>
+<p>Idea: Use a function that is inherently order variant - we saw that above - symmetric functions don't give a damn about the order of input! Irrespective of the order, the output remains the same.</p>
+<h4 id=22-pointnets-solution-equation-1>2.2 PointNet's Solution: Equation 1</h4><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">&#x00028;</mo><mo stretchy="false">&#x0007B;</mo><msub><mi>x</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo>&#x0002C;</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false">&#x0007D;</mo><mo stretchy="false">&#x00029;</mo><mo>&#x02248;</mo><mi>g</mi><mo minsize="1.2em" maxsize="1.2em">(</mo><mi>h</mi><mo stretchy="false">&#x00028;</mo><msub><mi>x</mi><mn>1</mn></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo>&#x0002C;</mo><mi>h</mi><mo stretchy="false">&#x00028;</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false">&#x00029;</mo><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow></math><p>Breaking down the equation:</p>
+<p>Left Side</p>
+<ul>
+<li>f is the target function we want to learn</li>
+<li>the input is a set of points : x1,x2......and so on</li>
+<li>output is a single value - a class label for classification</li>
+</ul>
+<p>Right Side</p>
+<p>Step 1:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>h</mi><mi>:</mi><msup><mi>&#x0211D;</mi><mi>N</mi></msup><mo>&#x02192;</mo><msup><mi>&#x0211D;</mi><mi>K</mi></msup></mrow></math><ul>
+<li>h is the shared MLP</li>
+<li>Each point is processed independently</li>
+<li>output is a K dimensional feature vector (typically K = 1024)</li>
+</ul>
+<p>Step 2:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>g</mi><mi>:</mi><mo stretchy="false">&#x00028;</mo><msup><mi>&#x0211D;</mi><mi>K</mi></msup><msup><mo stretchy="false">&#x00029;</mo><mi>n</mi></msup><mo>&#x02192;</mo><mi>&#x0211D;</mi></mrow></math><ul>
+<li>g is the symmetric aggregator and it takes n feature vectors each of dimension K.</li>
+<li>outputs a single value</li>
+<li>must be symmetric: order of inputs does not matter</li>
+</ul>
+<p>PointNet's choice for g is is :</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>g</mi><mo stretchy="false">&#x00028;</mo><msub><mi>f</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo>&#x0002C;</mo><msub><mi>f</mi><mi>n</mi></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>&#x003B3;</mi><mo minsize="1.2em" maxsize="1.2em">(</mo><mo>MAX</mo><mo stretchy="false">&#x00028;</mo><msub><mi>f</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo>&#x0002C;</mo><msub><mi>f</mi><mi>n</mi></msub><mo stretchy="false">&#x00029;</mo><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow></math><p>MAX is element wise max across all n vectors and gamma is another small MLP that processes the pooled K vector to produce final output.</p>
+<h5 id=example>Example:</h5><p>Imagine classifying a chair from 4 points:
+Input point cloud:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>S</mi><mo>&#x0003D;</mo><mo stretchy="false">&#x0007B;</mo><mo stretchy="false">&#x00028;</mo><mn>0.1</mn><mo>&#x0002C;</mo><mn>0.2</mn><mo>&#x0002C;</mo><mn>0.3</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mo stretchy="false">&#x00028;</mo><mn>0.4</mn><mo>&#x0002C;</mo><mn>0.5</mn><mo>&#x0002C;</mo><mn>0.6</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mo stretchy="false">&#x00028;</mo><mn>0.7</mn><mo>&#x0002C;</mo><mn>0.8</mn><mo>&#x0002C;</mo><mn>0.9</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mo stretchy="false">&#x00028;</mo><mn>0.2</mn><mo>&#x0002C;</mo><mn>0.3</mn><mo>&#x0002C;</mo><mn>0.4</mn><mo stretchy="false">&#x00029;</mo><mo stretchy="false">&#x0007D;</mo></mrow></math><p>Step 1: Apply <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>h</mi></mrow></math> (shared MLP) to each point</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>h</mi><mo stretchy="false">&#x00028;</mo><mn>0.1</mn><mo>&#x0002C;</mo><mn>0.2</mn><mo>&#x0002C;</mo><mn>0.3</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>2.1</mn><mo>&#x0002C;</mo><mn>0.5</mn><mo>&#x0002C;</mo><mn>3.7</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>1024</mn></mrow></msup></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>h</mi><mo stretchy="false">&#x00028;</mo><mn>0.4</mn><mo>&#x0002C;</mo><mn>0.5</mn><mo>&#x0002C;</mo><mn>0.6</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>1.8</mn><mo>&#x0002C;</mo><mn>2.3</mn><mo>&#x0002C;</mo><mn>1.2</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>1024</mn></mrow></msup></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>h</mi><mo stretchy="false">&#x00028;</mo><mn>0.7</mn><mo>&#x0002C;</mo><mn>0.8</mn><mo>&#x0002C;</mo><mn>0.9</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>3.5</mn><mo>&#x0002C;</mo><mn>1.1</mn><mo>&#x0002C;</mo><mn>2.9</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>1024</mn></mrow></msup></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>h</mi><mo stretchy="false">&#x00028;</mo><mn>0.2</mn><mo>&#x0002C;</mo><mn>0.3</mn><mo>&#x0002C;</mo><mn>0.4</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>1.2</mn><mo>&#x0002C;</mo><mn>3.8</mn><mo>&#x0002C;</mo><mn>0.4</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>1024</mn></mrow></msup></mrow></math><p>Step 2: MAX pooling (element-wise across the 4 vectors)</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MAX</mtext><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>3.5</mn><mo>&#x0002C;</mo><mn>3.8</mn><mo>&#x0002C;</mo><mn>3.7</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo>&#x02208;</mo><msup><mi>&#x0211D;</mi><mrow><mn>1024</mn></mrow></msup></mrow></math><p>Step 3: Apply <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B3;</mi></mrow></math> (final MLP)</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x003B3;</mi><mo stretchy="false">&#x00028;</mo><mo stretchy="false">[</mo><mn>3.5</mn><mo>&#x0002C;</mo><mn>3.8</mn><mo>&#x0002C;</mo><mn>3.7</mn><mo>&#x0002C;</mo><mi>&#x02026;</mi><mo stretchy="false">]</mo><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">[</mo><mn>0.1</mn><mo>&#x0002C;</mo><mn>0.05</mn><mo>&#x0002C;</mo><mn>0.8</mn><mo>&#x0002C;</mo><mn>0.05</mn><mo stretchy="false">]</mo><mspace width="1em" /><mtext>(scores&#x000A0;for&#x000A0;4&#x000A0;classes)</mtext></mrow></math><p>Chair has highest score (0.8) → Prediction: chair</p>
+<p>Again,in simpler words, leaving all the maths behind the above equation is responsible for doing 2 things:</p>
+<ol>
+<li>Transform each point individually into a richer representation</li>
+<li>Combine all those representations in a way that ignores order</li>
+</ol>
+<p>h(x) looks at each point individually - here a small MLP processes one point at a point and since x,y,z coordinates are not enough we need to extract features like whether the point is at an edge? or if it is part of a flat surface etc.</p>
+<p>(x, y, z) → [64 numbers] → [128 numbers] → [1024 numbers]</p>
+<p>These 1024 numbers are a "learned description" of what is interesting about the point.</p>
+<p>The g(...) combines everything while ignoring the order. It is a symmetric function that merges all the individual point features into a single global description.</p>
+<p>But why do we do this? well we have thousands of 1024-dim vectors (one per point) and we need to summarise them and for this we use 'max pooling' - take the element wise maximum across all the points.</p>
+<p>Point 1's features: [2.1, 0.5, 3.7, 1.2, ...]
+Point 2's features: [1.8, 2.3, 1.2, 0.9, ...]
+Point 3's features: [3.5, 1.1, 2.9, 1.8, ...]</p>
+<p>Global summary:     [3.5, 2.3, 3.7, 1.8, ...] - max from each column</p>
+<p>After max pooling:
+You have one 1024-dimensional vector that describes the entire shape, and this vector is identical no matter what order the points came in.</p>
+<h4 id=23-local-and-global-information-aggregation>2.3 Local and Global Information Aggregation</h4><p>After this step we are left with a vector which is a global signature of the input set.</p>
+<p>The Problem:</p>
+<p>Classification: Is this entire object a chair or a table? -> to understand this we need a global understanding of the shape and structure.</p>
+<p>Segmentation: Which point belongs to leg of chair and which belong to seat of chair? for this we need both! global as well local understanding of the points.</p>
+<p>So in nutshell:</p>
+<p>Local info: What is the geometry around this point?
+Global info: What kind of object am I a part of?</p>
+<p>The solution:</p>
+<p>Feature Concatenation:</p>
+<blockquote>
+<p>After computing the global point cloud feature vector, we feed it back to per point features by concatenating the global feature with each of the point features. Then we extract new per point features based on the combined point features - this time the per point feature is aware of both the local and global information.</p>
+</blockquote>
+<p>Both global and local info alone is not good enough. why? because let us us say we only have local info about things - so a point from the leg of chair will be same to the point that will be of the leg of a table. To distinguish between them we need to have global understanding of the both. Also if we only have global info about something then we will only have info like "this entire object is a chair" without any understanding of the individual parts like seat or leg of chair.</p>
+<p>The solution proposed in the paper was "concatenation".</p>
+<p>A visual walkthrough will be like this:</p>
+<p>before concatenation:</p>
+<p>Point 1:  [a₁, a₂, ..., a₆₄]  ← 64-D local features
+Point 2:  [b₁, b₂, ..., b₆₄]  ← 64-D local features (different from Point 1)
+Point 3:  [c₁, c₂, ..., c₆₄]  ← 64-D local features (different from Points 1&2)
+...</p>
+<p>Global:   [g₁, g₂, ..., g₁₀₂₄] ← 1024-D global features (same for all)</p>
+<p>after concatenation:
+Point 1:  [a₁, a₂, ..., a₆₄, g₁, g₂, ..., g₁₀₂₄]  ← 1088-D combined
+Point 2:  [b₁, b₂, ..., b₆₄, g₁, g₂, ..., g₁₀₂₄]  ← 1088-D combined
+Point 3:  [c₁, c₂, ..., c₆₄, g₁, g₂, ..., g₁₀₂₄]  ← 1088-D combined</p>
+<p>The Final Step:
+it involves using the combined features to be fed into a new MLP the get a set of new features of (128 -D).</p>
+<p>Combined features (1088-D) → MLP → New features (128-D) → MLP → Part label</p>
+<p>the final mlp learns the following:</p>
+<ul>
+<li>interpretation of local and global info</li>
+<li>extract relevant patterns</li>
+<li>make final per-point predictions</li>
+</ul>
+<h4 id=24-joint-alignment-network>2.4 Joint Alignment Network;</h4><p>let us say we have two objects (chair leg for instance) - one is upright (0,0,0) and the other is a bit rotated (0.7,0.7,0.7).</p>
+<p>Problem: the network sees completely different numbers even though the geometric shape is exactly the same.</p>
+<p>Three ways to handle this:</p>
+<ol>
+<li>Brute Force - data augmentation:</li>
+</ol>
+<p>train the model on millions of chair images so that it is able to identify all sorts of chairs.</p>
+<ol start="2">
+<li>Build rotation invariance into the network:</li>
+</ol>
+<p>design such special layers that are able to guarantee that rotation does not matter!</p>
+<p>but these are very hard and complex to design and the network has to memorise all sort of orientations for the same object.</p>
+<ol start="3">
+<li>Predict the rotation first and then undo it -PointNet's solution</li>
+</ol>
+<p>Before even processing, rotate all the inputs into a canonical orientation.</p>
+<p>Part 1: Spatial Transfomer Network (T-Net)</p>
+<p>Goal: No matter the orientation of the input chair, we will automatically rotate it to face forward before processing it any further.</p>
+<p>How it works? well internally it has a mini architecture of the point net itself "mini PointNet" and it learns to predict " What rotation should I apply to make the object upright?"</p>
+<p>Example:</p>
+<ol>
+<li>Input: Rotated Object</li>
+</ol>
+<p>Point 1: (0.7, 0.7, 0.0)
+Point 2: (0.6, 0.8, 0.0)
+Point 3: (0.7, 0.7, 1.0)
+...</p>
+<ol start="2">
+<li>Transformation Matrix predicted by T-Net:</li>
+</ol>
+<p>T = [0.707  -0.707   0]
+[0.707   0.707   0]
+[0       0       1]</p>
+<ol start="3">
+<li>Apply the transformation to every point:</li>
+</ol>
+<p>Point 1': T × [0.7, 0.7, 0.0]ᵀ = [0.0, 1.0, 0.0]ᵀ  ← Now aligned!
+Point 2': T × [0.6, 0.8, 0.0]ᵀ = [-0.14, 1.0, 0.0]ᵀ
+Point 3': T × [0.7, 0.7, 1.0]ᵀ = [0.0, 1.0, 1.0]ᵀ</p>
+<ol start="4">
+<li>Feed the aligned points to the main network.</li>
+</ol>
+<p>How does T-Net learns?</p>
+<p>T-Net doesn't know ahead of time what "upright" means.
+During training:</p>
+<ol>
+<li>T-Net predicts some transformation</li>
+<li>Transformed points go through the main network</li>
+<li>Main network makes a prediction ("chair")</li>
+<li>If prediction is wrong, both networks get corrected via backpropagation</li>
+<li>Over time, T-Net learns to align in a way that helps the main network succeed</li>
+</ol>
+<p>Result: T-Net discovers a canonical orientation that makes classification easiest</p>
+<p>Part 2: Feature Space Alignment:</p>
+<p>Extension of the main problem - not only the coordinates need this alignment - but the internal feature representations might also need them!  In other words, after the first MLP, each point has a 64-D feature vector and various features like "flatness in X direction", "curvature along y axis" etc., can be encoded in them .</p>
+<p>Problem: If the input was rotated, then these features might also be rotated in 64 dimensional space right?</p>
+<p>The solution to the above problem: Another T-Net but this time for the features!</p>
+<p>Insert a second T-Net that predicts a 64×64 transformation matrix to align the feature space.</p>
+<p>But this also gives rise to a new challenge! High Dimensionality.</p>
+<p>Spatial T-Net:</p>
+<ul>
+<li>Predicts 3×3 matrix = 9 numbers</li>
+<li>Easy to optimize</li>
+</ul>
+<p>Feature T-Net:</p>
+<ul>
+<li>Predicts 64×64 matrix = 4,096 numbers</li>
+<li>Much harder to optimize!</li>
+</ul>
+<p>Problems that can occur:</p>
+<ol>
+<li>Matrix might learn to squash all features to zero</li>
+<li>Matrix might explode (make features infinitely large)</li>
+<li>Matrix might collapse dimensions (lose information)</li>
+<li>Training becomes unstable</li>
+</ol>
+<p>Now to solve the above, the authors added a regularization term to the softmax training.</p>
+<blockquote>
+<p>However, transformation matrix in the feature space has much higher dimension than the spatial transform matrix, which greatly increases the difficulty of optimization. We therefore add a regularization term to our softmax training loss.</p>
+</blockquote>
+<p>Part 3: Orthogonal regularisation</p>
+<p>Matrix A is orthogonal if:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><mo>&#x0003D;</mo><mi>I</mi></mrow></math><p>where I is the identity matrix</p>
+<p>So why orthogonal matrix? well because these are good! really good tbh!</p>
+<ol>
+<li>they preserve distances:</li>
+</ol>
+<p>before transformation:</p>
+<p>Point A: [1, 0]
+Point B: [0, 1]
+Distance: √2</p>
+<p>after transformation:</p>
+<p>Point A': [0, 1]
+Point B': [-1, 0]
+Distance: still √2 ✓</p>
+<ol start="2">
+<li>the preserve informatoin:</li>
+</ol>
+<p>these are reversible, we can always undo them. If we know the transformed data and the matrix we can recover the original data.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>A</mi><mrow><mo>&#x02212;</mo><mn>1</mn></mrow></msup><mo>&#x0003D;</mo><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup></mrow></math><p>The Regularization Term:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>L</mi><mrow><mtext>reg</mtext></mrow></msub><mo>&#x0003D;</mo><mo fence="false" stretchy="false">&#x02016;</mo><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><msubsup><mo fence="false" stretchy="false">&#x02016;</mo><mi>F</mi><mn>2</mn></msubsup></mrow></math><p>A = the 64x64 term predicted by the T-Net
+I = identity matrix</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup></mrow></math><p>the difference between identity and A.A^T</p>
+<p>What does it measure?</p>
+<p>If A is perfectly orthogonal:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><mo>&#x0003D;</mo><mi>I</mi></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><mo>&#x0003D;</mo><mn>0</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>&#x02016;</mo><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><msubsup><mo>&#x02016;</mo><mi>F</mi><mn>2</mn></msubsup><mo>&#x0003D;</mo><mn>0</mn></mrow></math><p>If A is NOT orthogonal:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><mo>&#x02260;</mo><mi>I</mi></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><mo>&#x02260;</mo><mn>0</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>&#x02016;</mo><mi>I</mi><mo>&#x02212;</mo><mi>A</mi><msup><mi>A</mi><mrow><mo>&#x022A4;</mo></mrow></msup><msubsup><mo>&#x02016;</mo><mi>F</mi><mn>2</mn></msubsup><mo>&#x0003E;</mo><mn>0</mn></mrow></math><p>How it is used in training:</p>
+<p>Total Loss Function :</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>L</mi><mrow><mtext>total</mtext></mrow></msub><mo>&#x0003D;</mo><msub><mi>L</mi><mrow><mtext>classification</mtext></mrow></msub><mo>&#x0002B;</mo><mi>&#x003BB;</mi><mi>&#x000B7;</mi><msub><mi>L</mi><mrow><mtext>reg</mtext></mrow></msub></mrow></math><p>the network tries to:</p>
+<ol>
+<li>classify shapes correctly - minimise the classfication loss</li>
+<li>keep the transformation matrix orthogonal - minimise the regularisation loss</li>
+</ol>
+<p>example:</p>
+<p>let
+A = [0  0  0  ...]
+[0  0  0  ...]
+[0  0  0  ...]
+...</p>
+<p>Result: All features become zero → Information destroyed!</p>
+<p>AAᵀ = [0  0  0  ...]
+[0  0  0  ...]
+...</p>
+<p>regularisation penalty:</p>
+<p>‖I - AAᵀ‖²_F = ‖I - 0‖²_F = very large!</p>
+<p>The regularization penalizes this, pushing the network away from destructive transformations.</p>
+<p>Good matrix:</p>
+<p>A = [0.707  -0.707   0  ...]
+[0.707   0.707   0  ...]
+[0       0       1  ...]
+...</p>
+<p>AAᵀ ≈ I (very close to identity)</p>
+<p>penalty:</p>
+<p>‖I - AAᵀ‖²_F ≈ 0  ← Very small penalty</p>
+<p>The regularization encourages this type of transformation.</p>
+<p>Why This Works
+Stability
+Without regularization, the optimization can:</p>
+<ol>
+<li>Jump around wildly</li>
+<li>Get stuck in bad local minima</li>
+<li>Produce transformations that make training unstable</li>
+</ol>
+<p>With regularization:</p>
+<ol>
+<li>The transformation stays well-behaved</li>
+<li>Gradients don't explode</li>
+<li>Training converges smoothly</li>
+</ol>
+<p>Performance
+The paper states:</p>
+<blockquote>
+<p>"We find that by adding the regularization term, the optimization becomes more stable and our model achieves better performance."</p>
+</blockquote>
+<p>Why better performance?</p>
+<ol>
+<li>The network learns meaningful transformations (rotations/reflections)</li>
+<li>Information is preserved through the transformation</li>
+<li>The main network receives consistent, aligned features</li>
+</ol>
+<h2 id=pointnet-1>PointNet++</h2><p><a href='https://www.alphaxiv.org/abs/1706.02413?chatId=019bb109-ae8c-7541-9cc3-4e76ec2bbf77'>paper</a></p>
+<p>to begin with let me try to put this new approach in the most basic terms possible:</p>
+<p>PointNet++ = Hierarchical(PointNet(Local Neighborhoods))</p>
+<p>The intuition: PointNet++ takes PointNet's core operation (feature learning + max pooling) and applies it recursively on local neighborhoods at multiple hierarchical levels, instead of once on the entire point cloud.</p>
+<h3 id=method>Method</h3><h4 id=hierachial-point-set-feature-learning>Hierachial Point Set Feature Learning:</h4><p>PointNet uses a single max pooling operation to aggregate the whole point set. It's like trying to understand a building by looking at every brick simultaneously, without noticing that bricks form walls, walls form rooms, and rooms form floors.</p>
+<p>What PointNet++ does differently is that it builds its understanding in stages.</p>
+<p>Think of it as if you are zooming out progressively:</p>
+<ol>
+<li>You start with all of the points that are available to you.</li>
+<li>Then focus on small areas/neighbourhoods and understand the details</li>
+<li>Zoom out, focus on medium regions, capture how these details continue</li>
+<li>Zoom out further, to understand the whole strcuture.</li>
+</ol>
+<p>this is a three step understanding of the entire picture!</p>
+<ol>
+<li>sampling layer -pick the representatives:</li>
+</ol>
+<p>From your 10,000 points, pick 1,000 points that are spread out well. These become centers of attention. Like choosing 1,000 spots on the chair where you'll look closely.</p>
+<ol start="2">
+<li>grouping layer - find the neighbours</li>
+</ol>
+<p>For each of those 1,000 centers, grab all points nearby (say, within 10cm radius). Now you have 1,000 small groups of points, each representing a local patch of the chair.</p>
+<ol start="3">
+<li>PointNet Layer - understanding each group</li>
+</ol>
+<p>Run mini-PointNet on each group separately. Each group of points becomes one feature vector. So 1,000 groups → 1,000 feature vectors.</p>
+<p>Now you have 1,000 points with rich features (instead of 10,000 raw points). Repeat this process: sample 100 from those 1,000, group their neighbors, extract features. Keep going until you understand the whole object.</p>
+<h4 id=robust-feature-learning-under-non-uniform-sampling-density>Robust Feature Learning under Non-Uniform Sampling Density</h4><p>The basic problem of non-uniform density.</p>
+<p>In basic terms, density is defined as the total number of points that exist in a given volume of space.</p>
+<p>Usually density varies wildly across our point cloud data and cause non-uniform sampling.</p>
+<p>Why this thing breaks regular PointNet++?</p>
+<p>Well let us say we have a region with high density. Here PointNet can learn rich patterns. But when it comes to a sparse region only few points will be captured and thus PointNet can only observe noise and not patterns. Such features become unreliable.</p>
+<p>One can argue that by simply changing the radius of the region that we want to observe we can get away with this problem.</p>
+<p>Small radius - great for dense regions but at the same time terrible for sparse regions</p>
+<p>Large radius - works in sparse regions but misses fine details in denser regions.</p>
+<p>Thus by keeping a single fixed radius we cannot actually solve this problem.</p>
+<p><img src="/assets/writing/from-points-to-token-a-3d-learning-log/02-Screenshot-from-2026-01-12-14-34-35.png" alt="msg and mrg" width="169" height="161" loading="lazy" decoding="async">
+Solution 1: Multi-Scale Grouping (MSG)</p>
+<p>Idea: Use multiple radii simultaneously and let the model figure out which one to use.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>r</mi><mn>1</mn></msub><mo>&#x0003D;</mo><mn>0.1</mn><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>r</mi><mn>2</mn></msub><mo>&#x0003D;</mo><mn>0.2</mn><mo>&#x0002C;</mo><mspace width="1em" /><msub><mi>r</mi><mn>3</mn></msub><mo>&#x0003D;</mo><mn>0.4</mn></mrow></math><p>Apply PointNet to each scale independently</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>f</mi><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo>PointNet</mo><mspace width="negativethinmathspace" /><mo minsize="1.2em" maxsize="1.2em">(</mo><msub><mi>&#x1D4A9;</mi><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo minsize="1.2em" maxsize="1.2em">)</mo></mrow></math><p>Then finally concatenate all of the features</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>f</mi><mrow><mtext>MSG</mtext></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo minsize="1.2em" maxsize="1.2em">[</mo><msub><mi>f</mi><mrow><msub><mi>r</mi><mn>1</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02295;</mo><msub><mi>f</mi><mrow><msub><mi>r</mi><mn>2</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02295;</mo><msub><mi>f</mi><mrow><msub><mi>r</mi><mn>3</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo minsize="1.2em" maxsize="1.2em">]</mo></mrow></math><p>During training the network will learn these weights through random dropout.</p>
+<blockquote>
+<p>We train the network to learn an optimized strategy to combine the multi-scale features. This is done by randomly dropping out input points with a randomized probability for each instance, which we call random input dropout.</p>
+</blockquote>
+<p>Solution 2: Multi-Resolution Grouping (MRG)</p>
+<p>Why MRG? well MSG is pretty expensive - we are running the model on 3 different scales for every point - it means we are tripling the cost of computation.</p>
+<p>How does MRG solve this? well it combines two information sources:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>f</mi><mrow><mtext>MRG</mtext></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo minsize="1.2em" maxsize="1.2em">[</mo><msub><mi>f</mi><mrow><mtext>hierarchical</mtext></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02295;</mo><msub><mi>f</mi><mrow><mtext>direct</mtext></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo minsize="1.2em" maxsize="1.2em">]</mo></mrow></math><p>Hierarchial: Features from the previous abstraction level. This comes from processing smaller neighbourhoods recursively - good for dense regions.</p>
+<p>Direct: Run PointNet directly on all the raw points in a larger neighbourhood.</p>
+<p>This uses a bigger region and is well suited for sparse regions.</p>
+<p>Let us understand the MRG with a concrete example that will make the maths behind it crystal clear!</p>
+<p>Imagine processing a chair point cloud through a 3 level hierarchy:</p>
+<p>Layer 0: 1024 raw points (just x, y, z coordinates)</p>
+<p>Layer 1: Pick 256 important points. For each, look at nearby Layer 0 points, understand them with PointNet. Now you have 256 points with smart features.</p>
+<p>Layer 2: Pick 64 important points. For each, we need to create features. This is where MRG comes in.</p>
+<p>The Problem at Layer 2
+Let's focus on one point at Layer 2. Call it Point A.</p>
+<p>We need to give Point A a feature that describes what's around it. But there's a density problem:</p>
+<p>Maybe Point A is on the chair seat (lots of points nearby)
+Maybe Point A is on a thin leg (very few points nearby)
+We need TWO different ways to look at Point A's neighborhood:</p>
+<p>Path 1: Hierarchical Path (Look at Layer 1)
+Simple steps to follow:</p>
+<p>Look around Point A
+Find which Layer 1 points are nearby
+Each Layer 1 point already has a feature vector which we computed earlier
+Collect those features and summarize them
+Example:</p>
+<p>Point A is here: ★</p>
+<p>Nearby Layer 1 points (already have features):
+• Point B: "I see smooth surface, horizontal"
+• Point C: "I see smooth surface, horizontal"<br />
+• Point D: "I see an edge connecting to something"
+...
+(10 such descriptions)</p>
+<p>Summarize → "Mostly smooth horizontal surface with an edge"</p>
+<p>Path 2: The Direct Path (Look at Layer 0)
+What we do is:</p>
+<p>Look around Point A
+Find which Layer 0 raw points are nearby
+Run PointNet directly on those raw coordinates
+Get a feature
+Example:</p>
+<p>Point A is here: ★</p>
+<p>Nearby Layer 0 raw points (just coordinates):
+• (0.12, 0.45, 0.78)
+• (0.13, 0.46, 0.79)
+• (0.14, 0.47, 0.80)
+...
+(80 such points)</p>
+<p>PointNet looks at all 80 → "This is a flat surface"</p>
+<p>Why Different Numbers of Points?
+Here's the key: Both paths look at the same radius around Point A (say, 0.4 meters), but they look at different layers.</p>
+<p>Path 1 finds Layer 1 points within that radius → only 10 points (because Layer 1 is sparse—we sampled down from 1024 to 256 points)</p>
+<p>Path 2 finds Layer 0 points within that radius → 80 points (because Layer 0 is dense—it has all 1024 original points)</p>
+<p>Since we reduced the points by 4× when going from Layer 0 (1024 points) to Layer 1 (256 points), any given region naturally has about 4× fewer Layer 1 points than Layer 0 points.</p>
+<p>Combining Both Paths</p>
+<p>Point A now has TWO descriptions:</p>
+<p>Path 1 (hierarchical): Summary from 10 Layer 1 neighbors</p>
+<p>Path 2 (direct): Direct observation of 80 Layer 0 points</p>
+<p>We glue them together: [Path 1 feature] + [Path 2 feature]</p>
+<p>Why Two Paths?
+This approach actually solves the density problem we talked about earlier!</p>
+<p>Path 1 - Hierarchical is GOOD when Point A is in a DENSE area:</p>
+<p>Those 10 Layer 1 points were each created by looking at 50+ Layer 0 points.</p>
+<p>They captured fine details like curves, edges, and textures</p>
+<p>Their summary contains rich, detailed information</p>
+<p>Path 2 - Direct is GOOD when Point A is in a SPARSE region:</p>
+<p>Those 10 Layer 1 points were each created from only 5 Layer 0 points
+Their features are unreliable (not enough data)</p>
+<p>Looking directly at 80 raw Layer 0 points gives more solid information</p>
+<p>The network learns to automatically weight which path to trust more based on local point density!</p>
+<h4 id=point-feature-propogation-for-set-segmentation>Point Feature Propogation for Set Segmentation</h4><p>Ok let's go back to our hierarchy:</p>
+<p>Layer 0 : 1024 points - the original chair scan
+Layer 1 : 256 points - 256 sampled down points
+Layer 2 : 64 points - further sampled down
+Layer 3 : 1 point - global feature for the whole chair</p>
+<p>Looking at the above hierarchy we can see that it will work absolutely fine for a "classification" task. But what about segmentation?</p>
+<p>The problem is that we only have features for 64 points in our layer 2 and 1 point in layer 3. But we need features for all 1024 original points to carry out the segmentation task!</p>
+<p>A brute force solution that you think of is that, why not have all 1024 pints at every layer? But think about it, this will be computationally expensive af. having 1024 points at each and every layer will defeat the entire purpose of hierarchical learning!</p>
+<p>The Solution boys : Feature Propogation!</p>
+<ol>
+<li>Go UP the hierarchy normally (1024 -> 256 -> 64 -> 1) - learn all the high level features</li>
+<li>Go BACK DOWN (1 -> 64 -> 256 -> 1024)  - thus spreading all the features to all the points.</li>
+</ol>
+<p>Now how does it happen???</p>
+<p>Step 1:</p>
+<p>Layer 3 -> Layer 2 (1 point to 64 points)</p>
+<p>We have one point at Layer 3 which has a feature vector. A naive approach to give this feature vector to layer 2 will be to just copy the features to all 64 points. The problem with this approach will be that each point will get an identical global information without any spatial variation! What do the authors do to solve this is that they use the feature but also keep the layer 2's own features (use of skip connections)</p>
+<p>Step 2:</p>
+<p>Now we have 64 points with features. We need to give features to 256 Layer 1 points.</p>
+<p>The challenge here is that not every layer 1 point has a matching layer 2 point nearby. Or in other words - layer 2 only has 64 points, so it will be sparse as compared to layer 1 points which has 256 points which will be denser.</p>
+<p>So the question arises of how a layer 1 point can get a feature when there is no layer 2 point at its exact location?</p>
+<p>The solution is Interpolation!</p>
+<p>Step 1: Interpolates features from the subsampled points to the original points using inverse distance weighting</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>f</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>j</mi><mo stretchy="false">&#x00029;</mo></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mrow><msubsup><mo>&#x02211;</mo><mrow><mi>i</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mi>k</mi></msubsup><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mi>&#x000B7;</mi><msubsup><mi>f</mi><mi>i</mi><mrow><mo stretchy="false">&#x00028;</mo><mi>j</mi><mo stretchy="false">&#x00029;</mo></mrow></msubsup></mrow><mrow><msubsup><mo>&#x02211;</mo><mrow><mi>i</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mi>k</mi></msubsup><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo></mrow></mfrac></mrow></math><p>where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>w</mi><mi>i</mi></msub><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mi>d</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><msub><mi>x</mi><mi>i</mi></msub><msup><mo stretchy="false">&#x00029;</mo><mi>p</mi></msup></mrow></mfrac></mrow></math> is the inverse weight distance.</p>
+<p>Step 2:</p>
+<p>After interpolation, point <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi></mrow></math> has a feature from Layer 2. But wait—point <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>x</mi></mrow></math> was already at Layer 1 during the upward pass! It already had features from looking at Layer 0 points.</p>
+<p>Next thing to do: Concatenate both!</p>
+<p>Interpolated feature from Layer 2: [0.8, 0.3, 0.5, ...] (128-dim)
+Original feature from Layer 1:     [0.2, 0.7, 0.1, ...] (64-dim)</p>
+<p>Combined: [0.8, 0.3, 0.5, ..., 0.2, 0.7, 0.1, ...] (192-dim)</p>
+<p>After concatenation pass through "unit PointNet" (basically MLP applied to each point):</p>
+<p>Input: 192-dim concatenated feature
+↓ Fully connected layer + ReLU
+↓ Fully connected layer + ReLU<br />
+↓ Fully connected layer + ReLU
+Output: 128-dim refined feature</p>
+<p>This approach allows PointNet++ to generate detailed segmentation maps that preserve both global context and local geometric details.</p>
+<p>Why this works?</p>
+<p>Interpolation ensures smooth spatial transition of features—nearby points get similar features.</p>
+<p>Skip connections preserve fine details learned during the upward pass.
+Unit PointNet learns to optimally blend high-level context with low-level details.</p>
+<p>The combination gives you the best of both worlds: global understanding from the hierarchy + local precision for every point.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/bradley-terry-model/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Bradley Terry Model</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/engineering-fully-local-retrieval-augmented-generation-systems/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Engineering Fully Local Retrieval-Augmented Generation Systems</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

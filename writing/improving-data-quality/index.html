@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Improving Data Quality — Habeeb</title>
+<meta name="description" content="So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/improving-data-quality/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Improving Data Quality">
+<meta property="og:description" content="So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/improving-data-quality/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-03-10">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Improving Data Quality">
+<meta name="twitter:description" content="So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Improving Data Quality",
+  "description": "So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like…",
+  "datePublished": "2025-03-10",
+  "url": "https://habibsnippets.github.io/writing/improving-data-quality/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Improving Data Quality</h1>
+      <p class="post-meta">
+        <time datetime="2025-03-10">10 Mar, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<p>So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like they were named by a drunk intern. Don’t worry. I’m here to clean up your mess, Gotham-style. Let’s dive into the shadows and make your data shine.</p>
+<p>Step 1: Read Your Dataset into a Pandas DataFrame:</p>
+<p>First things first. You’ve got a CSV file, and you need to load it into a Pandas DataFrame. Think of this as your Batcave—a place where all your tools and gadgets are stored.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>  
+<span class="n">df_transport</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;your_dataset.csv&#39;</span><span class="p">)</span>  
+</pre></div>
+<p>Now, your data is in a DataFrame. But don’t get too comfortable. This is just the beginning.</p>
+<p>Step 2: Check the Data Types:</p>
+<p>Your DataFrame might look clean, but it’s probably hiding secrets. Pandas tries to guess the data types, but it’s not perfect. Let’s expose the truth.</p>
+<div class="highlight"><pre><span></span><span class="n">Copy</span>
+<span class="n">df_transport</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>  
+</pre></div>
+<p>This will show you the data types of each column. Numbers? Strings? Dates? Pandas will spill the beans. But remember, not everything is as it seems.</p>
+<p>Step 3: Get the Stats:</p>
+<p>For numerical columns, you need to know the lay of the land. Use .describe() to get the summary statistics.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>  
+</pre></div>
+<p>This will give you the mean, standard deviation, min, max, and more. Think of it as your Batcomputer analyzing the situation.</p>
+<p>Step 4: Check for Missing Values:</p>
+<p>Missing values are like the Joker—they wreak havoc wherever they go. You need to find them and deal with them.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  
+</pre></div>
+<p>This will show you how many missing values are in each column. If you see a lot of NaNs, don’t panic. We’ll handle them.</p>
+<p>Step 5: Resolve Missing Values:</p>
+<p>Most algorithms hate missing values. But you’re not most people. You’re Batman. You don’t just drop rows like a coward. You fix them.</p>
+<p>For numeric columns, fill missing values with the mean. For categorical columns, use the mode (the most frequent value).</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span> <span class="o">=</span> <span class="n">df_transport</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>  
+</pre></div>
+<p>Boom. Missing values? Handled.</p>
+<p>Step 6: Convert the Date Column:</p>
+<p>Dates are tricky. They look like strings, but they’re not. You need to convert them to a datetime format.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Now, let’s break it down into year, month, and day. Because why not?</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>  
+<span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span>  
+<span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">day</span>  
+</pre></div>
+<p>Your data just got a whole lot more powerful.</p>
+<p>Step 7: Rename Columns and Clean Up:</p>
+<p>Your column names are a mess. Some are uppercase, some are lowercase, and some have spaces. Let’s fix that.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>  
+    <span class="s1">&#39;Date&#39;</span><span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Zip Code&#39;</span><span class="p">:</span> <span class="s1">&#39;zipcode&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Model Year&#39;</span><span class="p">:</span> <span class="s1">&#39;modelyear&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Fuel&#39;</span><span class="p">:</span> <span class="s1">&#39;fuel&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Make&#39;</span><span class="p">:</span> <span class="s1">&#39;make&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Light_Duty&#39;</span><span class="p">:</span> <span class="s1">&#39;lightduty&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Vehicles&#39;</span><span class="p">:</span> <span class="s1">&#39;vehicles&#39;</span>  
+<span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+</pre></div>
+<p>And while we’re at it, let’s remove any rows where the model year is "<2006". Because who cares about ancient history?</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;modelyear&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&lt;2006&#39;</span><span class="p">]</span>  
+</pre></div>
+<p>Step 8: Handle Categorical Columns:</p>
+<p>Categorical columns are like riddles. They need to be decoded. Let’s start with the lightduty column, which has "Yes/No" values. We’ll convert them to 1s and 0s.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;lightduty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;lightduty&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;No&#39;</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>  
+</pre></div>
+<p>Lambda functions are your best friend here. They’re quick, dirty, and get the job done.</p>
+<p>Step 9: One-Hot Encoding:</p>
+<p>Machine learning models don’t understand text. They need numbers. So, we’ll convert categorical columns into binary vectors using one-hot encoding.</p>
+<div class="highlight"><pre><span></span><span class="n">data_dummy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df_transport</span><span class="p">[[</span><span class="s1">&#39;zipcode&#39;</span><span class="p">,</span> <span class="s1">&#39;modelyear&#39;</span><span class="p">,</span> <span class="s1">&#39;fuel&#39;</span><span class="p">,</span> <span class="s1">&#39;make&#39;</span><span class="p">]],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+</pre></div>
+<p>This creates a new DataFrame where each category is a binary column. It’s like turning your data into a swarm of bats—each one representing a single category.</p>
+<p>enjoy the blog boys.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/wolperts-no-free-lunch-theorem/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Wolpert's No Free Lunch Theorem</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/advanced-keras-techniques/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Advanced Keras Techniques</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

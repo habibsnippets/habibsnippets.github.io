@@ -1,0 +1,49 @@
+<!-- Imported from https://defygrad.bearblog.dev/simplifying-ddp/ on 2026-10-24. Edit freely. -->
+<h2 id=a-basic-example>a basic example</h2><p>let us say you have a big library having a million books and you have a task to summarize them all. if you start doing it yourself - one by one - it will take you an eternity. this is standard training. nothing fancy, just pick one book, read it and summarise it.</p>
+<p>let us say you think of upgrading the setup so that you can read one book faster ( hypothetically) but despite having it you will still have a physical limit. think of it as buying a faster reading desk that allows you to read books fast. but it can only fit so many books at once.</p>
+<p>so in a nutshell what i am trying to say is that for this task we have 2 major issues:</p>
+<ol>
+<li>time : just like reading a book - training on 1 GPU takes a lot of time</li>
+<li>memory : if you have big books, despite having a faster reading desk you will still fail - same applies to large sized models as they do not fit on a single chip.</li>
+</ol>
+<p>now let us use the terminology of GPUs only from here</p>
+<p>assume you had 2 GPUs, you might think that " i will divide my task amongst the two - i will put half of the model on GPU 0 and the other on GPU 1 ". this approach is called as "model parallelism". in our book example it can be thought of having one person read the first half of the book while the second person read the second half</p>
+<p>why this approach fails? so let us say GPU 0 is carrying out its own task, what about GPU 1? it is sitting completely idle, doing absolutely nothing. so we are again wasting time!</p>
+<p>then again we need to think of a new approach. now you might think "ok let us put the full model on both GPUs and give them different books - this way both will be involved and will be busy - we won't waste any time right?" but again think about it, GPU 0 learned some information that GPU 1 has no idea about and vice versa. the solution is basic if you think about it. this problem occurs because both of them have no clue about each other - there is a lack of communication. that is why if the models that are getting trained on two separate GPUs, if they do no talk to each other, they will drift apart - communication is the key as always.</p>
+<p>comes in DDP. what it does is that it replicates your model across multiple GPUs, feeds each one a slice of data and then uses a communication protocol to "average out" what the GPUs have learned so that every GPUs model stays identical.</p>
+<p>so how does it all play out? well think of a "Synchronized brain"! we have multiple workers (GPUs) having different data but they will work under the influence of a synch brain. it works like this;</p>
+<ol>
+<li>the broadcast : start with one "master" model and copy its weights exactly to all  of the other GPUs</li>
+<li>the map : we split the data, if we have 100 samples of data and 4 GPUs, each GPU will get 25 samples</li>
+<li>the local work : each GPU works independently, does its own forward pass, backward pass and then calculate the gradients. but it doesn't update locally! this is where the trick comes into play</li>
+<li>the all reduce : before updating the weights using the gradient that were computed locally the GPUs talk to each other - the communication is established. they share their gradients and then calculate the average gradient. if GPU 0 says move by +2 and GPU 1 says move by +4 then both of the GPUs agree to move by - 2+4/2 = 3</li>
+</ol>
+<h3 id=code>code:</h3><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch.distributed</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dist</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">DistributedDataParallel</span> <span class="k">as</span> <span class="n">DDP</span>
+
+<span class="c1"># 1. Initialize the &quot;Phone Line&quot;</span>
+<span class="n">dist</span><span class="o">.</span><span class="n">init_process_group</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="s2">&quot;ncpu&quot;</span><span class="p">)</span> <span class="c1"># or &quot;nccl&quot; for NVIDIA GPUs</span>
+
+<span class="c1"># 2. Pick the local GPU for this specific process</span>
+<span class="n">device_id</span> <span class="o">=</span> <span class="n">rank</span> <span class="c1"># &#39;rank&#39; is the ID of the GPU (0, 1, 2...)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">MyModel</span><span class="p">()</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device_id</span><span class="p">)</span>
+
+<span class="c1"># 3. The Magic Wrapper</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">DDP</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">device_ids</span><span class="o">=</span><span class="p">[</span><span class="n">device_id</span><span class="p">])</span>
+
+<span class="c1"># 4. Standard Loop</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span>      <span class="c1"># Forward</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">criterion</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>                 <span class="c1"># Backward (DDP automatically triggers All-Reduce here!)</span>
+<span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>                <span class="c1"># Update</span>
+</pre></div>
+<p>some edge cases to think about</p>
+<ol>
+<li>we say that we are calculating the average of gradients before updating the weights of the model right. but this means that we need the gradients from all the GPUs? yes! this is one of the edge case. let us say there is an if condition and it is not used every time, then DDP will hang forever because it will keep on waiting for the gradient so that it can average it out.</li>
+</ol>
+<p>the solution - code -  is to use : <code>find_unused_parameters=True</code> in the DDP constructor</p>
+<ol start="2">
+<li>think like this: GPU 0  has image of cat, GPU 1 has images of dogs and GPU 2 has images of cars. now if we apply batch normalization on each GPU then for each of the the images (data) that is present in them will be dominated. because of this the statistics (mean and variance) of each will be different and hence our training will be inconsistent! the solution to this problem is again communication. instead of calculating local stats of mean and variance we find the global mean and variance and use them in all of the GPUs .</li>
+</ol>
+<p>the fix is to use :  <code>SyncBatchNorm</code> to share statistics across all GPUs.
+come to think of it DDP is great but waiting for the communication (called as All-Reduce in docs) is a bottleneck because it is time consuming.</p>

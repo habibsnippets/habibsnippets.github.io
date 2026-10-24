@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zero to ROS2 - Building pub/sub from scratch — Habeeb</title>
+<meta name="description" content="The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/zero-to-ros2-building-pubsub-from-scratch/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zero to ROS2 - Building pub/sub from scratch">
+<meta property="og:description" content="The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/zero-to-ros2-building-pubsub-from-scratch/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/zero-to-ros2-building-pubsub-from-scratch/01-Screenshot-from-2026-04-02-11-48-55.png">
+<meta property="article:published_time" content="2026-04-02">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Zero to ROS2 - Building pub/sub from scratch">
+<meta name="twitter:description" content="The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zero to ROS2 - Building pub/sub from scratch",
+  "description": "The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a…",
+  "datePublished": "2026-04-02",
+  "url": "https://habibsnippets.github.io/writing/zero-to-ros2-building-pubsub-from-scratch/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/writing/zero-to-ros2-building-pubsub-from-scratch/01-Screenshot-from-2026-04-02-11-48-55.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Zero to ROS2 - Building pub/sub from scratch</h1>
+      <p class="post-meta">
+        <time datetime="2026-04-02">02 Apr, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>4 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=why>Why?</h2><p>The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a ZeroMQ pub/sub system, benchmark it, then implement the same thing in DDS and compare. Every design decision becomes visible when you have to make it yourself.</p>
+<p>Stack: Python 3.8, pyzmq, CycloneDDS 0.10.5, matplotlib. Machine: Ubuntu 18.04 + ROS1 Noetic (no ROS2 available — used CycloneDDS Python bindings directly). All experiments on loopback (localhost), CPU-only.</p>
+<h2 id=architecture>Architecture:</h2><p>Chose round-trip latency over one-way. One-way needs clock sync between processes. RTT doesn't — publisher timestamps the message, subscriber echoes it back unchanged, publisher measures recv_time minus send_time. No NTP. Clean.</p>
+<h3 id=zeromq-two-sockets-per-side>ZeroMQ — two sockets per side</h3><p>publisher:   PUB bind tcp://<em>:5555   (send pings)
+SUB connect localhost:5556  (receive echoes)
+subscriber:  SUB connect localhost:5555  (receive pings)
+PUB bind tcp://</em>:5556   (send echoes)</p>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/01-Screenshot-from-2026-04-02-11-48-55.png" alt="architecutre_zmq" width="505" height="426" loading="lazy" decoding="async"></p>
+<h3 id=dds-two-topics-no-addresses>DDS — two topics, no addresses</h3><p>publisher:   DataWriter  → topic 'ping'
+DataReader  ← topic 'pong'
+subscriber:  DataReader  ← topic 'ping'
+DataWriter  → topic 'pong'</p>
+<blockquote>
+<p>No IP. No port. DDS Participant Discovery Protocol (PDP) broadcasts UDP multicast beacons on 239.255.0.1:7400. Publisher and subscriber find each other by topic name automatically.</p>
+</blockquote>
+<h2 id=bugs-hit-and-fixed-includes-some-stupid-mistakes>Bugs Hit and Fixed (includes some stupid mistakes)</h2><h3 id=zeromq>ZeroMQ</h3><p>• Double bind — created two sockets both binding to port 5555. Fix: deleted the orphan.
+• RTT measured nothing — called time.time_ns() immediately after send_multipart() before any echo arrived. send_multipart() is non-blocking. Fix: block on recv_multipart() before recording recv time.</p>
+<p>• Subscriber received nothing — setsockopt(SUBSCRIBE, b"") called on wrong socket variable. ZMQ SUB sockets receive nothing by default. Fix: set filter on the correct object.</p>
+<p>• Slow joiner — ZMQ has no discovery. connect() is async. First messages sent before TCP handshake drop silently. Fix: time.sleep(0.5) before timed run. This is a hack.</p>
+<h3 id=cyclonedds>CycloneDDS</h3><p>• byte not found — cyclonedds.idl.types has no 'byte' alias in 0.10.5. Fix: use uint8 instead. Identical at wire level.</p>
+<p>• PingMsg type mismatch — struct definition must be byte-for-byte identical on both sides. DDS rejects mismatched types at connection time.</p>
+<h2 id=zeromq-benchmark-results>ZeroMQ Benchmark Results</h2><p>Payload sweep at 100Hz. 1000 messages per condition. Fixed rate, variable payload size.</p>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/02-Screenshot-from-2026-04-02-11-46-49.png" alt="zeromq benchmark results" width="625" height="133" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>Key finding: median barely moves across payload sizes. Fixed ZMQ overhead (~1.2ms TCP stack + socket wakeup) dominates. Bytes are not the bottleneck at 100Hz on loopback.</p>
+</blockquote>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/03-Screenshot-from-2026-04-02-11-50-15.png" alt="ZMQ round-trip latency percentile — payload sweep" width="1077" height="295" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>Read this chart: the gap between the median bar (green) and the p99 bar (red) is jitter. 10KB and 1KB have the tightest gap — lowest jitter — despite being 156x larger than 64B.</p>
+</blockquote>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/04-Screenshot-from-2026-04-02-11-51-55.png" alt="zmq latency dist" width="545" height="269" loading="lazy" decoding="async"></p>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/05-Screenshot-from-2026-04-02-11-54-13.png" alt="histogram" width="1055" height="447" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>The spike at 64B seq~700 (8.5ms) is an OS scheduling event — Linux preempted the process. Not a ZMQ bug. The tail gets fatter at 100KB (p99 jumps to 2.575ms) because larger buffer copies give the scheduler more opportunities to interrupt.</p>
+</blockquote>
+<h2 id=dds-benchmark-results>DDS Benchmark Results</h2><p>Same benchmark, same machine, same payload sweep, same 100Hz rate. Only the middleware changed.</p>
+<p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/06-Screenshot-from-2026-04-02-11-55-38.png" alt="results" width="624" height="131" loading="lazy" decoding="async"></p>
+<h3 id=latency-percentiles>Latency Percentiles</h3><p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/07-Screenshot-from-2026-04-02-11-20-03.png" alt="latency percentiles" width="998" height="503" loading="lazy" decoding="async"></p>
+<h3 id=rtt-distribution>RTT Distribution</h3><p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/08-Screenshot-from-2026-04-02-11-19-55.png" alt="rttd" width="1001" height="499" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>100KB DDS (coral) is a completely separate distribution — peaks at 7-9ms while 64B/1KB/10KB all peak below 1ms. This is not jitter. It is a different operating regime caused by UDP fragmentation.</p>
+</blockquote>
+<h3 id=rtt-over-time>RTT over time</h3><p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/09-Screenshot-from-2026-04-02-11-20-14.png" alt="rtt over time" width="1280" height="649" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>1KB panel: high variance in first ~150 messages, then dramatically settles to a tight band. That is DDS RTPS endpoint matching completing mid-run. After discovery is done, DDS is faster and more stable than ZMQ was.</p>
+</blockquote>
+<h2 id=head-to-head-comparison>Head to head comparison</h2><p><img src="/assets/writing/zero-to-ros2-building-pubsub-from-scratch/10-Screenshot-from-2026-04-02-12-08-23.png" alt="table" width="627" height="135" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>There is no single winner. The result depends entirely on payload size.</p>
+</blockquote>
+<h2 id=findings>Findings</h2><ol>
+<li><p>DDS uses UDP. ZMQ uses TCP. At small payloads UDP has no connection overhead, no ACK, no Nagle delay — it is faster. At 100KB a single message exceeds UDP's maximum payload per packet (1472 bytes on standard Ethernet MTU). DDS must fragment 100KB into ~70 UDP packets, send them separately, and reassemble. Fragmentation cost grows with payload size. TCP cost doesn't. They cross between 10KB and 100KB.</p>
+</li>
+<li><p>At 10KB: ZMQ p99 = 2.074ms, DDS p99 = 2.845ms. ZMQ wins on p99 despite DDS having lower median. If you chose middleware based on median alone you'd pick DDS for 10KB and get worse worst-case behavior. The metric that determines control loop reliability is jitter: p99 minus median. Not median alone.</p>
+</li>
+<li><p>Published literature (Vanderbilt 2020, eProsima) shows ZMQ faster at small payloads in C++ over real networks. Our Python loopback results show DDS faster at small payloads. On loopback there is no actual network unreliability — TCP's reliability machinery (ACKs, flow control, connection state) is pure overhead with zero benefit. UDP's advantage is more pronounced. The finding is real for this deployment context and should be stated as such, not hidden.</p>
+</li>
+</ol>
+<h2 id=what-was-not-measured>What was not measured</h2><p>• Rate sweep (10Hz / 100Hz / 1000Hz / flood) — would show where ZMQ drops messages and DDS retransmits</p>
+<p>• Multi-subscriber scaling — DDS multicast advantage grows with subscriber count, ZMQ unicasts to each</p>
+<p>• RELIABLE vs BEST_EFFORT QoS — ran default QoS throughout</p>
+<p>• Real network vs loopback — findings may not transfer to multi-machine deployment</p>
+<p>• C++ baseline — cannot isolate Python binding overhead from protocol overhead</p>
+<p>Each of these is a known limitation, not a hidden flaw. The rate sweep is the highest priority next experiment — that is where drop behavior and QoS differences become visible.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">The T4 Ceiling: Why Vanilla VLMs Fail on Video</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/cnn-build-weight-init-rabbit-hole/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">CNN Build - Weight Init Rabbit Hole</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

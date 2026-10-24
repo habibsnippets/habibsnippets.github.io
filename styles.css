@@ -1828,6 +1828,227 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 }
 .contact-tile:hover .contact-hint { color: var(--sky); }
 
+/* ── Article pages (writing/<slug>/) ───────────────────────── */
+.post-main {
+  padding: calc(var(--nav-h) + 56px) 0 104px;
+}
+.post-page {
+  width: 100%;
+  max-width: 748px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.post-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+  margin-bottom: 26px;
+  transition: color 0.2s;
+}
+.post-back:hover { color: var(--fg); }
+
+.post-head h1 {
+  font-size: clamp(1.85rem, 4.6vw, 2.9rem);
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.post-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--fg-faint);
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 38px;
+}
+.post-meta .sep { opacity: 0.6; }
+
+/* Article body — the site reset strips list markers and spacing, so the
+   prose scope puts the typography back for imported and hand-written HTML. */
+.prose {
+  font-size: 16.5px;
+  line-height: 1.78;
+  color: var(--fg-dim);
+}
+.prose p { margin: 0 0 1.25em; }
+.prose ul,
+.prose ol { margin: 0 0 1.35em; padding-left: 1.35em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li { margin-bottom: 0.45em; }
+.prose li::marker { color: var(--fg-faint); }
+.prose li > ul,
+.prose li > ol { margin: 0.45em 0 0; }
+.prose h2 {
+  margin: 2.1em 0 0.6em;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--fg);
+}
+.prose h3 {
+  margin: 1.9em 0 0.5em;
+  font-size: 1.18rem;
+  line-height: 1.28;
+  color: var(--fg);
+}
+.prose h4 {
+  margin: 1.7em 0 0.45em;
+  font-size: 1.02rem;
+  line-height: 1.35;
+  color: var(--fg);
+}
+.prose h5,
+.prose h6 {
+  margin: 1.6em 0 0.4em;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.prose h2:first-child,
+.prose h3:first-child,
+.prose h4:first-child { margin-top: 0; }
+.prose a {
+  color: var(--fg);
+  border-bottom: 1px solid color-mix(in srgb, var(--sky) 45%, transparent);
+  transition: color 0.2s, border-color 0.2s;
+}
+.prose a:hover { color: var(--sky); border-color: var(--sky); }
+.prose strong { color: var(--fg); font-weight: 600; }
+.prose blockquote {
+  margin: 1.8em 0;
+  padding: 4px 0 4px 18px;
+  border-left: 2px solid var(--sky);
+  font-style: italic;
+}
+.prose blockquote p:last-child { margin-bottom: 0; }
+.prose hr {
+  margin: 2.4em 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.prose img {
+  height: auto;
+  margin: 1.9em auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--wash);
+}
+.prose figure { margin: 1.9em 0; }
+.prose figcaption {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--fg-faint);
+  text-align: center;
+}
+.prose code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  background: var(--wash);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--fg);
+  overflow-wrap: break-word;
+}
+.prose pre {
+  margin: 1.6em 0;
+  padding: 16px 18px;
+  background: var(--wash-soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow-x: auto;
+  font-size: 12.5px;
+  line-height: 1.65;
+  -webkit-overflow-scrolling: touch;
+}
+.prose pre code {
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  font-size: inherit;
+  color: var(--fg-dim);
+}
+
+/* Wide tables scroll rather than push the page sideways. */
+.table-wrap {
+  margin: 1.7em 0;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.prose th,
+.prose td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.prose th {
+  background: var(--wash);
+  color: var(--fg);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.prose tr:last-child td { border-bottom: 0; }
+
+.post-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 64px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+.pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card-grad);
+  box-shadow: var(--card-shadow);
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease),
+              transform 0.25s var(--ease);
+}
+.pager-link:hover {
+  border-color: var(--line-hi);
+  background: var(--panel-hi);
+  transform: translateY(-2px);
+}
+.pager-dir {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.pager-title {
+  font-size: 15px;
+  letter-spacing: -0.015em;
+  color: var(--fg);
+}
+.pager-next { text-align: right; }
+
 /* ── Footer ────────────────────────────────────────────────── */
 .footer {
   border-top: 1px solid var(--line);
@@ -2013,6 +2234,19 @@ html.is-theming *::after {
   .contact-label { font-size: 10.5px; }
   .contact-hint { font-size: 11.5px; }
   .footer-inner { justify-content: flex-start; }
+
+  /* Article pages */
+  .post-main { padding: calc(var(--nav-h) + 30px) 0 72px; }
+  .post-page { padding-inline: 16px; }
+  .post-back { margin-bottom: 20px; }
+  .post-head h1 { font-size: 1.72rem; }
+  .post-meta { margin-bottom: 28px; padding-bottom: 20px; }
+  .prose { font-size: 16px; line-height: 1.72; }
+  .prose h2 { font-size: 1.3rem; }
+  .prose h3 { font-size: 1.08rem; }
+  .prose pre { font-size: 12px; padding: 14px 14px; }
+  .post-pager { grid-template-columns: 1fr; margin-top: 46px; padding-top: 24px; }
+  .pager-next { text-align: left; }
 }
 
 /* Touch screens never fire hover, so the reveal panels on the Focus cards

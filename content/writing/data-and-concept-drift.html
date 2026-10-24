@@ -1,0 +1,27 @@
+<!-- Imported from https://defygrad.bearblog.dev/data-and-concept-drift/ on 2026-10-24. Edit freely. -->
+<h4 id=></h4><p>All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the data is fine then there are these two suspects that we should look for: data drift and concept drift. Let's look into them in some detail:</p>
+<h3 id=data-drift>Data Drift:</h3><p>In simple words, the input (x) changes. Thus the model that was trained on the old data becomes completely irrelevant for this new data.</p>
+<p>An example to understand this:</p>
+<p>Imagine you own an ice cream shop, and you’ve built a machine learning model to predict how much ice cream you’ll sell each day based on the weather. The model was trained on historical data from the past year, where hotter days generally led to higher sales.</p>
+<h4 id=case-1-no-data-drift>Case 1: No data drift</h4><p>During the summer, your model works perfectly because the weather patterns and customer behavior are similar to the data it was trained on. Hot days = more sales, cool days = fewer sales.</p>
+<h4 id=case-2-data-drift>Case 2: Data drift</h4><p>Now, let’s say a new trend emerges: people in your area start preferring watermelon over ice cream, even on hot days. Additionally, the weather becomes more unpredictable due to climate change, with sudden rainstorms on hot days.</p>
+<p>Your model, which was trained on the old data, doesn’t know about these changes. It keeps predicting high ice cream sales on hot days, but in reality, sales are dropping because of the new preferences and weather patterns.</p>
+<h3 id=concept-drift>Concept Drift:</h3><p>It occurs when the patterns the model learned no longer hold. The data distributions might remain the same, but the relationship between input (x) and output (y) changes.</p>
+<p>An example to understand this:</p>
+<p>Imagine a new health trend emerges: people start avoiding ice cream on hot days because they believe it’s unhealthy to eat cold treats in extreme heat.</p>
+<p>The weather data, input (x) remains the same—hot days are still hot—but the relationship between hot weather and ice cream sales (y) has changed. Now, hot days lead to lower sales, even though the model was trained on data where hot days meant higher sales.</p>
+<p>Also, concept drift has the following types:</p>
+<h4 id=1-gradual-concept-drift>1. Gradual Concept Drift:</h4><p>The relationship between x and y changes slowly over time. Since the change is slow it is a bit hard to detect.</p>
+<p>An example to understand this:</p>
+<p>Let us say that over several years, people in your area gradually become more health-conscious. They start reducing their ice cream consumption little by little, opting for healthier alternatives like frozen yogurt or fruit sorbets.</p>
+<p>At first, the impact is minimal—maybe sales drop by 1% each month. But as time passes, the cumulative effect becomes significant. The model, which was trained on data where hot weather always meant high ice cream sales, starts to perform worse as the relationship between weather and sales slowly changes.</p>
+<h4 id=2-sudden-concept-drift>2. Sudden Concept Drift:</h4><p>The relationship changes more abruptly.</p>
+<p>An example to understand this:</p>
+<p>Imagine a Rajat Dalal suddenly goes viral with a campaign claiming that eating ice cream on hot days is bad for your health. Overnight, people stop buying ice cream on hot days, even though the weather remains the same.</p>
+<p>Your model, which was trained to predict high sales on hot days, now makes wildly inaccurate predictions because the relationship between hot weather and sales has changed dramatically in a very short time.</p>
+<h3 id=how-to-deal-with-drift>How to deal with drift?</h3><p>To deal with drift, we need to retrain our model and the approaches may vary as:</p>
+<ol>
+<li>Retrain the entire model using all the available data.</li>
+<li>Give higher weights (priority) to the new data so the model gives more priority to the recent discovered patterns.</li>
+<li>If you think that enough of the new data has been collected, you can simply drop the old data and start training the model on the new data only.</li>
+</ol>

@@ -1,0 +1,47 @@
+<!-- Imported from https://defygrad.bearblog.dev/automatic-differentiation/ on 2026-10-24. Edit freely. -->
+<h2 id=automatic-differentiation-an-introduction>Automatic Differentiation - An Introduction</h2><p>The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.</p>
+<p>AD computes derivatives by applying chain rule systematically to elementary operations in a computer program and achieves machine level precision without any approximation error of numerical methods.</p>
+<p>It can be put like this:</p>
+<ul>
+<li>Symbolic differentiation can get messy.</li>
+<li>Numerical differentiation (finite differences) is approximate and suffers from floating-point errors.</li>
+<li>Automatic differentiation gives exact derivatives up to machine precision, efficiently.</li>
+</ul>
+<p>There are two primary modes of this - forward and backward mode.</p>
+<p>Since we are explaining it in the most basic terms let us use a story!</p>
+<p>Let us say we have a machine that takes in 2 inputs - x and y. The machine has to do the following:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>y</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="false">&#x00028;</mo><mi>x</mi><mi>&#x000B7;</mi><mi>y</mi><mo stretchy="false">&#x00029;</mo></mrow></math><p>Now looking at the above let us assume that our machine is made up of three parts :</p>
+<ul>
+<li>Gear A: That is responsible for adding the two inputs and produce u1</li>
+<li>Gear B: That is responsible for multiplying the two inputs and produce u2</li>
+<li>Gear C: Responsible for multiplying the two (u1 and u2) and then giving out the final result as the output</li>
+</ul>
+<p>Let for the simplicity x = 2 and y = 3</p>
+<h3 id=forward-pass>Forward Pass:</h3><ol>
+<li>Gear A comes into the picture:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>1</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi><mo>&#x0003D;</mo><mn>2</mn><mo>&#x0002B;</mo><mn>3</mn><mo>&#x0003D;</mo><mn>5</mn></mrow></math><ol start="2">
+<li>Gear B comes into the pictures:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002A;</mo><mi>y</mi><mo>&#x0003D;</mo><mn>2</mn><mo>&#x0002A;</mo><mn>3</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><ol start="3">
+<li>Finally Gear C comes into play to produce the final output:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo>&#x0003D;</mo><mi>u</mi><mn>1</mn><mo>&#x0002A;</mo><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mn>5</mn><mo>&#x0002A;</mo><mn>6</mn><mo>&#x0003D;</mo><mn>30</mn></mrow></math><p>The machine in its forward pass has produced 30 as its final output!</p>
+<h3 id=backward-pass-backpropagation>Backward Pass: (Backpropagation)</h3><p>Think of it like this, the final output f asks its subjects - the inputs - x and y, how much did each of you contribute to me becoming 30?</p>
+<p>Now this message will travel backwards from gear C to gear A and B.</p>
+<p>For gear C the equation was like this:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo>&#x0003D;</mo><mi>u</mi><mn>1</mn><mo>&#x0002A;</mo><mi>u</mi><mn>2</mn></mrow></math><p>C knows that if u1 changes then f changes by u2 = 6 (basic chain rule):</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><msub><mi>u</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn></mrow></math><p>Similarly if u2 changes then f changes by u1 = 5:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><msub><mi>u</mi><mrow><mn>2</mn></mrow></msub></mrow></mfrac><mo>&#x0003D;</mo><mn>5</mn></mrow></math><p>So the Gear C will send this message to its previous gears A and B:</p>
+<p>Message to A : "Your importance is 6."
+Message to B : "Your importance is 5."</p>
+<p>Now its time for Gear A!</p>
+<p>Gear A knows that</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>1</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi></mrow></math><p>Gear A knows that if x changes by 1 then u1 also changes by 1 and same for y, if it changes by 1 then also u1 changes by 1.</p>
+<p>So the total contributions will be as follows:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>6</mn><mi>&#x000B7;</mi><mn>1</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>6</mn><mi>&#x000B7;</mi><mn>1</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><p>Now coming to Gear B:</p>
+<p>Gear B knows that:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002A;</mo><mi>y</mi></mrow></math><p>If x changes by 1 then u2 changes by y = 3 and if y changes by 1 then u2 changes by x = 2.</p>
+<p>So the total contributions are as follows:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>5</mn><mi>&#x000B7;</mi><mn>3</mn><mo>&#x0003D;</mo><mn>15</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>5</mn><mi>&#x000B7;</mi><mn>2</mn><mo>&#x0003D;</mo><mn>10</mn></mrow></math><p>Now for the final contributions:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn><mo>&#x0002B;</mo><mn>15</mn><mo>&#x0003D;</mo><mn>21</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn><mo>&#x0002B;</mo><mn>10</mn><mo>&#x0003D;</mo><mn>16</mn></mrow></math><h3 id=conclusions>Conclusions:</h3><p>By going through all of this we came to know each function can be broken down into small operations and the forward pass computes the intermediate values of all the steps that comes in between. The backward pass computes the gradients by propagating values backwards using the chain rule. The chain rule is the core of everything. Each input variable has some contribution to the output along all the paths  and that's why in backpropagation we sum the contributions from the different paths.</p>

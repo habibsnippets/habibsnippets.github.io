@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The T4 Ceiling: Why Vanilla VLMs Fail on Video — Habeeb</title>
+<meta name="description" content="If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The T4 Ceiling: Why Vanilla VLMs Fail on Video">
+<meta property="og:description" content="If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/01-Screenshot-from-2026-04-12-19-59-05.png">
+<meta property="article:published_time" content="2026-04-09">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="The T4 Ceiling: Why Vanilla VLMs Fail on Video">
+<meta name="twitter:description" content="If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "The T4 Ceiling: Why Vanilla VLMs Fail on Video",
+  "description": "If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in…",
+  "datePublished": "2026-04-09",
+  "url": "https://habibsnippets.github.io/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/01-Screenshot-from-2026-04-12-19-59-05.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>The T4 Ceiling: Why Vanilla VLMs Fail on Video</h1>
+      <p class="post-meta">
+        <time datetime="2026-04-09">09 Apr, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>6 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=the-anatomy-of-a-crash-why-video-ai-models-explode-your-gpu-memory>The Anatomy of a Crash: Why Video AI Models Explode Your GPU Memory</h2><p>If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in that mess you see: CUDA out of memory.</p>
+<p>I wanted to run Qwen2-VL-2B — a model that can watch videos and answer questions about them — on a free Colab T4. I knew it was going to crash. That wasn't the interesting part. The interesting part was figuring out exactly when, exactly how fast, and exactly which line of code pulled the trigger.</p>
+<h2 id=heres-the-full-autopsy>Here's the full autopsy.</h2><h3 id=quick-glossary-before-we-dive-in>Quick glossary before we dive in</h3><ul>
+<li><p>VLM (Vision-Language Model): An AI that processes both images/video and text. Qwen2-VL-2B is one — the 2B means 2 billion parameters.</p>
+</li>
+<li><p>VRAM: The GPU's working memory. Think of it as a kitchen counter — 15 square feet of workspace. Every ingredient you pull out takes up space. Run out of counter and everything crashes to the floor.</p>
+</li>
+<li><p>Tokens: AI doesn't see pixels or read words. It converts everything — text, images, video frames — into numerical chunks called tokens. A sentence might be 50 tokens. A single video frame might be hundreds.</p>
+</li>
+<li><p>Prefill vs. Decoding: When you ask the model a question about a video, it works in two phases. Prefill is reading — the model ingests the entire video and prompt at once. Decoding is writing — it generates the answer one token at a time.</p>
+</li>
+<li><p>KV Cache: During decoding, the model needs a notepad to remember what it already processed so it doesn't re-read the entire video for every word it generates. That notepad lives in VRAM.</p>
+</li>
+</ul>
+<h3 id=the-setup>The setup</h3><h4 id=model-qwen2-vl-2b-instruct-fp16-hardware-t4-15-gb-vram-one-fixed-720p-59-second-video-clip-same-prompt-every-run-describe-what-is-happening-in-this-video>Model: Qwen2-VL-2B-Instruct fp16. Hardware: T4, 15 GB VRAM. One fixed 720p, 59-second video clip. Same prompt every run: "Describe what is happening in this video."</h4><p>The model weights alone consume ~4.5 GB. That leaves about 10.5 GB for everything else — the KV cache, attention matrices, intermediate buffers. The plan was to sweep frame counts from N=5 to N=30, record peak VRAM at each step, and let it crash.</p>
+<p><img src="/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/01-Screenshot-from-2026-04-12-19-59-05.png" alt="diagram1" width="729" height="404" loading="lazy" decoding="async"></p>
+<h4 id=the-first-surprise-the-secret-downscale>The first surprise: the secret downscale</h4><p>I fed it a 720p video. 1280×720 = 921,600 pixels per frame. At that resolution, the model would have generated thousands of tokens per frame and crashed immediately on the first test.
+It didn't crash. The tokenizer dry-run showed only 360 visual tokens per frame.</p>
+<p>What happened? The preprocessing pipeline quietly saved my life. It looked at the 720p input, decided it would destroy the GPU, and downsampled the frames to roughly 282,000 pixels before the model ever saw them.</p>
+<p>This is actually by design. Qwen2-VL has a hard ceiling of 729 tokens per frame, regardless of input resolution. Here's where that number comes from:</p>
+<p>The ViT (Vision Transformer) divides images into 14×14 pixel patches
+Maximum grid size is 448×448 pixels → that's a 32×32 patch grid
+32×32 = 1,024 patches, which get merged down to ~729 tokens</p>
+<p>Because my video is wide but not very tall, the aspect ratio compression landed at 360 tokens/frame rather than the 729 ceiling. That became the baseline.</p>
+<h4 id=the-sweep-watching-memory-explode>The sweep: watching memory explode</h4><p><img src="/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/02-Screenshot-from-2026-04-12-20-06-14.png" alt="diagram2" width="1131" height="375" loading="lazy" decoding="async"></p>
+<p>With the token density confirmed, I ran the full sweep:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>Frames</th>
+  <th>Total Tokens</th>
+  <th>Peak VRAM</th>
+  <th>Delta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>5</td>
+  <td>1,466</td>
+  <td>4.58 GB</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td>3,626</td>
+  <td>5.94 GB</td>
+  <td>+1.36 GB</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td>5,066</td>
+  <td>7.40 GB</td>
+  <td>+1.46 GB</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td>7,226</td>
+  <td>10.42 GB</td>
+  <td>+3.02 GB</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td>8,666</td>
+  <td>12.99 GB</td>
+  <td>+2.57 GB</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td>10,826</td>
+  <td>OOM</td>
+  <td>—</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>The delta column is where things get interesting. Going from 5→10 frames costs 1.36 GB. Going from 15→20 frames costs 3.02 GB. Same five frames added, more than double the VRAM cost. That's not a coincidence.</p>
+</blockquote>
+<h3 id=why-the-cost-keeps-accelerating-the-dinner-party-problem>Why the cost keeps accelerating: the dinner party problem</h3><p>Standard self-attention computes a relationship score between every token and every other token. That's an L×L matrix where L is sequence length.</p>
+<p>Think of it like a dinner party where every guest shakes hands with every other guest. 10 guests = 45 handshakes. Double to 20 guests and you don't get 90 handshakes — you get 190. The math scales as O(L²): when the guest count doubles, the handshakes roughly quadruple.
+At N=10 I had L≈3,626 tokens. At N=20 I had L≈7,226 — roughly double. The attention matrix didn't double. It nearly quadrupled. That's exactly what the delta jump from +1.36 GB to +3.02 GB is showing.
+By N=30, L≈10,826. The dinner party got too big. The kitchen counter collapsed.</p>
+<h2 id=the-autopsy-what-actually-killed-it>The autopsy: what actually killed it</h2><p>Knowing when it crashed wasn't enough. I hooked torch.profiler into the N=10 run and sorted by cumulative CUDA memory allocation to find exactly which operations were responsible.</p>
+<p>Two distinct culprits showed up.</p>
+<h4 id=culprit-1-the-attention-matrix-atenbmm-aten_softmax>Culprit 1 — The attention matrix (aten::bmm + aten::_softmax)</h4><p>These two ops accumulated over 33 GB of memory allocation across the forward pass. On a 15 GB card.
+That sounds impossible until you understand the difference between cumulative and peak allocation. The model has 32 attention layers. Each layer builds a massive L×L score matrix, uses it, then frees it before the next layer runs. So 33 GB cumulative doesn't mean 33 GB resident simultaneously — it means the same memory got allocated and freed repeatedly across all 32 layers.</p>
+<hr />
+<p>Going a bit in depth here: First, what even is attention? Before the diagram, you need this mental model: Every token needs to ask every other token "hey, how relevant are you to me?" That question-and-answer process produces a score. Those scores fill a grid — one row per token asking, one column per token being asked. That grid is the attention matrix. It lives in VRAM.
+<img src="/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/03-Screenshot-from-2026-04-12-23-06-04.png" alt="attention score" width="517" height="339" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>The key insight - The model has 32 layers. Each layer builds this grid, uses it, then deletes it. That's why profiler shows 33 GB cumulative but only ~6 GB peak — same memory reused 32 times.
+But at N=30, one single layer's grid = 7.4 GB. Doesn't fit.</p>
+</blockquote>
+<p>So the attention matrix isn't one big thing sitting in memory the whole time. It's a temporary grid that gets built, used, and deleted — 32 times, once per layer. The profiler's 33 GB is the sum of all those temporary grids, not the peak. But at N=30, even one grid is too large to fit. That's the actual crash.</p>
+<hr />
+<p>But here's the actual problem: at N=30, just one of those per-layer matrices became larger than the entire 15 GB card. Not the sum, a single layer's attention matrix exceeded VRAM capacity. That's when it stopped being a cumulative accounting story and became a hard physics problem.</p>
+<h4 id=culprit-2-the-copy-on-append-kv-cache-atenempty_strided-atencat>Culprit 2 — The copy-on-append KV cache (aten::empty_strided + aten::cat)</h4><p>These two ops accumulated over 24 GB.</p>
+<p>Every time the model generates a new token during decoding, it needs to append new Key and Value vectors to the cache. HuggingFace does this by concatenating, it allocates a brand new buffer large enough for the old cache plus the new entry, copies everything over, then frees the old one. At sequence length L, every single decode step costs O(L) in allocation just for bookkeeping. As the sequence grows, this gets progressively more expensive.</p>
+<p>Understand this using this diagram:</p>
+<p><img src="/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/04-Screenshot-from-2026-04-12-23-12-30.png" alt="diagram" width="819" height="349" loading="lazy" decoding="async"></p>
+<p>Two problems, two different fixes</p>
+<p>The profiler finding matters because the two failure modes need two different solutions, not one.</p>
+<p>The attention matrix problem is mathematical. You can't just allocate memory more cleverly when the matrix itself is too large. You need to either reduce the number of tokens entering the model, or process the prefill in chunks so the full L×L matrix never exists all at once. That's chunked prefill.</p>
+<p>The copy-on-append problem is a pure engineering failure. PagedAttention — used by SGLang and vLLM — fixes this by breaking the KV cache into fixed-size memory pages scattered wherever free space exists. No contiguous buffer required. No copying. The cache grows by adding pages, not by duplicating itself.
+<img src="/assets/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/05-Screenshot-from-2026-04-12-23-17-17.png" alt="page caliming" width="957" height="367" loading="lazy" decoding="async"></p>
+<h3 id=what-this-actually-tells-us-about-video-inference>What this actually tells us about video inference</h3><p>The T4's 15 GB isn't unusual, most edge inference hardware sits in the 8–16 GB range. And the Qwen2-VL-2B model is genuinely small at 4.5 GB of weights. The problem isn't the model size. It's that even a small model becomes unrunnable on video because sequence length, not model size, is what kills you.</p>
+<p>This is the core tension in video VLM inference: temporal understanding needs many frames, many frames mean long sequences, and long sequences are quadratically expensive by default. The baseline HuggingFace implementation makes no attempt to solve this. It just runs until it crashes.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/dataloaders-part-1/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">dataloaders part 1</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/zero-to-ros2-building-pubsub-from-scratch/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Zero to ROS2 - Building pub/sub from scratch</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

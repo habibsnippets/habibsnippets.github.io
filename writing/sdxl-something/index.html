@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SDXL something — Habeeb</title>
+<meta name="description" content="The autoencoder converts images into a compressed, abstract representation called latent space.">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/sdxl-something/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SDXL something">
+<meta property="og:description" content="The autoencoder converts images into a compressed, abstract representation called latent space.">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/sdxl-something/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-11-19">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="SDXL something">
+<meta name="twitter:description" content="The autoencoder converts images into a compressed, abstract representation called latent space.">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "SDXL something",
+  "description": "The autoencoder converts images into a compressed, abstract representation called latent space.",
+  "datePublished": "2025-11-19",
+  "url": "https://habibsnippets.github.io/writing/sdxl-something/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>SDXL something</h1>
+      <p class="post-meta">
+        <time datetime="2025-11-19">19 Nov, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h3 id=latent-space-what-it-is-how-pixels-become-latents>Latent Space — What It Is & How Pixels Become Latents</h3><p>The autoencoder converts images into a compressed, abstract representation called latent space.</p>
+<p>Think of it like:</p>
+<p>Pixels = raw brushstrokes</p>
+<p>Latent space = the “idea” of the image (style, shapes, semantics)</p>
+<p>Steps:</p>
+<p>Encoder extracts features via convolutions.</p>
+<p>Downsamples → compresses spatial dimensions.</p>
+<p>Produces a dense, meaningful latent representation (e.g., 64×64×4).</p>
+<p>The decoder later reverses this — turning the latent back into pixels.</p>
+<p>The diffusion model works entirely in this latent space because it’s smaller, structured, and far more semantically meaningful than raw pixel space.</p>
+<h3 id=unet-changes-more-parameters-why-that-matters>UNet Changes — More Parameters & Why That Matters</h3><p>SDXL bumps the UNet backbone from ~860M to 2.6B parameters.</p>
+<p>Why is this good?
+More parameters → more capacity → more ability to understand complex visual concepts → better fidelity, richer details, more nuanced alignment with text prompts.</p>
+<p>Basically: the UNet “thinks” in a higher-dimensional way now.</p>
+<h3 id=transformer-blocks-why-sdxl-doesnt-use-uniform-distribution>Transformer Blocks — Why SDXL Doesn’t Use Uniform Distribution</h3><p>Previous Models:</p>
+<p>Used 1,1,1,1 transformer blocks uniformly at the four feature levels (corresponding to progressively downsampled feature maps).</p>
+<p>SDXL:</p>
+<p>Uses 0 → 2 → 10 transformer blocks as features keep getting reduced.</p>
+<p>Why does this work better?</p>
+<p>High-resolution level (0 blocks):
+Transformers here are too expensive and don’t add much. Convs handle fine spatial details anyway.</p>
+<p>Lowest-resolution level (10 blocks):
+This is where the model holds the most abstract, global understanding.
+Transformers shine at semantic relationships → so SDXL pushes heavy attention here.</p>
+<p>Mid-level (2 blocks):
+A balance between local + global understanding.</p>
+<p>So SDXL doesn’t “just distribute evenly.” It places attention where it actually matters for global semantic composition.</p>
+<p>Efficiency + Correct Allocation = better results.</p>
+<h3 id=channel-multipliers-why-only-1-2-4>Channel Multipliers — Why Only 1, 2, 4?</h3><p>Yes, channel multipliers compensate for loss of spatial resolution by increasing channel depth. But SDXL uses only 3 multipliers because:</p>
+<p>SDXL removed the lowest (8×) downsampling stage from the UNet.</p>
+<p>One fewer stage → one fewer multiplier → simpler, more efficient UNet.</p>
+<p>Still captures the necessary abstractions while avoiding the extra computation of another downsampling level.</p>
+<h3 id=two-text-encoders-pooled-embedding-whats-the-point>Two Text Encoders + Pooled Embedding — What’s the Point?</h3><p>SDXL uses:</p>
+<ul>
+<li><p>CLIP ViT-L</p>
+</li>
+<li><p>OpenCLIP ViT-bigG</p>
+</li>
+</ul>
+<p>Why?</p>
+<ul>
+<li><p>Each encoder captures different nuances. Concatenating them gives a richer, more robust understanding of the text.</p>
+</li>
+<li><p>It also uses a pooled text embedding (from ViT-bigG):</p>
+</li>
+<li><p>This is a single global summary of the entire prompt.</p>
+</li>
+</ul>
+<p>Cross-attention handles token-level details and pooled embedding handles the big picture (style, composition, overall intent).</p>
+<p>Together: better semantic grounding for the image.</p>
+<h3 id=size-conditioning-why-sdxl-tells-the-unet-the-original-image-size>Size Conditioning — Why SDXL Tells the UNet the Original Image Size</h3><p>Older models dealt with mismatched image sizes by:</p>
+<ul>
+<li><p>Discarding small images → losing valuable training data</p>
+</li>
+<li><p>Upscaling small images → introducing blur artifacts the model ends up learning</p>
+</li>
+</ul>
+<p>SDXL’s fix:</p>
+<p>For every training image, it feeds the original height and width into the UNet as conditioning (c_size = (h_original, w_original)). These values are Fourier-encoded → concatenated → added to the timestep embedding.</p>
+<p>What does this solve?</p>
+<ul>
+<li><p>Model no longer has to discard small images.</p>
+</li>
+<li><p>Model knows when an image was originally tiny and doesn’t learn upscaling artifacts as “truth.”</p>
+</li>
+<li><p>Model can learn different aspect ratios naturally.</p>
+</li>
+</ul>
+<p>In short: this metadata gives the model context it never had before.</p>
+<h3 id=improved-autoencoder-same-architecture-better-training>Improved Autoencoder — Same Architecture, Better Training</h3><p>Even though the architecture is the same, SDXL trains the autoencoder with:</p>
+<ul>
+<li><p>Batch size 256 (vs 9 previously)</p>
+</li>
+<li><p>EMA (Exponential Moving Average) weight tracking</p>
+</li>
+</ul>
+<p>Why is this better?</p>
+<p>Large batch → more stable gradients, more robust learning and EMA led to smoother, more stable weight trajectory which resulted in better generalization.</p>
+<p>Result:</p>
+<p>Autoencoder outperforms previous SD models in all reconstruction metrics.
+This is crucial because LDMs rely on the autoencoder’s latent space for local, high-frequency details.</p>
+<h3 id=sdxl-workflow-from-text-to-image-first-principles>SDXL Workflow — From Text to Image (First Principles)</h3><p>Here’s the whole pipeline:</p>
+<ol>
+<li>Text Prompt → Text Embeddings :</li>
+</ol>
+<ul>
+<li><p>Two text encoders process the prompt.</p>
+</li>
+<li><p>Produce token-level embeddings + a pooled embedding.</p>
+</li>
+</ul>
+<p>This becomes the “instruction manual” for the UNet.</p>
+<ol start="2">
+<li>Start with Random Latent Noise :</li>
+</ol>
+<p>Random noise is generated for the next step.</p>
+<ol start="3">
+<li>Denoising Loop (The Core Generation Process):</li>
+</ol>
+<p>At every step the UNet receives noisy latent + text embeddings timestep and size conditioning. The job of the UNet is to predict what noise to remove, remove it and make sense out of the chaos.</p>
+<ol start="4">
+<li>Decode:</li>
+</ol>
+<p>The clean latent is passed through the improved autoencoder and the image is formed out of it.</p>
+<p>NOTE: It also uses a refinement model to sharpen the image and the edges and all.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/engineering-fully-local-retrieval-augmented-generation-systems/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Engineering Fully Local Retrieval-Augmented Generation Systems</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/lns/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Log Number System for Low Precision Training</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

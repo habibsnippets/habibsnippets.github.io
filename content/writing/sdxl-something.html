@@ -1,0 +1,106 @@
+<!-- Imported from https://defygrad.bearblog.dev/sdxl-something/ on 2026-10-24. Edit freely. -->
+<h3 id=latent-space-what-it-is-how-pixels-become-latents>Latent Space — What It Is & How Pixels Become Latents</h3><p>The autoencoder converts images into a compressed, abstract representation called latent space.</p>
+<p>Think of it like:</p>
+<p>Pixels = raw brushstrokes</p>
+<p>Latent space = the “idea” of the image (style, shapes, semantics)</p>
+<p>Steps:</p>
+<p>Encoder extracts features via convolutions.</p>
+<p>Downsamples → compresses spatial dimensions.</p>
+<p>Produces a dense, meaningful latent representation (e.g., 64×64×4).</p>
+<p>The decoder later reverses this — turning the latent back into pixels.</p>
+<p>The diffusion model works entirely in this latent space because it’s smaller, structured, and far more semantically meaningful than raw pixel space.</p>
+<h3 id=unet-changes-more-parameters-why-that-matters>UNet Changes — More Parameters & Why That Matters</h3><p>SDXL bumps the UNet backbone from ~860M to 2.6B parameters.</p>
+<p>Why is this good?
+More parameters → more capacity → more ability to understand complex visual concepts → better fidelity, richer details, more nuanced alignment with text prompts.</p>
+<p>Basically: the UNet “thinks” in a higher-dimensional way now.</p>
+<h3 id=transformer-blocks-why-sdxl-doesnt-use-uniform-distribution>Transformer Blocks — Why SDXL Doesn’t Use Uniform Distribution</h3><p>Previous Models:</p>
+<p>Used 1,1,1,1 transformer blocks uniformly at the four feature levels (corresponding to progressively downsampled feature maps).</p>
+<p>SDXL:</p>
+<p>Uses 0 → 2 → 10 transformer blocks as features keep getting reduced.</p>
+<p>Why does this work better?</p>
+<p>High-resolution level (0 blocks):
+Transformers here are too expensive and don’t add much. Convs handle fine spatial details anyway.</p>
+<p>Lowest-resolution level (10 blocks):
+This is where the model holds the most abstract, global understanding.
+Transformers shine at semantic relationships → so SDXL pushes heavy attention here.</p>
+<p>Mid-level (2 blocks):
+A balance between local + global understanding.</p>
+<p>So SDXL doesn’t “just distribute evenly.” It places attention where it actually matters for global semantic composition.</p>
+<p>Efficiency + Correct Allocation = better results.</p>
+<h3 id=channel-multipliers-why-only-1-2-4>Channel Multipliers — Why Only 1, 2, 4?</h3><p>Yes, channel multipliers compensate for loss of spatial resolution by increasing channel depth. But SDXL uses only 3 multipliers because:</p>
+<p>SDXL removed the lowest (8×) downsampling stage from the UNet.</p>
+<p>One fewer stage → one fewer multiplier → simpler, more efficient UNet.</p>
+<p>Still captures the necessary abstractions while avoiding the extra computation of another downsampling level.</p>
+<h3 id=two-text-encoders-pooled-embedding-whats-the-point>Two Text Encoders + Pooled Embedding — What’s the Point?</h3><p>SDXL uses:</p>
+<ul>
+<li><p>CLIP ViT-L</p>
+</li>
+<li><p>OpenCLIP ViT-bigG</p>
+</li>
+</ul>
+<p>Why?</p>
+<ul>
+<li><p>Each encoder captures different nuances. Concatenating them gives a richer, more robust understanding of the text.</p>
+</li>
+<li><p>It also uses a pooled text embedding (from ViT-bigG):</p>
+</li>
+<li><p>This is a single global summary of the entire prompt.</p>
+</li>
+</ul>
+<p>Cross-attention handles token-level details and pooled embedding handles the big picture (style, composition, overall intent).</p>
+<p>Together: better semantic grounding for the image.</p>
+<h3 id=size-conditioning-why-sdxl-tells-the-unet-the-original-image-size>Size Conditioning — Why SDXL Tells the UNet the Original Image Size</h3><p>Older models dealt with mismatched image sizes by:</p>
+<ul>
+<li><p>Discarding small images → losing valuable training data</p>
+</li>
+<li><p>Upscaling small images → introducing blur artifacts the model ends up learning</p>
+</li>
+</ul>
+<p>SDXL’s fix:</p>
+<p>For every training image, it feeds the original height and width into the UNet as conditioning (c_size = (h_original, w_original)). These values are Fourier-encoded → concatenated → added to the timestep embedding.</p>
+<p>What does this solve?</p>
+<ul>
+<li><p>Model no longer has to discard small images.</p>
+</li>
+<li><p>Model knows when an image was originally tiny and doesn’t learn upscaling artifacts as “truth.”</p>
+</li>
+<li><p>Model can learn different aspect ratios naturally.</p>
+</li>
+</ul>
+<p>In short: this metadata gives the model context it never had before.</p>
+<h3 id=improved-autoencoder-same-architecture-better-training>Improved Autoencoder — Same Architecture, Better Training</h3><p>Even though the architecture is the same, SDXL trains the autoencoder with:</p>
+<ul>
+<li><p>Batch size 256 (vs 9 previously)</p>
+</li>
+<li><p>EMA (Exponential Moving Average) weight tracking</p>
+</li>
+</ul>
+<p>Why is this better?</p>
+<p>Large batch → more stable gradients, more robust learning and EMA led to smoother, more stable weight trajectory which resulted in better generalization.</p>
+<p>Result:</p>
+<p>Autoencoder outperforms previous SD models in all reconstruction metrics.
+This is crucial because LDMs rely on the autoencoder’s latent space for local, high-frequency details.</p>
+<h3 id=sdxl-workflow-from-text-to-image-first-principles>SDXL Workflow — From Text to Image (First Principles)</h3><p>Here’s the whole pipeline:</p>
+<ol>
+<li>Text Prompt → Text Embeddings :</li>
+</ol>
+<ul>
+<li><p>Two text encoders process the prompt.</p>
+</li>
+<li><p>Produce token-level embeddings + a pooled embedding.</p>
+</li>
+</ul>
+<p>This becomes the “instruction manual” for the UNet.</p>
+<ol start="2">
+<li>Start with Random Latent Noise :</li>
+</ol>
+<p>Random noise is generated for the next step.</p>
+<ol start="3">
+<li>Denoising Loop (The Core Generation Process):</li>
+</ol>
+<p>At every step the UNet receives noisy latent + text embeddings timestep and size conditioning. The job of the UNet is to predict what noise to remove, remove it and make sense out of the chaos.</p>
+<ol start="4">
+<li>Decode:</li>
+</ol>
+<p>The clean latent is passed through the improved autoencoder and the image is formed out of it.</p>
+<p>NOTE: It also uses a refinement model to sharpen the image and the edges and all.</p>

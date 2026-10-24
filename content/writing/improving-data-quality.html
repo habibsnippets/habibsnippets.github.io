@@ -1,0 +1,66 @@
+<!-- Imported from https://defygrad.bearblog.dev/improving-data-quality/ on 2026-10-24. Edit freely. -->
+<p>So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like they were named by a drunk intern. Don’t worry. I’m here to clean up your mess, Gotham-style. Let’s dive into the shadows and make your data shine.</p>
+<p>Step 1: Read Your Dataset into a Pandas DataFrame:</p>
+<p>First things first. You’ve got a CSV file, and you need to load it into a Pandas DataFrame. Think of this as your Batcave—a place where all your tools and gadgets are stored.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>  
+<span class="n">df_transport</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;your_dataset.csv&#39;</span><span class="p">)</span>  
+</pre></div>
+<p>Now, your data is in a DataFrame. But don’t get too comfortable. This is just the beginning.</p>
+<p>Step 2: Check the Data Types:</p>
+<p>Your DataFrame might look clean, but it’s probably hiding secrets. Pandas tries to guess the data types, but it’s not perfect. Let’s expose the truth.</p>
+<div class="highlight"><pre><span></span><span class="n">Copy</span>
+<span class="n">df_transport</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>  
+</pre></div>
+<p>This will show you the data types of each column. Numbers? Strings? Dates? Pandas will spill the beans. But remember, not everything is as it seems.</p>
+<p>Step 3: Get the Stats:</p>
+<p>For numerical columns, you need to know the lay of the land. Use .describe() to get the summary statistics.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>  
+</pre></div>
+<p>This will give you the mean, standard deviation, min, max, and more. Think of it as your Batcomputer analyzing the situation.</p>
+<p>Step 4: Check for Missing Values:</p>
+<p>Missing values are like the Joker—they wreak havoc wherever they go. You need to find them and deal with them.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>  
+</pre></div>
+<p>This will show you how many missing values are in each column. If you see a lot of NaNs, don’t panic. We’ll handle them.</p>
+<p>Step 5: Resolve Missing Values:</p>
+<p>Most algorithms hate missing values. But you’re not most people. You’re Batman. You don’t just drop rows like a coward. You fix them.</p>
+<p>For numeric columns, fill missing values with the mean. For categorical columns, use the mode (the most frequent value).</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span> <span class="o">=</span> <span class="n">df_transport</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>  
+</pre></div>
+<p>Boom. Missing values? Handled.</p>
+<p>Step 6: Convert the Date Column:</p>
+<p>Dates are tricky. They look like strings, but they’re not. You need to convert them to a datetime format.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">],</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Now, let’s break it down into year, month, and day. Because why not?</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>  
+<span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;month&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">month</span>  
+<span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;day&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">day</span>  
+</pre></div>
+<p>Your data just got a whole lot more powerful.</p>
+<p>Step 7: Rename Columns and Clean Up:</p>
+<p>Your column names are a mess. Some are uppercase, some are lowercase, and some have spaces. Let’s fix that.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>  
+    <span class="s1">&#39;Date&#39;</span><span class="p">:</span> <span class="s1">&#39;date&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Zip Code&#39;</span><span class="p">:</span> <span class="s1">&#39;zipcode&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Model Year&#39;</span><span class="p">:</span> <span class="s1">&#39;modelyear&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Fuel&#39;</span><span class="p">:</span> <span class="s1">&#39;fuel&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Make&#39;</span><span class="p">:</span> <span class="s1">&#39;make&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Light_Duty&#39;</span><span class="p">:</span> <span class="s1">&#39;lightduty&#39;</span><span class="p">,</span>  
+    <span class="s1">&#39;Vehicles&#39;</span><span class="p">:</span> <span class="s1">&#39;vehicles&#39;</span>  
+<span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+</pre></div>
+<p>And while we’re at it, let’s remove any rows where the model year is "<2006". Because who cares about ancient history?</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;modelyear&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&lt;2006&#39;</span><span class="p">]</span>  
+</pre></div>
+<p>Step 8: Handle Categorical Columns:</p>
+<p>Categorical columns are like riddles. They need to be decoded. Let’s start with the lightduty column, which has "Yes/No" values. We’ll convert them to 1s and 0s.</p>
+<div class="highlight"><pre><span></span><span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;lightduty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_transport</span><span class="p">[</span><span class="s1">&#39;lightduty&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;No&#39;</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>  
+</pre></div>
+<p>Lambda functions are your best friend here. They’re quick, dirty, and get the job done.</p>
+<p>Step 9: One-Hot Encoding:</p>
+<p>Machine learning models don’t understand text. They need numbers. So, we’ll convert categorical columns into binary vectors using one-hot encoding.</p>
+<div class="highlight"><pre><span></span><span class="n">data_dummy</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">get_dummies</span><span class="p">(</span><span class="n">df_transport</span><span class="p">[[</span><span class="s1">&#39;zipcode&#39;</span><span class="p">,</span> <span class="s1">&#39;modelyear&#39;</span><span class="p">,</span> <span class="s1">&#39;fuel&#39;</span><span class="p">,</span> <span class="s1">&#39;make&#39;</span><span class="p">]],</span> <span class="n">drop_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  
+</pre></div>
+<p>This creates a new DataFrame where each category is a binary column. It’s like turning your data into a swarm of bats—each one representing a single category.</p>
+<p>enjoy the blog boys.</p>

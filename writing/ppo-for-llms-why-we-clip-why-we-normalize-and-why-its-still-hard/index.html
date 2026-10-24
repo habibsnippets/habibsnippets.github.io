@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard — Habeeb</title>
+<meta name="description" content="after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard">
+<meta property="og:description" content="after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2026-02-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard">
+<meta name="twitter:description" content="after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard",
+  "description": "after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the…",
+  "datePublished": "2026-02-20",
+  "url": "https://habibsnippets.github.io/writing/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard</h1>
+      <p class="post-meta">
+        <time datetime="2026-02-20">20 Feb, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>14 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=why-are-we-here>Why are we here?</h2><h3 id=the-wall-of-supervised-learning>the wall of supervised learning</h3><p>after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the next word, it is kinda useless.in standard pre-training or sft (supervised fine-tuning) approaches we teach llms to mimic patterns. the loss function is a simple cross entropy loss which penalizes the model for saying apple instead of orange. the problem is simple: just because a sentence has a high likelihood does not mean that it is useful — meaning it should align with our preferences by being helpful or safe.</p>
+<p><a href='https://arxiv.org/abs/1909.08593'>Ziegler et al</a> dropped a truth bomb in 2020 suggesting that we do not need better models. instead we need a better way to reward the model. so instead of going for better prediction we want our models to optimize for a reward that will in turn enhance the quality of the model's outputs.</p>
+<p>the logic was simple:</p>
+<ul>
+<li>let the llm generate a response</li>
+<li>give the response a score - a reward depending on how good it is - given by humans thus human preference is taken into account</li>
+<li>use PPO to nudge the model towards a higher score / reward.</li>
+</ul>
+<h2 id=the-foundation>the foundation:</h2><p>to get the llm to generate the way humans want them to be or in other words follow the human preference we start with the grand-daddy of of rl : the policy gradient (reinforce).</p>
+<h3 id=starting-point-vanilla-policy-gradient>starting point : vanilla policy gradient</h3><p>in llms, the policy (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003C0;</mi></mrow></math>) is the model itself. so for every prompt you give to the model, it will generate some response (sequence of tokens). all we want to do is to tweak the weights (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B8;</mi></mrow></math>) so that the high reward sequence becomes more likely.</p>
+<p>the math:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>L</mi><mrow><mi>P</mi><mi>G</mi></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mover><mrow><mi>&#x1D53C;</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo stretchy="false">[</mo><mi>log</mi><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">&#x0007C;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo stretchy="false">]</mo></mrow></math><p>where :</p>
+<ul>
+<li><p>the goal: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>L</mi><mrow><mi>P</mi><mi>G</mi></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo></mrow></math>
+this is the loss function (or more accurately, the objective function) we want to maximize.</p>
+</li>
+<li><p>the context: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>&#x1D53C;</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math>
+this stands for the Empirical Expectation at time <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>t</mi></mrow></math>. We don't just look at one word; we look at a whole "batch" of generated text and take the average performance.</p>
+</li>
+<li><p>the action : <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>log</mi><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">&#x0007C;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math>
+this is the log probability of the model taking a specific action (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow></math>) given the current state (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow></math>)</p>
+<ul>
+<li>state (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow></math>): is the prompt and all the words generated yet</li>
+<li>action (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>a</mi><mi>t</mi></msub></mrow></math>) : next word model chooses</li>
+</ul>
+</li>
+<li><p>the feedback (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math>):
+this is the advantage estimate and it tells the model how much better was the generated response than the average expected response.</p>
+</li>
+</ul>
+<p>if it is positive -> response was better than the expected and thus we would like to increase the probability of the generated response.</p>
+<ul>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>log</mi><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">&#x0007C;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math>: This is the "log-probability" of the model choosing a specific word.</p>
+</li>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math> (The Advantage): This is the secret sauce. It tells us: "Was this word better than what we expected?"</p>
+</li>
+</ul>
+<h3 id=the-problem-sample-efficiency>the problem : sample efficiency</h3><p>vanilla policy gradient has one flaw - and it is huge (that's what she said) , it is a "one and done" (that's what he said) system.</p>
+<ul>
+<li>one trajectory, one gradient update : you gen a response, calculate the gradient and then update the model. once the model weights change the old data becomes stale and thus you have to throw it because the model is like "i have never seen this man (data) in my life before!".</li>
+</ul>
+<p>a bit more deep dive into the above problem:</p>
+<ul>
+<li>step 1: the sampling first
+we let our current model (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub></mrow></math>) talk.</li>
+</ul>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x003C4;</mi><mi>&#x0007E;</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub></mrow></math><ul>
+<li>step 2 : the calculation</li>
+</ul>
+<p>we compute the gradient (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>g</mi><mn>0</mn></msub></mrow></math>) to see how to improve the model.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>g</mi><mn>0</mn></msub><mo>&#x0003D;</mo><msub><mi>&#x1D53C;</mi><mrow><mi>&#x003C4;</mi><mi>&#x0007E;</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msub><mo>&#x02211;</mo><mi>t</mi></msub><msub><mo>&#x02207;</mo><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub><mi>log</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo>&#x02223;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow></mrow></math><ul>
+<li>step 3 : the update</li>
+</ul>
+<p>we apply the update to get a new, "smarter" model</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003B8;</mi><mn>1</mn></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mi>&#x003B8;</mi><mn>0</mn></msub><mo>&#x0002B;</mo><mi>&#x003B1;</mi><msub><mi>g</mi><mn>0</mn></msub></mrow></math><p>here’s the catch: why the data becomes stale.</p>
+<p>now you want to do another update to reach <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B8;</mi><mn>2</mn></msub></mrow></math>. you look at the pile of data you collected in step 1. can you use it again? mathematically, No.</p>
+<p>after the update, the correct gradient should be:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mo>&#x02207;</mo><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub><mi>J</mi><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003B8;</mi><mn>1</mn></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mi>&#x1D53C;</mi><mrow><mi>&#x003C4;</mi><mi>&#x0007E;</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub></mrow></msub><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msub><mo>&#x02211;</mo><mi>t</mi></msub><msub><mo>&#x02207;</mo><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub><mi>log</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo>&#x02223;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow></mrow></math><p>notice the subscript. the expectation <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x1D53C;</mi></mrow></math> must be taken over trajectories generated by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub></mrow></math>.</p>
+<p>the problem: your data came from</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x003C4;</mi><mi>&#x0007E;</mi><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub></mrow></math><p>but your model is now</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></math>.</p>
+<p>Formally:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>0</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003C4;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02260;</mo><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mn>1</mn></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003C4;</mi><mo stretchy="false">&#x00029;</mo></mrow></math><h3 id=the-solution-importance-sampling>the solution ? importance sampling</h3><p>to save compute so that we don't waste our data, we need to find a way to reuse it. we want to collect the bunch of responses using an old version of the model (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></msub></mrow></math>) and then use them to update the new model multiple times. also we need to keep in check that the updates are not crazy! meaning we have to take into account the factor of distribution shift! our new model should not be much different from the old model. to do this we use a ratio to correct the math.</p>
+<h3 id=the-logic-probability-ratio-math-xmlnshttpwwww3org1998mathmathml-displayinlinemrowmsubmirmimitmimsubmrowmath>the logic : probability ratio (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub></mrow></math>):</h3><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mrow><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">&#x0007C;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></msub><mo stretchy="false">&#x00028;</mo><msub><mi>a</mi><mi>t</mi></msub><mo stretchy="false">&#x0007C;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></mfrac></mrow></math><p>imagine the old model gave the word "helpful" a 10% chance.</p>
+<ul>
+<li><p>old probability  (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mrow><msub><mi>&#x003B8;</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub></mrow></msub></mrow></math>): 0.10</p>
+</li>
+<li><p>new probability (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub></mrow></math>): 0.12 (after a small update)</p>
+</li>
+<li><p>ratio (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub></mrow></math>): <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.12</mn><mo>&#x0002F;</mo><mn>0.10</mn><mo>&#x0003D;</mo><mrow><mn mathvariant="bold">1.2</mn></mrow></mrow></math></p>
+</li>
+</ul>
+<p>now, instead of just using <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>log</mi><mi>&#x003C0;</mi></mrow></math>, we multiply the advantage by this ratio (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1.2</mn></mrow></math>). this "importance sampling" trick lets us recycle data safely.</p>
+<h2 id=the-clip-ppos-central-innovation>the clip - ppo's central innovation</h2><p>so we talked about advantage right. a positive advantage means the model did something right and that we want to increase its probability. also we do not want our model to drift too much, so we introduce a limit! same when we want to decrease its probability. the advantage is less than 0, so we will want to decease the probability but it should not be decreased so much so that it change the policy entirely.</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>L</mi><mrow><mi>C</mi><mi>L</mi><mi>I</mi><mi>P</mi></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mover><mrow><mi>&#x1D53C;</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mo>min</mo><mo stretchy="false">&#x00028;</mo><munder><munder><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow><mo>&#x23DF;</mo></munder><mrow><mtext>Original</mtext></mrow></munder><mo>&#x0002C;</mo><munder><munder><mrow><mtext>clip</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002C;</mo><mn>1</mn><mo>&#x02212;</mo><mi>&#x003F5;</mi><mo>&#x0002C;</mo><mn>1</mn><mo>&#x0002B;</mo><mi>&#x003F5;</mi><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow><mo>&#x23DF;</mo></munder><mrow><mtext>Clipped</mtext></mrow></munder><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow></mrow></math><p>at first glance the above equation looks ugly but it is very simple</p>
+<h3 id=what-ppo-wants-to-do-without-clipping>what ppo wants to do ? (without clipping)</h3><p>if we ignore clipping, the only objective of clipping is to increase the probability of a response when the advantage is positive and decrease it when it is negative.</p>
+<p>so far so good.</p>
+<h3 id=what-ppo-refuses-to-do>what ppo refuses to do</h3><p>ppo refuses to let this policy change like a maniac in one step. this where this clipping comes in.</p>
+<p>it enforces a hard rule which states:</p>
+<blockquote>
+<p>“no matter what the gradient wants, don’t change action probabilities by more than ±ε.”</p>
+</blockquote>
+<p>if ε = 0.2:</p>
+<ul>
+<li><p>max increase = 1.2×</p>
+</li>
+<li><p>max decrease = 0.8×</p>
+</li>
+</ul>
+<p>this is a trust region, but enforced with algebra instead of constraints.</p>
+<h3 id=why-the-min-the-safety>why the min? the safety</h3><p>ppo takes : min(unclipped objective,clipped objective)</p>
+<p>why?</p>
+<p>because if clipping helps in achieving the objective then we will ignore this min thing and go with what clipping has to offer, but if it hurts the objective then we will enforce it. in other words:</p>
+<blockquote>
+<p>“if a large update would make things look better, i don’t trust it. i’ll take the safer improvement.”</p>
+</blockquote>
+<p>this makes ppo a conservative optimizer by design.</p>
+<h3 id=the-choice>the ϵ  choice:</h3><ul>
+<li>ϵ=0.2  is standard (20% probability change max)</li>
+<li>smaller ϵ  = safer but slower learning</li>
+<li>larger ϵ  = faster but riskier</li>
+</ul>
+<h2 id=kl-penalty>kl penalty</h2><p>why? so even after having clipping which prevents the model from not changing too much in one update, the issue of eventually drifting into the  gibberish land still persists over thousands of updates. thus we need kl penaltyyyyyyyyyyyyyyyy.</p>
+<h3 id=the-full-objective>the full objective:</h3><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>L</mi><mrow><mi>P</mi><mi>P</mi><mi>O</mi></mrow></msup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><msub><mover><mrow><mi>&#x1D53C;</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><msubsup><mi>L</mi><mi>t</mi><mrow><mi>C</mi><mi>L</mi><mi>I</mi><mi>P</mi></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><msub><mi>c</mi><mn>1</mn></msub><msubsup><mi>L</mi><mi>t</mi><mrow><mi>V</mi><mi>F</mi></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><msub><mi>c</mi><mn>2</mn></msub><mi>S</mi><mo stretchy="false">[</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">]</mo><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="true" fence="true" form="postfix">]</mo></mrow><mo>&#x02212;</mo><mi>&#x003B2;</mi><mi>&#x000B7;</mi><mtext>KL</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x0007C;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003C0;</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math><p>what is what?</p>
+<ol>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msubsup><mi>L</mi><mi>t</mi><mrow><mi>C</mi><mi>L</mi><mi>I</mi><mi>P</mi></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo></mrow></math>: The "Actor" (the policy we’ve been talking about).</p>
+</li>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>c</mi><mn>1</mn></msub><msubsup><mi>L</mi><mi>t</mi><mrow><mi>V</mi><mi>F</mi></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo></mrow></math>: The "Critic" (Value Function). It helps predict rewards to reduce noise.</p>
+</li>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>c</mi><mn>2</mn></msub><mi>S</mi><mo stretchy="false">[</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">]</mo></mrow></math>: Entropy. It forces the model to keep exploring and not get stuck on one answer.</p>
+</li>
+<li><p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B2;</mi><mi>&#x000B7;</mi><mtext>KL</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x0007C;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003C0;</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math>: The Penalty. This ensures the model doesn't become a "Reward Hacker."</p>
+</li>
+</ol>
+<h3 id=the-kl-penalty-term-a-closer-look>the kl penalty term - a closer look:</h3><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>&#x003B2;</mi><mi>&#x000B7;</mi><mtext>KL</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x0007C;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003C0;</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math><p>the term basically says</p>
+<blockquote>
+<p>“every time you update, pay a tax for moving away from a trusted reference policy.”</p>
+</blockquote>
+<p>what, or rather who is the reference model/policy?</p>
+<p>two common choices are there for the reference model:</p>
+<ol>
+<li>episode level reference :  where the old policy is treated as the reference model</li>
+</ol>
+<ul>
+<li><p>rest at the start of each PPO rollout</p>
+</li>
+<li><p>prevents aggressive per-iteration drift</p>
+</li>
+<li><p>used in classic PPO</p>
+</li>
+</ul>
+<ol start="2">
+<li>fixed reference (llm style): here the reference model is the sft model.</li>
+</ol>
+<ul>
+<li><p>never changes</p>
+</li>
+<li><p>represents “human-like language”</p>
+</li>
+<li><p>acts as a long-term anchor</p>
+</li>
+</ul>
+<p>this is very critical for llms as without it rlhf models will lose fluency, hallucinate structures and optimize reward at the cost of meaning.</p>
+<h3 id=how-is-clipping-different-from-kl-divergence>how is clipping different from KL divergence?</h3><p>well it is very straightforward. clipping is concerned about whether the step is too big for now while kl divergence is concerned about how far has the new policy wandered overall from the reference policy. one is local while the other is global and for proper optimization we need both.</p>
+<h3 id=the-role-of-math-xmlnshttpwwww3org1998mathmathml-displayinlinemrowmix003b2mimrowmath>the role of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B2;</mi></mrow></math>:</h3><p>it control how strongly are we about to change</p>
+<p>penalty is:</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B2;</mi><mi>&#x000B7;</mi><mtext>KL</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>&#x003C0;</mi><mi>&#x003B8;</mi></msub><mo stretchy="false">&#x0007C;</mo><mo stretchy="false">&#x0007C;</mo><msub><mi>&#x003C0;</mi><mrow><mi>r</mi><mi>e</mi><mi>f</mi></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math></p>
+<p>if it is small then training will be fast and there will be high risk of drift and if it is large then training will be slow and v.v.</p>
+<h4 id=fixed-vs-adaptive-beta>fixed vs adaptive $\beta$</h4><p>fixed values of beta are simple and easy to implement but at the same time is we use them we allow kl to grow unpredictably. adaptive beta values are more principled and adjusted to hit a target kl.</p>
+<p>although most systems today use a combination of fixed beta and early stopping on kl as it is simple, robust and operationally predictable.</p>
+<h2 id=normalization>normalization</h2><p>by this point if you see, ppo is solid right? we have reused the old data, used clipping to keep the updates conservative and kl penalty to prevent long term drift. despite all this, without normalization it all can still fail.</p>
+<h3 id=why-it-matters>why it matters?</h3><p>see the core update term of ppo is: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub><mo stretchy="false">&#x00028;</mo><mi>&#x003B8;</mi><mo stretchy="false">&#x00029;</mo><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math>. this tinyyy multiplication decides 3 things:</p>
+<ol>
+<li>gradient magnitude : how much weights actually change</li>
+<li>clipping activation : whether we hit the <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1</mn><mi>&#x000B1;</mi><mi>&#x003F5;</mi></mrow></math> wall.</li>
+<li>dominance : which samples will get to teach the model</li>
+</ol>
+<p>see advantages are noisy and they depend on reward models which are often imperfect and value estimates which can be wrong.</p>
+<ol>
+<li><p>failure mode 1 : let us say <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math> is huge (say, +500), then <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math> becomes massive. the problem that arises with this is that gradient explodes and only few reward samples will dominate the entire update and ppo will turn back into unstable vanilla pg.</p>
+</li>
+<li><p>failure mode 2 : if <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub></mrow></math> is tiny (say, 0.0001), the gradients vanish. because of this no learning happens and though the model and its training look stable, it does not learn anything.</p>
+</li>
+</ol>
+<h3 id=how-to-normalize>how to normalize:</h3><h4 id=step-a-structured-advantage-via-gae>step a : structured advantage via GAE</h4><p>before normalizing we need "clean" advantages. for llms we use generalised advantage estimation (GAE):</p>
+<p>the math:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo>&#x0003D;</mo><msubsup><mo>&#x02211;</mo><mrow><mi>l</mi><mo>&#x0003D;</mo><mn>0</mn></mrow><mrow><mo>&#x0221E;</mo></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B3;</mi><mi>&#x003BB;</mi><msup><mo stretchy="false">&#x00029;</mo><mi>l</mi></msup><msubsup><mi>&#x003B4;</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mi>l</mi></mrow><mi>V</mi></msubsup></mrow></math><p>where the TD (temporal difference) Residual is :</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msubsup><mi>&#x003B4;</mi><mi>t</mi><mi>V</mi></msubsup><mo>&#x0003D;</mo><msub><mi>r</mi><mi>t</mi></msub><mo>&#x0002B;</mo><mi>&#x003B3;</mi><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math><p>so what just happened here? let us roll back a little to get the full understanding of the things.</p>
+<p>we want to train a model that makes decisions and to improve this decision taking ability of the model we need to answer one question repeatedly:</p>
+<blockquote>
+<p>"was this decision better or worse than expected?"</p>
+</blockquote>
+<p>this number is called advantage.</p>
+<p>first you find the value function: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math>
+this is just a prediction about how good of a future is going to be if you are present in state <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>s</mi><mi>t</mi></msub></mrow></math>. for llms state is nothing but the prompt and the tokens that have been generated so far and the value is the predicted future reward from here. all of this is learned by a critic network.</p>
+<p>second we find the immediate reward <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub></mrow></math>. as the name suggests this is the reward that you get when you take the action.</p>
+<blockquote>
+<p>in rlhf it is mostly 0 at most of the timsteps.</p>
+</blockquote>
+<p>then we move to the TD error :</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msubsup><mi>&#x003B4;</mi><mi>t</mi><mi>V</mi></msubsup><mo>&#x0003D;</mo><msub><mi>r</mi><mi>t</mi></msub><mo>&#x0002B;</mo><mi>&#x003B3;</mi><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math><p>just look at the above terms, they basically translate to : what actually happened - what i expected to happen.</p>
+<p>$ V(s_t) $ : what i thought would happen
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub><mo>&#x0002B;</mo><mi>&#x003B3;</mi><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math> : what actually happened - reward + future</p>
+<p>if this term is positive then the things were better than expected and if it is negative then they were not. simple</p>
+<p>suppose :</p>
+<ul>
+<li><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math> = 5 --- i expect a reward unit of 5 from here</li>
+<li>i take an action</li>
+<li>i get <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>t</mi></msub></mrow></math> = 1</li>
+<li>this means that the next state value <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub><mo stretchy="false">&#x00029;</mo></mrow></math> will be 6</li>
+<li>let <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x003B3;</mi></mrow></math> = 1 for simplicity</li>
+</ul>
+<p>then :</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msubsup><mi>&#x003B4;</mi><mi>t</mi><mi>V</mi></msubsup><mo>&#x0003D;</mo><msub><mi>r</mi><mi>t</mi></msub><mo>&#x0002B;</mo><mi>&#x003B3;</mi><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><mi>V</mi><mo stretchy="false">&#x00028;</mo><msub><mi>s</mi><mi>t</mi></msub><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mn>1</mn><mo>&#x0002B;</mo><mo stretchy="false">&#x00028;</mo><mn>1</mn><mi>×</mi><mn>6</mn><mo stretchy="false">&#x00029;</mo><mo>&#x02212;</mo><mn>5</mn><mo>&#x0003D;</mo><mn>2</mn></mrow></math><p>meaning : things turned out to be 2 units better than i expected them to be. this acts as a basic learning signal.</p>
+<p>so the thing is that TD error is a very local (one time step taken into account) thing and it also misses the long term effects due to it. so in long sequences (that are obv present in llms ) single step TD cannot do much justice. we need some way to take into account the future as well.</p>
+<p>comes in GAE. it preaches to not only look at the current surprises but also at the future surprises, but with a catch, which is to not trust them more as we move further away.</p>
+<p>coming back to that equation again that we mentioned at the top:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mover><mrow><mi>A</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>t</mi></msub><mo>&#x0003D;</mo><msubsup><mo>&#x02211;</mo><mrow><mi>l</mi><mo>&#x0003D;</mo><mn>0</mn></mrow><mrow><mo>&#x0221E;</mo></mrow></msubsup><mo stretchy="false">&#x00028;</mo><mi>&#x003B3;</mi><mi>&#x003BB;</mi><msup><mo stretchy="false">&#x00029;</mo><mi>l</mi></msup><msubsup><mi>&#x003B4;</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mi>l</mi></mrow><mi>V</mi></msubsup></mrow></math><ul>
+<li><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B4;</mi><mi>t</mi></msub></mrow></math>: surprise now</li>
+<li><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B4;</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub></mrow></math>: surprise one step later</li>
+<li><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B4;</mi><mrow><mi>t</mi><mo>&#x0002B;</mo><mn>2</mn></mrow></msub></mrow></math>: surprise two steps later...</li>
+<li>each of the subsequent surprises get discounted by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x00028;</mo><mi>&#x003B3;</mi><mi>&#x003BB;</mi><msup><mo stretchy="false">&#x00029;</mo><mi>l</mi></msup></mrow></math></li>
+</ul>
+<blockquote>
+<p>so in simple words GAE is just a discounted sum of TD errors that is taken so that not just the current one</p>
+</blockquote>
+<p>but why two of these factors? this is kinda subtle but v important.
+see gamma is the environment discount which takes into account "how much do the future rewards matter?" while lambda is the smoothing knob which tells "how much do i trust the future TD errors?"</p>
+<h2 id=why-is-it-still-hard>why is it still hard?</h2><p>by now ppo looks a 10/10 thingy that's gonna solve all of our problems . you get the math the clipping, the normalization but there are some challenges.</p>
+<h3 id=challenge-1-reward-model-optimization-goodharts-law>challenge 1 : reward model optimization (goodhart's law)</h3><blockquote>
+<p>when a measure becomes a target, it ceases to be a good measure.</p>
+</blockquote>
+<p>the reward model is just a mathematical guess of what humans like. if we train too hard then the llm finds blind spots and it learns to output repetitive, perfectly grammatical non sense that tricks the reward model into giving a high score even though humans would hate it.</p>
+<h3 id=challenge-2-the-length-bias>challenge 2 : the length bias</h3><p>the reward models are inherently biased towards long responses and they think that longer the response the better is the quality.</p>
+<blockquote>
+<p>size matters</p>
+</blockquote>
+<p>because of this ppo forces the model to become a "yap - god" so that it keeps on generating longer responses for a better reward.</p>
+<h3 id=challenge-3-training-instability-at-scale>challenge 3 : training instability at scale</h3><p>while training larger models (70b param) we hit NaN values, loss spikes and all of this is due to issues like  gradient explosion and mixed precision.</p>
+<h2 id=beyond-ppo>beyond ppo</h2><p>ppo is still the gold standard but also very high maintenance. the newer methods are trying to reach the same level of alignment without the 4 models in memory headache.</p>
+<h3 id=why-it-still-persists>why it still persists:</h3><ol>
+<li>flexibility: can incorporate any reward signal</li>
+<li>robustness: kl penalty provides guardrails</li>
+<li>proven: works at 100B+ scale (GPT-4, Claude, etc.)</li>
+</ol>
+<h2 id=references>references:</h2><h3 id=foundational-papers>foundational papers</h3><ol>
+<li><a href='https://arxiv.org/abs/1909.08593'>ziegler et al.</a></li>
+<li><a href='https://arxiv.org/abs/1706.03741'>christiano et al.</a></li>
+<li><a href='https://arxiv.org/abs/2203.02155'>ouyang et al.</a></li>
+<li><a href='https://arxiv.org/abs/1707.06347'>schulman et al.</a></li>
+</ol>
+<h3 id=further-reading-if-you-want-to-go-deeper>further reading (if you want to go deeper)</h3><ul>
+<li><p><a href='https://arxiv.org/abs/1502.05477'>schulman et al. (2015)</a> — trust region policy optimization (trpo)
+ppo's predecessor — the constrained optimization approach that ppo simplified.</p>
+</li>
+<li><p><a href='https://arxiv.org/abs/2009.01325'>stiennon et al. (2020)</a> — learning to summarize with human feedback
+the bridge between christiano 2017 and instructgpt — showed rlhf works at scale on real nlp tasks.</p>
+</li>
+<li><p><a href='https://arxiv.org/abs/2204.05862'>bai et al. (2022)</a> — training a helpful and harmless assistant with rlhf (anthropic / constitutional ai)
+how anthropic applied rlhf + additional safety alignment, relevant to the "beyond ppo" section.</p>
+</li>
+</ul>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/simplifying-ddp/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">simplifying DDP</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/bradley-terry-model/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Bradley Terry Model</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

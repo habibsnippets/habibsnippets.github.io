@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data and Concept Drift — Habeeb</title>
+<meta name="description" content="All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/data-and-concept-drift/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Data and Concept Drift">
+<meta property="og:description" content="All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/data-and-concept-drift/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-01-26">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Data and Concept Drift">
+<meta name="twitter:description" content="All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Data and Concept Drift",
+  "description": "All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the…",
+  "datePublished": "2025-01-26",
+  "url": "https://habibsnippets.github.io/writing/data-and-concept-drift/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Data and Concept Drift</h1>
+      <p class="post-meta">
+        <time datetime="2025-01-26">26 Jan, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h4 id=></h4><p>All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the data is fine then there are these two suspects that we should look for: data drift and concept drift. Let's look into them in some detail:</p>
+<h3 id=data-drift>Data Drift:</h3><p>In simple words, the input (x) changes. Thus the model that was trained on the old data becomes completely irrelevant for this new data.</p>
+<p>An example to understand this:</p>
+<p>Imagine you own an ice cream shop, and you’ve built a machine learning model to predict how much ice cream you’ll sell each day based on the weather. The model was trained on historical data from the past year, where hotter days generally led to higher sales.</p>
+<h4 id=case-1-no-data-drift>Case 1: No data drift</h4><p>During the summer, your model works perfectly because the weather patterns and customer behavior are similar to the data it was trained on. Hot days = more sales, cool days = fewer sales.</p>
+<h4 id=case-2-data-drift>Case 2: Data drift</h4><p>Now, let’s say a new trend emerges: people in your area start preferring watermelon over ice cream, even on hot days. Additionally, the weather becomes more unpredictable due to climate change, with sudden rainstorms on hot days.</p>
+<p>Your model, which was trained on the old data, doesn’t know about these changes. It keeps predicting high ice cream sales on hot days, but in reality, sales are dropping because of the new preferences and weather patterns.</p>
+<h3 id=concept-drift>Concept Drift:</h3><p>It occurs when the patterns the model learned no longer hold. The data distributions might remain the same, but the relationship between input (x) and output (y) changes.</p>
+<p>An example to understand this:</p>
+<p>Imagine a new health trend emerges: people start avoiding ice cream on hot days because they believe it’s unhealthy to eat cold treats in extreme heat.</p>
+<p>The weather data, input (x) remains the same—hot days are still hot—but the relationship between hot weather and ice cream sales (y) has changed. Now, hot days lead to lower sales, even though the model was trained on data where hot days meant higher sales.</p>
+<p>Also, concept drift has the following types:</p>
+<h4 id=1-gradual-concept-drift>1. Gradual Concept Drift:</h4><p>The relationship between x and y changes slowly over time. Since the change is slow it is a bit hard to detect.</p>
+<p>An example to understand this:</p>
+<p>Let us say that over several years, people in your area gradually become more health-conscious. They start reducing their ice cream consumption little by little, opting for healthier alternatives like frozen yogurt or fruit sorbets.</p>
+<p>At first, the impact is minimal—maybe sales drop by 1% each month. But as time passes, the cumulative effect becomes significant. The model, which was trained on data where hot weather always meant high ice cream sales, starts to perform worse as the relationship between weather and sales slowly changes.</p>
+<h4 id=2-sudden-concept-drift>2. Sudden Concept Drift:</h4><p>The relationship changes more abruptly.</p>
+<p>An example to understand this:</p>
+<p>Imagine a Rajat Dalal suddenly goes viral with a campaign claiming that eating ice cream on hot days is bad for your health. Overnight, people stop buying ice cream on hot days, even though the weather remains the same.</p>
+<p>Your model, which was trained to predict high sales on hot days, now makes wildly inaccurate predictions because the relationship between hot weather and sales has changed dramatically in a very short time.</p>
+<h3 id=how-to-deal-with-drift>How to deal with drift?</h3><p>To deal with drift, we need to retrain our model and the approaches may vary as:</p>
+<ol>
+<li>Retrain the entire model using all the available data.</li>
+<li>Give higher weights (priority) to the new data so the model gives more priority to the recent discovered patterns.</li>
+<li>If you think that enough of the new data has been collected, you can simply drop the old data and start training the model on the new data only.</li>
+</ol>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/advanced-keras-techniques/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Advanced Keras Techniques</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

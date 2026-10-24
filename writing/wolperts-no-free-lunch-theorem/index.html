@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wolpert's No Free Lunch Theorem — Habeeb</title>
+<meta name="description" content="The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/wolperts-no-free-lunch-theorem/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wolpert's No Free Lunch Theorem">
+<meta property="og:description" content="The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/wolperts-no-free-lunch-theorem/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-09-16">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Wolpert's No Free Lunch Theorem">
+<meta name="twitter:description" content="The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Wolpert's No Free Lunch Theorem",
+  "description": "The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of…",
+  "datePublished": "2025-09-16",
+  "url": "https://habibsnippets.github.io/writing/wolperts-no-free-lunch-theorem/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Wolpert's No Free Lunch Theorem</h1>
+      <p class="post-meta">
+        <time datetime="2025-09-16">16 Sep, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>1 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<p>Came across this theorem while reading this :</p>
+<p><a href='https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf'>Few Useful Things About Machine Learning</a></p>
+<p>The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of problems. In simpler terms let us say if we consider every possible function or problem equally likely then all the algorithms will tend to perform the same on average.</p>
+<p>Well does it mean that algorithms that we use are useless? Well the answer is straight NO as they tend to perform better on specific problem classes.</p>
+<p>Also why is this important as a theorem? Because it entirely kills the idea of the pursuit of a magical algorithm that work universally on all functions/problems.
+The best example to understand this is Gradient Descent. It works well on smooth functions but not on noisy ones. Why is it so? Gradient descent assumes local gradients to point towards the optimum but in noisy function this can be misleading.</p>
+<p>Again this question might arise that if all algorithms perform the same on average then why are some preferred in practice? The answer is simple! We do not face all possible problems at a time. We generally face a restricted class and some algorithms perform better on some specific use cases and some do not.</p>
+<p>There is this takeaway of NFL theorem about hyper-parameter tuning and model selection which states that we need to experiment and match our models to our dataset or specific problem and compare the results with each other until and unless we find the best one out of them.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/resnet-so-simple-your-grandma-could-understand/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">ResNet, So Simple Your Grandma Could Understand</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/improving-data-quality/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Improving Data Quality</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

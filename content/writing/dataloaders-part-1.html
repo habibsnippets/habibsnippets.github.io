@@ -1,0 +1,175 @@
+<!-- Imported from https://defygrad.bearblog.dev/dataloaders-part-1/ on 2026-10-24. Edit freely. -->
+<h2 id=fafo-exercise-1-dumbest-dataloader>fafo exercise 1 : dumbest dataloader</h2><ul>
+<li>reads video and extracts raw frames</li>
+<li>no transfroms nothing , takes num_workers = 0 for baseline timing</li>
+<li>sweep num_workers, measure batch-fetch time</li>
+<li>toggle pin_memory, measure effect</li>
+</ul>
+<blockquote>
+<p>If you load your samples in the Dataset on CPU and would like to push it during training to the GPU, you can speed up the host to device transfer by enabling pin_memory. This lets your DataLoader allocate the samples in page-locked memory, which speeds-up the transfer.</p>
+</blockquote>
+<ul>
+<li>toggle persistent_workers, measure per-epoch startup cost</li>
+</ul>
+<blockquote>
+<p>With this option to false, every time your code hits a line line for sample in dataloader:, it will create a brand new set of workers to do this loading and will kill them on exit.
+Meaning that if you have multiple dataloaders, the workers will be killed when you are done with one instantly.
+If you make them persist, these workers will stay around (with their state) waiting for another call into that dataloader.
+Setting this to True will improve performances when you call into the dataloader multiple times in a row (as creating the workers is expensive). But it also means that the dataloader will have some persistent state even when it is not used (which can use some RAM depending on your dataset).</p>
+</blockquote>
+<p>*inject artifical I/O latency into <strong>getitem</strong> redo the num_workers sweep</p>
+<h2 id=dataloader-fafo-phase-1-worklog>Dataloader FAFO — Phase 1 Worklog</h2><p><strong>Date:</strong> 2026-07-03
+<strong>Setup:</strong> Fedora, 8 logical CPU cores, CPU-only run (no GPU in this pass)
+<strong>Source video:</strong> <code>test.mp4</code> — 1 min clip, 2054 frames extracted at native fps
+<strong>Dataset:</strong> naive <code>Dataset</code> — reads jpg via <code>cv2.imread</code>, resizes to 224x224, no other transforms</p>
+<hr />
+<h3 id=1-baseline-num_workers0>1. Baseline (num_workers=0)</h3><div class="highlight"><pre><span></span>total=6.00s | per_batch=60.04ms
+</pre></div>
+<p>Single-process loading: main process does read → decode → resize → tensor conversion, one sample at a time, no overlap with anything. This is the number every other optimization is measured against.</p>
+<hr />
+<h3 id=2-num_workers-sweep-no-artificial-io-delay>2. num_workers sweep — no artificial I/O delay</h3><table>
+<thead>
+<tr>
+  <th>num_workers</th>
+  <th>total (100 batches)</th>
+  <th>per_batch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0</td>
+  <td>5.50s</td>
+  <td>55.03ms</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>3.62s</td>
+  <td>36.20ms</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>2.29s</td>
+  <td>22.87ms</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>2.27s</td>
+  <td>22.68ms</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>2.50s</td>
+  <td>25.05ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading:</strong> Gains scale cleanly 0→4, then flatline at 4→8, then <em>regress</em> at 16.</p>
+<p><strong>Why:</strong> the machine has 8 logical cores. Once worker count approaches/exceeds that, workers start competing for CPU time instead of doing independent parallel work — context-switching overhead outweighs any benefit. PyTorch's own warning confirmed this directly: <em>"suggested max number of workers in current system is 8."</em></p>
+<p><strong>Takeaway:</strong> <code>__getitem__</code> here (imread + resize) is CPU-bound, not I/O-bound. In a CPU-bound regime, worker count has a hard ceiling around your core count — more workers past that point is pure waste, not "free" parallelism.</p>
+<hr />
+<h3 id=3-pin_memory-onoff>3. pin_memory on/off</h3><table>
+<thead>
+<tr>
+  <th>pin_memory</th>
+  <th>total</th>
+  <th>per_batch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>False</td>
+  <td>2.59s</td>
+  <td>25.90ms</td>
+</tr>
+<tr>
+  <td>True</td>
+  <td>2.79s</td>
+  <td>27.86ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading:</strong> no benefit — actually marginally slower (noise-level difference, not meaningful on its own).</p>
+<p><strong>Why:</strong> <code>pin_memory</code> speeds up host→GPU transfer. No GPU was available in this run (<code>torch.cuda.is_available() == False</code>), so there's no transfer to speed up — PyTorch printed this directly: <em>"pin_memory argument is set as true but no accelerator is found."</em></p>
+<p><strong>Takeaway:</strong> <code>pin_memory=True</code> is not a free "always on" setting — it's conditional on actually having a device to transfer to. Re-test once GPU driver issue is resolved.</p>
+<hr />
+<h3 id=4-persistent_workers-onoff-3-epochs>4. persistent_workers on/off (3 epochs)</h3><table>
+<thead>
+<tr>
+  <th>persistent_workers</th>
+  <th>epoch 0</th>
+  <th>epoch 1</th>
+  <th>epoch 2</th>
+  <th>total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>False</td>
+  <td>2.50s</td>
+  <td>2.04s</td>
+  <td>2.27s</td>
+  <td>6.81s</td>
+</tr>
+<tr>
+  <td>True</td>
+  <td>1.99s</td>
+  <td>1.98s</td>
+  <td>2.35s</td>
+  <td>6.32s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading:</strong> small win (~7%), not dramatic at this dataset size/complexity.</p>
+<p><strong>Why:</strong> <code>persistent_workers=False</code> respawns worker processes every epoch (interpreter startup, re-importing, re-initializing dataset state per worker). At 2054 frames and a trivial <code>__init__</code>, that respawn cost is small relative to total work per epoch. This optimization matters more as dataset setup cost grows (heavier <code>__init__</code>, larger metadata index, etc.) — not something to assume is dramatic by default.</p>
+<hr />
+<h3 id=5-num_workers-sweep-with-10ms-artificial-io-latency-per-sample>5. num_workers sweep — WITH 10ms artificial I/O latency per sample</h3><p>Simulates slow storage/network reads via <code>time.sleep(0.01)</code> inside <code>__getitem__</code>.</p>
+<table>
+<thead>
+<tr>
+  <th>num_workers</th>
+  <th>total (100 batches)</th>
+  <th>per_batch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>0</td>
+  <td>38.07s</td>
+  <td>380.66ms</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td>19.32s</td>
+  <td>193.23ms</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td>9.63s</td>
+  <td>96.33ms</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td>5.06s</td>
+  <td>50.58ms</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td>3.19s</td>
+  <td>31.92ms</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading:</strong> No plateau. Scaling stays roughly monotonic well past 8 workers — 16 is still meaningfully faster than 8, unlike the no-latency sweep where 8→16 regressed.</p>
+<p><strong>Why:</strong> when each sample involves a wait (blocked on I/O), a worker spends most of its time doing nothing useful — CPU sits idle during the sleep. More workers means more samples can be "in flight" waiting simultaneously, and since they're not actually contending for CPU cycles (they're blocked, not computing), you can meaningfully oversubscribe past your core count.</p>
+<p><strong>Takeaway — this is the core lesson of Phase 1:</strong>
+There is no universal "correct" <code>num_workers</code>. It's a direct function of whether your per-sample cost is:</p>
+<ul>
+<li><strong>CPU-bound</strong> (decode/resize/augment-heavy) → ceiling near core count, more workers past that hurts.</li>
+<li><strong>I/O-bound</strong> (slow disk, network, remote storage) → keep scaling well past core count, since workers spend most time blocked, not computing.</li>
+</ul>
+<p>The two sweeps side-by-side are the proof — same dataset, same machine, only difference is where the per-sample bottleneck sits.</p>
+<p>resources:</p>
+<ul>
+<li><a href='https://developer.nvidia.com/blog/how-optimize-data-transfers-cuda-cc/'>Read about pin memory and stuff</a></li>
+<li><a href='https://bazel.build/remote/persistent'>Read about persistent workers</a></li>
+</ul>

@@ -1,0 +1,9 @@
+<!-- Imported from https://defygrad.bearblog.dev/wolperts-no-free-lunch-theorem/ on 2026-10-24. Edit freely. -->
+<p>Came across this theorem while reading this :</p>
+<p><a href='https://homes.cs.washington.edu/~pedrod/papers/cacm12.pdf'>Few Useful Things About Machine Learning</a></p>
+<p>The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of problems. In simpler terms let us say if we consider every possible function or problem equally likely then all the algorithms will tend to perform the same on average.</p>
+<p>Well does it mean that algorithms that we use are useless? Well the answer is straight NO as they tend to perform better on specific problem classes.</p>
+<p>Also why is this important as a theorem? Because it entirely kills the idea of the pursuit of a magical algorithm that work universally on all functions/problems.
+The best example to understand this is Gradient Descent. It works well on smooth functions but not on noisy ones. Why is it so? Gradient descent assumes local gradients to point towards the optimum but in noisy function this can be misleading.</p>
+<p>Again this question might arise that if all algorithms perform the same on average then why are some preferred in practice? The answer is simple! We do not face all possible problems at a time. We generally face a restricted class and some algorithms perform better on some specific use cases and some do not.</p>
+<p>There is this takeaway of NFL theorem about hyper-parameter tuning and model selection which states that we need to experiment and match our models to our dataset or specific problem and compare the results with each other until and unless we find the best one out of them.</p>

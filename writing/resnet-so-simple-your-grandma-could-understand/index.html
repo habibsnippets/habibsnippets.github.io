@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ResNet, So Simple Your Grandma Could Understand — Habeeb</title>
+<meta name="description" content="Before going deep into the architecture granny, let us recap the topic &quot;vanishing gradient descent&quot;. when training a network using backprop and gradient…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/resnet-so-simple-your-grandma-could-understand/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ResNet, So Simple Your Grandma Could Understand">
+<meta property="og:description" content="Before going deep into the architecture granny, let us recap the topic &quot;vanishing gradient descent&quot;. when training a network using backprop and gradient…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/resnet-so-simple-your-grandma-could-understand/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-09-18">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="ResNet, So Simple Your Grandma Could Understand">
+<meta name="twitter:description" content="Before going deep into the architecture granny, let us recap the topic &quot;vanishing gradient descent&quot;. when training a network using backprop and gradient…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ResNet, So Simple Your Grandma Could Understand",
+  "description": "Before going deep into the architecture granny, let us recap the topic \"vanishing gradient descent\". when training a network using backprop and gradient…",
+  "datePublished": "2025-09-18",
+  "url": "https://habibsnippets.github.io/writing/resnet-so-simple-your-grandma-could-understand/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>ResNet, So Simple Your Grandma Could Understand</h1>
+      <p class="post-meta">
+        <time datetime="2025-09-18">18 Sep, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>2 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<p>Before going deep into the architecture granny, let us recap the topic "vanishing gradient descent". when training a network using backprop and gradient descent we calculate gradients (derivatives) of the loss with respect to the weights. These gradients tell us that how much we need to adjust the weights so that our loss is as min as possible. But sometimes these grads become so small that they make no updates to the weights and it results in training becoming slow as hell. We won't dive deep into the maths but think of it like this, during backprop the chain rule gets applied and in the calculation of the derivative of the loss function with respect to the weight if the derivatives are less than 1 and we keep on multiplying them again and again the result shrinks and it exponentially goes to 0. So this is how the grads vanish as they move backward.</p>
+<p>Researches found many ways to tackle this problem and they tried better normalization and initialization techniques but then a new problem emerged! The problem of degradation. As the number of layers increased the performance of the network got more bad.</p>
+<p>So what was the eureka moment for the authors of the resnet paper? Instead of asking a set of layers of neural network to learn a complete information from scratch what if we only made them learn the change or the small adjustment to the input? This small change is termed as residual. Think of it like this:
+H(x) is the entire desired complex info we wanted our layer to learn</p>
+<p>H(x) = F(x) + x
+where F(x) is the residual function -> the part we want our layers to learn and x is the original input that was passed.</p>
+<p>So the layers will be made to learn just the small difference that has occurred between the input and the output.</p>
+<p>Now how does it help to sort our problem?
+Earlier our network had to learn the entire thing (H(x)) and now it only learns the small change that occurred to the input. If no adjustments were made then it can easily make that residual to zero which is much easier than learning to perfectly put the input through a bunch of complex deep layers.</p>
+<p>How to build this into a neural network? Well simple as fuck ngl. just use a shortcut, skip the other layers and use a skip connection. it will ensure that the information (x) is always passed through and the layers in the block will not need to learn how to modify (x) and not to create the entire output from scratch.</p>
+<p>Now to create a full network, we just simply stack these residual block on top of each other to create a very deep neural network.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/automatic-differentiation/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Automatic Differentiation</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/wolperts-no-free-lunch-theorem/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">Wolpert's No Free Lunch Theorem</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

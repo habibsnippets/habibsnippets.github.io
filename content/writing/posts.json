@@ -1,0 +1,222 @@
+[
+  {
+    "slug": "continual-learning",
+    "title": "Continual Learning",
+    "date": "22 Sep, 2026",
+    "dateISO": "2026-09-22",
+    "source": "https://defygrad.bearblog.dev/continual-learning/",
+    "description": "So I ran an experiment to see how badly a neural network forgets things when you teach it new stuff. Spoiler: it's really bad. Like, embarrassingly bad. But…",
+    "words": 2342,
+    "minutes": 11
+  },
+  {
+    "slug": "the-idea-of-chaining",
+    "title": "The Idea of Chaining",
+    "date": "13 Jul, 2026",
+    "dateISO": "2026-07-13",
+    "source": "https://defygrad.bearblog.dev/the-idea-of-chaining/",
+    "description": "DBSCAN (and connected components, which is basically the same mechanism) never asks \"are these two images actually similar?\" It only ever asks \"is there a…",
+    "words": 713,
+    "minutes": 3
+  },
+  {
+    "slug": "dataloaders-part-1",
+    "title": "dataloaders part 1",
+    "date": "13 Jul, 2026",
+    "dateISO": "2026-07-13",
+    "source": "https://defygrad.bearblog.dev/dataloaders-part-1/",
+    "description": "If you load your samples in the Dataset on CPU and would like to push it during training to the GPU, you can speed up the host to device transfer by enabling…",
+    "words": 833,
+    "minutes": 4
+  },
+  {
+    "slug": "the-t4-ceiling-why-vanilla-vlms-fail-on-video",
+    "title": "The T4 Ceiling: Why Vanilla VLMs Fail on Video",
+    "date": "09 Apr, 2026",
+    "dateISO": "2026-04-09",
+    "source": "https://defygrad.bearblog.dev/the-t4-ceiling-why-vanilla-vlms-fail-on-video/",
+    "description": "If you've ever tried running a large AI model on a consumer GPU, you know how it ends. The terminal hangs, an ugly red wall of text appears, and somewhere in…",
+    "words": 1418,
+    "minutes": 6
+  },
+  {
+    "slug": "zero-to-ros2-building-pubsub-from-scratch",
+    "title": "Zero to ROS2 - Building pub/sub from scratch",
+    "date": "02 Apr, 2026",
+    "dateISO": "2026-04-02",
+    "source": "https://defygrad.bearblog.dev/zero-to-ros2-building-pubsub-from-scratch/",
+    "description": "The goal was simple: understand why ROS2 chose DDS as its middleware by building the alternative from scratch first. Instead of reading docs, implement a…",
+    "words": 859,
+    "minutes": 4
+  },
+  {
+    "slug": "cnn-build-weight-init-rabbit-hole",
+    "title": "CNN Build - Weight Init Rabbit Hole",
+    "date": "18 Mar, 2026",
+    "dateISO": "2026-03-18",
+    "source": "https://defygrad.bearblog.dev/cnn-build-weight-init-rabbit-hole/",
+    "description": "mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is…",
+    "words": 619,
+    "minutes": 3
+  },
+  {
+    "slug": "understanding-zero",
+    "title": "understanding ZeRO!",
+    "date": "17 Mar, 2026",
+    "dateISO": "2026-03-17",
+    "source": "https://defygrad.bearblog.dev/understanding-zero/",
+    "description": "forget everything that you know. forget model. forget parameters. let's just start with a single number. a neural network is just a floating point number …",
+    "words": 1365,
+    "minutes": 6
+  },
+  {
+    "slug": "math-ai-say-no",
+    "title": "i tried to teach a math ai to say no",
+    "date": "13 Mar, 2026",
+    "dateISO": "2026-03-13",
+    "source": "https://defygrad.bearblog.dev/math-ai-say-no/",
+    "description": "math llms are really good at math. that sounds obvious but the implications are a bit alarming. ask a general purpose llm to calculate a lethal drug dose and…",
+    "words": 1804,
+    "minutes": 8
+  },
+  {
+    "slug": "studying-about-deepseek-v3",
+    "title": "DeepSeek V3 Deep Dive",
+    "date": "09 Mar, 2026",
+    "dateISO": "2026-03-09",
+    "source": "https://defygrad.bearblog.dev/studying-about-deepseek-v3/",
+    "description": "Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training…",
+    "words": 2718,
+    "minutes": 12
+  },
+  {
+    "slug": "simplifying-ddp",
+    "title": "simplifying DDP",
+    "date": "23 Feb, 2026",
+    "dateISO": "2026-02-23",
+    "source": "https://defygrad.bearblog.dev/simplifying-ddp/",
+    "description": "let us say you have a big library having a million books and you have a task to summarize them all. if you start doing it yourself - one by one - it will…",
+    "words": 993,
+    "minutes": 5
+  },
+  {
+    "slug": "ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard",
+    "title": "PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard",
+    "date": "20 Feb, 2026",
+    "dateISO": "2026-02-20",
+    "source": "https://defygrad.bearblog.dev/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/",
+    "description": "after spending thousands of hours of gpu training and an insane amount of dollars, we observe that though the model is technically correct at predicting the…",
+    "words": 3161,
+    "minutes": 14
+  },
+  {
+    "slug": "bradley-terry-model",
+    "title": "Bradley Terry Model",
+    "date": "15 Feb, 2026",
+    "dateISO": "2026-02-15",
+    "source": "https://defygrad.bearblog.dev/bradley-terry-model/",
+    "description": "The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear \"score.\" If you've ever wondered how sports teams are ranked…",
+    "words": 667,
+    "minutes": 3
+  },
+  {
+    "slug": "from-points-to-token-a-3d-learning-log",
+    "title": "From Points to Token: A 3D Learning Log - Part 1",
+    "date": "05 Jan, 2026",
+    "dateISO": "2026-01-05",
+    "source": "https://defygrad.bearblog.dev/from-points-to-token-a-3d-learning-log/",
+    "description": "will be covering PointNet and PointNet++ in this first part of the series (idk how many parts will it take lmao, 3 more maybe but let's see how it goes)",
+    "words": 4897,
+    "minutes": 22
+  },
+  {
+    "slug": "engineering-fully-local-retrieval-augmented-generation-systems",
+    "title": "Engineering Fully Local Retrieval-Augmented Generation Systems",
+    "date": "29 Nov, 2025",
+    "dateISO": "2025-11-29",
+    "source": "https://defygrad.bearblog.dev/engineering-fully-local-retrieval-augmented-generation-systems/",
+    "description": "Parametric Memory : It is the memory that is stored in model's parameters during pre-training or fine-tuning. Traditional LLMs rely exclusively on parametric…",
+    "words": 2107,
+    "minutes": 10
+  },
+  {
+    "slug": "sdxl-something",
+    "title": "SDXL something",
+    "date": "19 Nov, 2025",
+    "dateISO": "2025-11-19",
+    "source": "https://defygrad.bearblog.dev/sdxl-something/",
+    "description": "The autoencoder converts images into a compressed, abstract representation called latent space.",
+    "words": 748,
+    "minutes": 3
+  },
+  {
+    "slug": "lns",
+    "title": "Log Number System for Low Precision Training",
+    "date": "09 Oct, 2025",
+    "dateISO": "2025-10-09",
+    "source": "https://defygrad.bearblog.dev/lns/",
+    "description": "Ok first things first, what is LNS? LNS stands for \"Logarithmic Number System\" . So how does it store numbers and what makes it different than storing…",
+    "words": 1949,
+    "minutes": 9
+  },
+  {
+    "slug": "automatic-differentiation",
+    "title": "Automatic Differentiation",
+    "date": "29 Sep, 2025",
+    "dateISO": "2025-09-29",
+    "source": "https://defygrad.bearblog.dev/automatic-differentiation/",
+    "description": "The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.",
+    "words": 689,
+    "minutes": 3
+  },
+  {
+    "slug": "resnet-so-simple-your-grandma-could-understand",
+    "title": "ResNet, So Simple Your Grandma Could Understand",
+    "date": "18 Sep, 2025",
+    "dateISO": "2025-09-18",
+    "source": "https://defygrad.bearblog.dev/resnet-so-simple-your-grandma-could-understand/",
+    "description": "Before going deep into the architecture granny, let us recap the topic \"vanishing gradient descent\". when training a network using backprop and gradient…",
+    "words": 465,
+    "minutes": 2
+  },
+  {
+    "slug": "wolperts-no-free-lunch-theorem",
+    "title": "Wolpert's No Free Lunch Theorem",
+    "date": "16 Sep, 2025",
+    "dateISO": "2025-09-16",
+    "source": "https://defygrad.bearblog.dev/wolperts-no-free-lunch-theorem/",
+    "description": "The core idea behind the theorem is that no algorithm is universally better than other algorithms when performance is averaged across all the possible set of…",
+    "words": 268,
+    "minutes": 1
+  },
+  {
+    "slug": "improving-data-quality",
+    "title": "Improving Data Quality",
+    "date": "10 Mar, 2025",
+    "dateISO": "2025-03-10",
+    "source": "https://defygrad.bearblog.dev/improving-data-quality/",
+    "description": "So, you’ve got a dataset. Cool. But let’s be real—your data is probably a hot mess. Missing values, mixed data types, and categorical columns that look like…",
+    "words": 709,
+    "minutes": 3
+  },
+  {
+    "slug": "advanced-keras-techniques",
+    "title": "Advanced Keras Techniques",
+    "date": "22 Feb, 2025",
+    "dateISO": "2025-02-22",
+    "source": "https://defygrad.bearblog.dev/advanced-keras-techniques/",
+    "description": "In this blog, we’ll explore some advanced Keras techniques that can help you improve your model’s performance, flexibility, and efficiency during training…",
+    "words": 1195,
+    "minutes": 5
+  },
+  {
+    "slug": "data-and-concept-drift",
+    "title": "Data and Concept Drift",
+    "date": "26 Jan, 2025",
+    "dateISO": "2025-01-26",
+    "source": "https://defygrad.bearblog.dev/data-and-concept-drift/",
+    "description": "All models decay, none of them is eternal, the speed of decay may vary but it sure does happen. But what causes our models to get worse overtime? Well if the…",
+    "words": 645,
+    "minutes": 3
+  }
+]

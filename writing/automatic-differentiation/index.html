@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Automatic Differentiation — Habeeb</title>
+<meta name="description" content="The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/automatic-differentiation/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Automatic Differentiation">
+<meta property="og:description" content="The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/automatic-differentiation/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2025-09-29">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Automatic Differentiation">
+<meta name="twitter:description" content="The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Automatic Differentiation",
+  "description": "The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.",
+  "datePublished": "2025-09-29",
+  "url": "https://habibsnippets.github.io/writing/automatic-differentiation/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Automatic Differentiation</h1>
+      <p class="post-meta">
+        <time datetime="2025-09-29">29 Sep, 2025</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=automatic-differentiation-an-introduction>Automatic Differentiation - An Introduction</h2><p>The paper establishes AD as distinct differentiation method as compared to other methods like that of manual, numerical, symbolic differentiation.</p>
+<p>AD computes derivatives by applying chain rule systematically to elementary operations in a computer program and achieves machine level precision without any approximation error of numerical methods.</p>
+<p>It can be put like this:</p>
+<ul>
+<li>Symbolic differentiation can get messy.</li>
+<li>Numerical differentiation (finite differences) is approximate and suffers from floating-point errors.</li>
+<li>Automatic differentiation gives exact derivatives up to machine precision, efficiently.</li>
+</ul>
+<p>There are two primary modes of this - forward and backward mode.</p>
+<p>Since we are explaining it in the most basic terms let us use a story!</p>
+<p>Let us say we have a machine that takes in 2 inputs - x and y. The machine has to do the following:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002C;</mo><mi>y</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="false">&#x00028;</mo><mi>x</mi><mi>&#x000B7;</mi><mi>y</mi><mo stretchy="false">&#x00029;</mo></mrow></math><p>Now looking at the above let us assume that our machine is made up of three parts :</p>
+<ul>
+<li>Gear A: That is responsible for adding the two inputs and produce u1</li>
+<li>Gear B: That is responsible for multiplying the two inputs and produce u2</li>
+<li>Gear C: Responsible for multiplying the two (u1 and u2) and then giving out the final result as the output</li>
+</ul>
+<p>Let for the simplicity x = 2 and y = 3</p>
+<h3 id=forward-pass>Forward Pass:</h3><ol>
+<li>Gear A comes into the picture:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>1</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi><mo>&#x0003D;</mo><mn>2</mn><mo>&#x0002B;</mo><mn>3</mn><mo>&#x0003D;</mo><mn>5</mn></mrow></math><ol start="2">
+<li>Gear B comes into the pictures:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002A;</mo><mi>y</mi><mo>&#x0003D;</mo><mn>2</mn><mo>&#x0002A;</mo><mn>3</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><ol start="3">
+<li>Finally Gear C comes into play to produce the final output:</li>
+</ol>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo>&#x0003D;</mo><mi>u</mi><mn>1</mn><mo>&#x0002A;</mo><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mn>5</mn><mo>&#x0002A;</mo><mn>6</mn><mo>&#x0003D;</mo><mn>30</mn></mrow></math><p>The machine in its forward pass has produced 30 as its final output!</p>
+<h3 id=backward-pass-backpropagation>Backward Pass: (Backpropagation)</h3><p>Think of it like this, the final output f asks its subjects - the inputs - x and y, how much did each of you contribute to me becoming 30?</p>
+<p>Now this message will travel backwards from gear C to gear A and B.</p>
+<p>For gear C the equation was like this:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo>&#x0003D;</mo><mi>u</mi><mn>1</mn><mo>&#x0002A;</mo><mi>u</mi><mn>2</mn></mrow></math><p>C knows that if u1 changes then f changes by u2 = 6 (basic chain rule):</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><msub><mi>u</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn></mrow></math><p>Similarly if u2 changes then f changes by u1 = 5:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><msub><mi>u</mi><mrow><mn>2</mn></mrow></msub></mrow></mfrac><mo>&#x0003D;</mo><mn>5</mn></mrow></math><p>So the Gear C will send this message to its previous gears A and B:</p>
+<p>Message to A : "Your importance is 6."
+Message to B : "Your importance is 5."</p>
+<p>Now its time for Gear A!</p>
+<p>Gear A knows that</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>1</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002B;</mo><mi>y</mi></mrow></math><p>Gear A knows that if x changes by 1 then u1 also changes by 1 and same for y, if it changes by 1 then also u1 changes by 1.</p>
+<p>So the total contributions will be as follows:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>6</mn><mi>&#x000B7;</mi><mn>1</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>6</mn><mi>&#x000B7;</mi><mn>1</mn><mo>&#x0003D;</mo><mn>6</mn></mrow></math><p>Now coming to Gear B:</p>
+<p>Gear B knows that:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>u</mi><mn>2</mn><mo>&#x0003D;</mo><mi>x</mi><mo>&#x0002A;</mo><mi>y</mi></mrow></math><p>If x changes by 1 then u2 changes by y = 3 and if y changes by 1 then u2 changes by x = 2.</p>
+<p>So the total contributions are as follows:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>5</mn><mi>&#x000B7;</mi><mn>3</mn><mo>&#x0003D;</mo><mn>15</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0002B;</mo><mo>&#x0003D;</mo><mn>5</mn><mi>&#x000B7;</mi><mn>2</mn><mo>&#x0003D;</mo><mn>10</mn></mrow></math><p>Now for the final contributions:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>x</mi></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn><mo>&#x0002B;</mo><mn>15</mn><mo>&#x0003D;</mo><mn>21</mn></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mo>&#x02202;</mo><mi>f</mi></mrow><mrow><mo>&#x02202;</mo><mi>y</mi></mrow></mfrac><mo>&#x0003D;</mo><mn>6</mn><mo>&#x0002B;</mo><mn>10</mn><mo>&#x0003D;</mo><mn>16</mn></mrow></math><h3 id=conclusions>Conclusions:</h3><p>By going through all of this we came to know each function can be broken down into small operations and the forward pass computes the intermediate values of all the steps that comes in between. The backward pass computes the gradients by propagating values backwards using the chain rule. The chain rule is the core of everything. Each input variable has some contribution to the output along all the paths  and that's why in backpropagation we sum the contributions from the different paths.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/lns/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Log Number System for Low Precision Training</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/resnet-so-simple-your-grandma-could-understand/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">ResNet, So Simple Your Grandma Could Understand</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

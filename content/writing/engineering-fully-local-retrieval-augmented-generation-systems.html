@@ -1,0 +1,167 @@
+<!-- Imported from https://defygrad.bearblog.dev/engineering-fully-local-retrieval-augmented-generation-systems/ on 2026-10-24. Edit freely. -->
+<h2 id=the-paradigm-of-localized-retrieval-augmented-generation>The Paradigm of Localized Retrieval-Augmented Generation</h2><p>Let's first understand what is parametric memory and non-parametric memory.</p>
+<p><em>Parametric Memory</em>: It is the memory that is stored in model's parameters during pre-training or fine-tuning. Traditional LLMs rely exclusively on parametric memory—the knowledge encoded within the model's weights during pre-training. While vast, this memory is static, prone to "hallucinations" (factually incorrect generations), and computationally expensive to update.</p>
+<p><em>Non-Parametric Memory</em>:This is knowledge stored outside the model, usually in vector databases (FAISS), document stores, knowledge graphs etc.</p>
+<p>RAG augments this parametric memory with non-parametric memory!</p>
+<p>RAG adds another layer of memory on top of what the model already knows. This new layer is non-parametric memory — basically an external, searchable database where all your real facts live.</p>
+<p>During inference, RAG looks into this database, pulls out the most relevant pieces of information, and then slips them into the model’s prompt. Because of this, the model isn’t just guessing, it’s grounding its answer in actual, verifiable data.</p>
+<p>This setup creates a clean separation of duties:
+the model handles the reasoning and writing part,while the retrieval system takes care of storing information and fetching the right pieces whenever needed.</p>
+<h3 id=local-rag>Local RAG</h3><p>Why local RAG? When all the processes of ingestion, embedding, retrieval, and generation run on your own machine or server, you unlock three huge advantages that cloud-based RAG simply can’t match.</p>
+<ol>
+<li>Your data stays yours (Privacy + Sovereignty)</li>
+</ol>
+<p>If you're dealing with things like internal financial reports, unpublished research, or anything remotely confidential, sending that data to external APIs is a big no-go. With Local RAG, nothing leaves your system. Everything stays inside your own encrypted environment, giving you full control and zero exposure.</p>
+<ol start="2">
+<li>No lag. No outages. No “retry later.” (Latency + Reliability)</li>
+</ol>
+<p>Relying on cloud services means relying on the network—latency spikes, dropped connections, or random service outages. When everything runs locally, your response time is limited only by your hardware. It’s predictable, stable, and consistent.</p>
+<ol start="3">
+<li>Costs stop scaling with tokens (Cost Predictability)</li>
+</ol>
+<p>API-based RAG becomes expensive fast because you're billed for every token sent or generated. Local models flip this:
+you pay once for hardware or a fixed cloud instance, and you can run as many queries as you want. For high-volume or budget-sensitive applications, this is a game changer.</p>
+<h2 id=understanding-the-basic-framework-transformers-vectors-and-quantization>Understanding the basic framework - Transformers, Vectors and Quantization.</h2><p>Before you can build a serious, fully local RAG pipeline, you need to understand the math and the architecture behind each component.</p>
+<h3 id=attention-is-all-you-need>Attention is All You Need</h3><p>The Transformer fundamentally changed deep learning by removing recurrence (RNNs/LSTMs) and replacing it with pure attention. Instead of processing tokens one-by-one, Transformers look at all tokens at once and learn global relationships.</p>
+<p>The core operation of your RAG system should be to retrieve accurately <em>Scaled Dot-Product Attention</em>:</p>
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>Attention</mtext><mo stretchy="false">&#x00028;</mo><mi>Q</mi><mo>&#x0002C;</mo><mi>K</mi><mo>&#x0002C;</mo><mi>V</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mtext>softmax</mtext><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mfrac><mrow><mi>Q</mi><msup><mi>K</mi><mrow><mi>T</mi></mrow></msup></mrow><mrow><msqrt><mrow><msub><mi>d</mi><mi>k</mi></msub></mrow></msqrt></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mi>V</mi></mrow></math><h3 id=vector-space-semantics>Vector Space Semantics</h3><p>So retrieval in RAG works by converting your text chunks into vectors in a high dimensional space.
+For our project we will use all-MiniLM-L6-v2 model that uses Sentence-BERT (SBERT), which takes BERT and restructures it into a siamese network to produce sentence-level embeddings that actually reflect semantic similarity.</p>
+<blockquote>
+<p>Sentence BERT 101: Let us go through the differences between BERT and Sentence BERT and understand what is what!
+BERT is trained using Masked Language Modeling (MLM) and Next Sentence Prediction (NSP). It’s great at token-level understanding, classification, and QA tasks.
+But here’s the catch:
+BERT outputs a vector for every token, plus a [CLS] token. The [CLS] embedding is not trained to represent the meaning of a full sentence.
+Because of that, cosine similarity between two BERT [CLS] vectors is basically meaningless.</p>
+</blockquote>
+<p><em>Sentence-BERT</em>: What Changes?
+SBERT starts from BERT (or RoBERTa, etc.) but introduces two critical improvements:</p>
+<ol>
+<li>A pooling layer</li>
+</ol>
+<p>Instead of relying on the raw [CLS] token, SBERT does:</p>
+<p>Mean pooling,max pooling or specially learned pooling.
+This produces a single fixed-size embedding for the entire sentence.</p>
+<ol start="2">
+<li>Fine-tuning for similarity</li>
+</ol>
+<p>SBERT is trained on sentence pairs using: Contrastive loss and triplet loss.</p>
+<p>With the help of all of these techniques, semantically similar sentences end up close together, and unrelated ones move farther apart in vector space.</p>
+<p>So the difference becomes simple:</p>
+<blockquote>
+<p>BERT just understands sentences while SBERT understands as well as  arranges sentences into a geometry where distances actually mean something</p>
+</blockquote>
+<p>Why the Siamese Architecture Matters?</p>
+<p>SBERT uses a siamese network: two or more identical encoder branches with shared weights. Each sentence in a training pair flows through its own path.</p>
+<p>The training objectives enforce:</p>
+<p>Positive pairs: pull embeddings closer</p>
+<p>Negative pairs: push embeddings apart</p>
+<p>This directly teaches the model that cosine similarity ≈ semantic similarity and that is exactly what nearest-neighbor retrieval needs.</p>
+<p>Another big advantage:
+At inference time, you only encode a sentence once. After that, you compare embeddings using cheap vector operations—no need to run BERT cross-attention over every document.</p>
+<h4 id=why-sbert-is-a-better-option-for-rag>Why SBERT is a better option for RAG?</h4><p>For RAG systems we need embeddings that are stable, well-spread and most importantly semantically meaningful. SBERT does all of that. Also while using SBERT the process is computationally efficient for large corpora as you embed documents once, store them, and retrieval is just fast similarity search, not repeated cross‑attention between query and every document.</p>
+<p>Normal BERT on the other hand suffer from issues like:</p>
+<ol>
+<li>Anisotropy (embeddings clump into a narrow cone in vector space).</li>
+<li>Randomly unrelated sentences often look too similar in cosine space.</li>
+</ol>
+<h3 id=quantization-and-model-compression>Quantization and Model Compression:</h3><p>Running LLMs on constrained hardware necessitates quantization - reducing the precision of the model's weights from standard floating-point formats to lower-bit representations.</p>
+<p>In this project we will implement NF4 (Normal Float 4), a data type introduced by the QLoRA research. NF4 is information-theoretically optimal for weights normally distributed around zero, which is typical for neural networks.</p>
+<h2 id=data-ingestion>Data Ingestion:</h2><p>The adage "Garbage In, Garbage Out" is axiomatic in RAG. A RAG system retrieves from an external knowledge base; if that knowledge base is outdated, inconsistent, poorly chunked, or irrelevant, the retrieved context will mislead the LLM, causing wrong or hallucinated answers. Even with a strong retriever and powerful LLM, feeding it “garbage” (bad documents, bad chunking, missing key sources) yields “garbage” answers, because RAG does not create new ground truth—it amplifies whatever is in the underlying data.​</p>
+<p>For this project we are using a PDF. So, there is a problem.</p>
+<blockquote>
+<p>How PDFs store data, a high level understanding: Each page has a “content stream” that is essentially a mini graphics program: “set font F, size 12; move to (x, y); draw text ‘Hello’; draw line here; place image there,” etc. Text is usually just glyphs placed at coordinates, not a continuous string with natural reading order.</p>
+</blockquote>
+<p>So the PDF’s primary goal is: “given this file, any conforming viewer can render the same visual page,” not “given this file, a program can easily recover clean, ordered text with semantics.”</p>
+<p>The code will deal with on how we will use the PDF of "Attention Is All You Need" research paper as a source for data ingestion.</p>
+<h2 id=semantic-segmentation-its-time-to-chunk>Semantic Segmentation - its time to chunk</h2><p>After extracting the linear stream of texts we need to segment them into discrete units (chunks). The model that we are using in this project "all-MiniLM-L6-v2" has a max sequence length of 256 tokens so if pass the entirety of the words we will face the problem of truncation because of which 90% of our information will be disregarded.</p>
+<h3 id=some-of-the-chunking-strategies-used-are-as-follows>Some of the chunking strategies used are as follows:</h3><ol>
+<li>Fixed Size:
+Split text into equal-sized segments (for example, 500 characters or 256 tokens), regardless of semantics.</li>
+</ol>
+<p><img src="/assets/writing/engineering-fully-local-retrieval-augmented-generation-systems/01-Screenshot-from-2025-11-29-12-49-17.png" alt="Fixed Size" width="913" height="413" loading="lazy" decoding="async"></p>
+<ol start="2">
+<li>Recursive Character Splitting:
+Split text hierarchically, first by paragraphs, then by sentences, then by characters, until chunks fit within a size limit.</li>
+</ol>
+<p><img src="/assets/writing/engineering-fully-local-retrieval-augmented-generation-systems/02-Screenshot-from-2025-11-29-17-41-10.png" alt="Recursive Chunking" width="631" height="426" loading="lazy" decoding="async"></p>
+<ol start="3">
+<li>Semantic Chunking:
+Use embeddings to segment text by topic similarity. Adjacent sentences that are semantically close are grouped.</li>
+</ol>
+<p><img src="/assets/writing/engineering-fully-local-retrieval-augmented-generation-systems/03-Screenshot-from-2025-11-29-17-43-36.png" alt="Semantic Chunking" width="1113" height="249" loading="lazy" decoding="async"></p>
+<ol start="4">
+<li><p>Language Based Chunking:
+Split text using linguistic boundaries (sentences, paragraphs). Tools like spaCy, NLTK, or Hugging Face tokenizers are common to be used.
+<img src="/assets/writing/engineering-fully-local-retrieval-augmented-generation-systems/04-Screenshot-from-2025-11-29-17-46-57.png" alt="LB Chunking" width="877" height="285" loading="lazy" decoding="async"></p>
+</li>
+<li><p>Context Aware Chunking:
+Context-aware chunking is an adaptive method for splitting documents into chunks that preserves meaningful structure and context, rather than just breaking text at fixed intervals. It uses document structure (like section headers), metadata (such as author or date), and domain-specific rules (for example, keeping entire code functions together) to create chunks that are more semantically coherent and useful for downstream tasks like retrieval in a RAG system.</p>
+</li>
+</ol>
+<p><img src="/assets/writing/engineering-fully-local-retrieval-augmented-generation-systems/05-Screenshot-from-2025-11-29-17-50-37.png" alt="CA Chunking" width="873" height="277" loading="lazy" decoding="async"></p>
+<blockquote>
+<p>The industry standard for processing prose and academic text is the Recursive Character Text Splitter.</p>
+</blockquote>
+<p>So for the same reasons we will be using the recursive character text splitting in this project.</p>
+<p>Read more about the techniques of chunking (<a href='https://community.databricks.com/t5/technical-blog/the-ultimate-guide-to-chunking-strategies-for-rag-applications/ba-p/113089' target='_blank'>here</a>)</p>
+<h3 id=chunk-size-and-overlap>Chunk Size and Overlap</h3><p>When you’re preparing long documents for a RAG system, you can’t just feed them in as a single block. You need to break the text into smaller, meaningful pieces—chunks—so they can be embedded, stored, and retrieved efficiently.
+Two hyperparameters control how this splitting works: chunk size and chunk overlap.</p>
+<p><em>Chunk Size</em>:
+Chunk size defines how big each chunk is. You usually measure it in:</p>
+<ul>
+<li><p>characters (e.g., 500–1000 characters), or</p>
+</li>
+<li><p>tokens (e.g., 200–300 tokens)</p>
+</li>
+</ul>
+<p>Larger chunk size means we will able to capture more context but there will be less precision and smaller chunk size will allow us to capture less context but with more precision. So at the end of the day it is a trade-off between precision and capturing the context of the documents.</p>
+<p><em>Chunk Overlap</em>: Chunk overlap defines how much text is shared between consecutive chunks. It’s measured in the same unit as chunk size (characters or tokens).</p>
+<p>It is important as it prevents awkward boundary cuts by making sure that:sentences aren’t split right in the middle, definitions or formulas that span a boundary stay intact and  both the retriever and the LLM see complete, coherent ideas.</p>
+<p>Example (characters)</p>
+<ul>
+<li><p>Chunk size = 1000, overlap = 200</p>
+</li>
+<li><p>Chunk 1 → characters 0–999</p>
+</li>
+<li><p>Chunk 2 → characters 800–1799</p>
+</li>
+<li><p>Chunk 3 → characters 1600–2599</p>
+</li>
+</ul>
+<p>Each new chunk repeats the last 200 characters of the previous one.</p>
+<p>Why These Hyperparameters Matter for RAG??</p>
+<p>Chunk size controls the trade-off between context and precision while the overlap guarantees continuity so the model doesn’t lose information at boundaries.</p>
+<blockquote>
+<p>The usual strategy is simple:Pick a chunk size that fits comfortably within your embedding model’s token limit,then add a moderate overlap (around 10–30% of chunk size) to preserve context across boundaries.
+This combination gives you clean, self-contained chunks that retrieve well and ground the LLM’s answers reliably.</p>
+</blockquote>
+<h2 id=vector-indexing-and-retrieval-system>Vector Indexing and Retrieval System:</h2><p>A RAG system is only as good as its retrieval layer. Once we’ve chunked the document, we need a way to turn each chunk into a vector, store those vectors efficiently, and quickly find the most relevant ones when the user asks a question.
+This is where embeddings, FAISS, and similarity search come into play.</p>
+<h3 id=generating-embeddings>Generating Embeddings:</h3><p>To convert text into machine-understandable vectors, we use the sentence-transformers library with the model all-MiniLM-L6-v2.
+This model produces a 384-dimensional dense embedding for any given text.</p>
+<h3 id=faiss-vector-database>FAISS Vector Database:</h3><p>Once we’ve generated embeddings for every chunk in the document, we need a fast, reliable way to store and search them.
+For this, we use FAISS (Facebook AI Similarity Search)—the industry-standard library for vector search.</p>
+<h4 id=working-of-faiss>Working of FAISS:</h4><ol>
+<li><p>Indexing: You add your precomputed vectors (e.g., from all-MiniLM) to a FAISS index, which organizes them for fast search.​</p>
+</li>
+<li><p>Searching: When you want to find similar items, you pass a query vector to FAISS, and it returns the most similar vectors from the index, usually as a list of IDs and similarity scores.​</p>
+</li>
+<li><p>Efficiency: FAISS uses advanced algorithms like k-means clustering, inverted files, and hierarchical navigable small world (HNSW) graphs to speed up searches, even on massive datasets.​​</p>
+</li>
+<li><p>Hardware optimization: It leverages multi-core CPUs and GPUs for parallel processing, reducing search time and latency</p>
+</li>
+</ol>
+<h4 id=various-indexes-provided-by-faiss>Various indexes provided by FAISS:</h4><p>FAISS provides several types of indexes, each optimized for different trade-offs in dataset size, speed, accuracy, and memory usage. Some of them are IndexFlatL2, IndexFlatIP, IndexIVFFlat, IndexHNSW etc.</p>
+<p>Usually for small datasets and for getting an exact search out of the corpus we use IndexFlatL2.</p>
+<blockquote>
+<p>IndexFlatL2:“Flat” - no clustering, no approximation; FAISS stores all vectors as-is. Search method - brute-force computation of L2 (Euclidean) distance between the query vector and every vector in the index.</p>
+</blockquote>
+<h2 id=using-phi-3-mini-4k-instruct-for-local-rag>Using Phi-3-mini-4k-instruct for Local RAG</h2><p>After retrieval, we need a lightweight, fast LLM for answering queries using the retrieved context.</p>
+<p>A step by step implementation can be found (<a href='https://github.com/habibsnippets/Local-RAG-Pipeline'>here</a>)</p>
+<p>Resources:</p>
+<ul>
+<li>(<a href='https://www.firecrawl.dev/blog/best-chunking-strategies-rag-2025'>Best chunking strategies - firecrawl</a>)</li>
+<li>(<a href='https://www.pinecone.io/learn/series/faiss/faiss-tutorial/'>FAISS</a>)</li>
+<li>(<a href='https://medium.com/@devbytes/similarity-search-with-faiss-a-practical-guide-to-efficient-indexing-and-retrieval-e99dd0e55e8c'>Similarity search with FAISS</a>)</li>
+<li>(<a href='https://medium.com/@advaitss11/rag-without-langchain-and-llamaindex-c1f70425dbe7'>RAG without Langchain and Llamaindex</a>)</li>
+</ul>

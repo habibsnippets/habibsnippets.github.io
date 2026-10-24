@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CNN Build - Weight Init Rabbit Hole — Habeeb</title>
+<meta name="description" content="mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/cnn-build-weight-init-rabbit-hole/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CNN Build - Weight Init Rabbit Hole">
+<meta property="og:description" content="mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/cnn-build-weight-init-rabbit-hole/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/cnn-build-weight-init-rabbit-hole/01-tanh.png">
+<meta property="article:published_time" content="2026-03-18">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="CNN Build - Weight Init Rabbit Hole">
+<meta name="twitter:description" content="mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "CNN Build - Weight Init Rabbit Hole",
+  "description": "mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is…",
+  "datePublished": "2026-03-18",
+  "url": "https://habibsnippets.github.io/writing/cnn-build-weight-init-rabbit-hole/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/writing/cnn-build-weight-init-rabbit-hole/01-tanh.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>CNN Build - Weight Init Rabbit Hole</h1>
+      <p class="post-meta">
+        <time datetime="2026-03-18">18 Mar, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=context-what-i-was-trying-to-do>Context — What I was trying to do</h2><p>mid implementing cnn from scratch , got to weight init, hit the question which to use - He or Xavier, also why to use them in the first place and how ReLU is related to all of this? might sound naive, but was a new thing for me</p>
+<h2 id=finding-1-relu-halves-your-invariance>Finding 1 - ReLU halves your invariance</h2><p>let us say you have an input signal z that is a random variable and it has a symmetric distribution and centered at zero (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>z</mi><mi>&#x0007E;</mi><mi>&#x1D4A9;</mi><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo>&#x0002C;</mo><msup><mi>&#x003C3;</mi><mn>2</mn></msup><mo stretchy="false">&#x00029;</mo></mrow></math>) , as we know that ReLU(x) = max (0,x) so the output will be just the positive side of the input as ReLU will act as a binary gate that will kill the negative input and since it is symmetrical distributed ~ 50% of the input signal will be gone from the output. so it means that as the variance is dropping by half at every layer the distribution is also shrinking towards zero. thus if the variance of the activation drops the gradients that will be calculated during the backprop will be very small -> no training at all. thus to encounter this halving effect He initialisation was proposed which said that instead of initializing weights with a variance of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></math> (where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>n</mi></mrow></math> is the number of input nodes), He Initialization uses:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>Var</mtext><mo stretchy="false">&#x00028;</mo><mi>W</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></math></p>
+<p>the "2" in the numerator is specifically designed to cancel out the "1/2" introduced by the ReLU, keeping the variance stable (near 1.0) across hundreds of layers.</p>
+<h2 id=why-not-xavier>why not Xavier</h2><p>before He came into existence people used Xavier(Glorot) initialisation but the network still kept on dying in the deeper layers. this was because of the fact that :</p>
+<blockquote>
+<p>xavier assumes that the activation functions were just a pass through for the sake of variance</p>
+</blockquote>
+<p>look at the tanh function for instance :</p>
+<p><img src="/assets/writing/cnn-build-weight-init-rabbit-hole/01-tanh.png" alt="tanh" width="976" height="576" loading="lazy" decoding="async"></p>
+<p>it looks linear at 0,0 (straight line) and because of it being straight there is no change in the variance of the signal that passes through it. but when you swap tanh with ReLU which looks like a hinge and throws away 50% of the distribution.</p>
+<p>if you use Xavier (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><mi>W</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mn>1</mn><mo>&#x0002F;</mo><mi>n</mi></mrow></math>), the variance of the signal before the ReLU (the <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>z</mi></mrow></math> value) is exactly 1.0.</p>
+<ul>
+<li>Layer 1: You start with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1.0</mn></mrow></math>. ReLU cuts it to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.5</mn></mrow></math>.</li>
+<li>Layer 2: You start with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.5</mn></mrow></math>. The weights preserve it, but ReLU cuts it to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.25</mn></mrow></math>.</li>
+<li>Layer 3: You start with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.25</mn></mrow></math>. ReLU cuts it to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.125</mn></mrow></math>.</li>
+</ul>
+<p>Mathematically, the variance at layer <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>L</mi></mrow></math> is:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>Var</mtext><mo stretchy="false">&#x00028;</mo><mi>L</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mtext>Var</mtext><mo stretchy="false">&#x00028;</mo><mn>0</mn><mo stretchy="false">&#x00029;</mo><mi>&#x000B7;</mi><msup><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mi>L</mi></msup></mrow></math></p>
+<h2 id=why-he-initialization-wins>why "He Initialization" wins:</h2><p>He simply looked at that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x00028;</mo><mn>1</mn><mo>&#x0002F;</mo><mn>2</mn><mo stretchy="false">&#x00029;</mo></mrow></math> and said</p>
+<blockquote>
+<p>if the activation halves the variance, we will make the weights double it.</p>
+</blockquote>
+<p>Xavier weight variance: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></math></p>
+<p>He weight variance: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mi>n</mi></mrow></mfrac></mrow></math></p>
+<p>by adding that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>2</mn></mrow></math> in the numerator, the forward pass math becomes:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><mi>z</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mi>n</mi><mi>&#x000B7;</mi><mrow><mo stretchy="true" fence="true" form="prefix">&#x00028;</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mi>n</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">&#x00029;</mo></mrow><mi>&#x000B7;</mi><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><msub><mi>a</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi></mrow></msub><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mn>2</mn><mi>&#x000B7;</mi><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><msub><mi>a</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi></mrow></msub><mo stretchy="false">]</mo></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><mi>a</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mi>&#x000B7;</mi><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><mi>z</mi><mo stretchy="false">]</mo><mo>&#x0003D;</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mi>&#x000B7;</mi><mo stretchy="false">&#x00028;</mo><mn>2</mn><mi>&#x000B7;</mi><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><msub><mi>a</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi></mrow></msub><mo stretchy="false">]</mo><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mi>V</mi><mi>a</mi><mi>r</mi><mo stretchy="false">[</mo><msub><mi>a</mi><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mi>v</mi></mrow></msub><mo stretchy="false">]</mo></mrow></math>The <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>2</mn></mrow></math> and the <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1</mn><mo>&#x0002F;</mo><mn>2</mn></mrow></math> cancel out perfectly.</p>
+<p>the signal stays at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1.0</mn></mrow></math> forever, no matter how deep the network is.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/zero-to-ros2-building-pubsub-from-scratch/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">Zero to ROS2 - Building pub/sub from scratch</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/understanding-zero/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">understanding ZeRO!</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

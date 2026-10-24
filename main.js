@@ -14,38 +14,9 @@
 
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* The real writing archive, pulled from defygrad.bearblog.dev. */
-  var POSTS = [
-    { title: "Continual Learning", date: "22 Sep, 2026", iso: "2026-09-22", url: "https://defygrad.bearblog.dev/continual-learning/", tag: "engineering" },
-    { title: "1 hour sprint approach", date: "10 Sep, 2026", iso: "2026-09-10", url: "https://defygrad.bearblog.dev/1-hour-sprint-approach/", tag: "reflection" },
-    { title: "go with your gut feeling", date: "02 Sep, 2026", iso: "2026-09-02", url: "https://defygrad.bearblog.dev/go-with-your-gut-feeling/", tag: "reflection" },
-    { title: "you have got nothing to lose", date: "27 Aug, 2026", iso: "2026-08-27", url: "https://defygrad.bearblog.dev/you-have-got-nothing-to-lose/", tag: "reflection" },
-    { title: "when will it make sense", date: "26 Aug, 2026", iso: "2026-08-26", url: "https://defygrad.bearblog.dev/when-will-it-make-sense/", tag: "reflection" },
-    { title: "don't half ass it", date: "24 Aug, 2026", iso: "2026-08-24", url: "https://defygrad.bearblog.dev/dont-half-ass-it/", tag: "reflection" },
-    { title: "you are the competition", date: "22 Aug, 2026", iso: "2026-08-22", url: "https://defygrad.bearblog.dev/you-are-the-competition/", tag: "reflection" },
-    { title: "this feels weird", date: "20 Aug, 2026", iso: "2026-08-20", url: "https://defygrad.bearblog.dev/this-feels-weird/", tag: "reflection" },
-    { title: "The Idea of Chaining", date: "13 Jul, 2026", iso: "2026-07-13", url: "https://defygrad.bearblog.dev/the-idea-of-chaining/", tag: "engineering" },
-    { title: "dataloaders part 1", date: "13 Jul, 2026", iso: "2026-07-13", url: "https://defygrad.bearblog.dev/dataloaders-part-1/", tag: "engineering" },
-    { title: "The T4 Ceiling: Why Vanilla VLMs Fail on Video", date: "09 Apr, 2026", iso: "2026-04-09", url: "https://defygrad.bearblog.dev/the-t4-ceiling-why-vanilla-vlms-fail-on-video/", tag: "engineering" },
-    { title: "Zero to ROS2 - Building pub/sub from scratch", date: "02 Apr, 2026", iso: "2026-04-02", url: "https://defygrad.bearblog.dev/zero-to-ros2-building-pubsub-from-scratch/", tag: "engineering" },
-    { title: "CNN Build - Weight Init Rabbit Hole", date: "18 Mar, 2026", iso: "2026-03-18", url: "https://defygrad.bearblog.dev/cnn-build-weight-init-rabbit-hole/", tag: "engineering" },
-    { title: "understanding ZeRO!", date: "17 Mar, 2026", iso: "2026-03-17", url: "https://defygrad.bearblog.dev/understanding-zero/", tag: "engineering" },
-    { title: "i tried to teach a math ai to say no", date: "13 Mar, 2026", iso: "2026-03-13", url: "https://defygrad.bearblog.dev/math-ai-say-no/", tag: "engineering" },
-    { title: "DeepSeek V3 Deep Dive", date: "09 Mar, 2026", iso: "2026-03-09", url: "https://defygrad.bearblog.dev/studying-about-deepseek-v3/", tag: "engineering" },
-    { title: "simplifying DDP", date: "23 Feb, 2026", iso: "2026-02-23", url: "https://defygrad.bearblog.dev/simplifying-ddp/", tag: "engineering" },
-    { title: "PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard", date: "20 Feb, 2026", iso: "2026-02-20", url: "https://defygrad.bearblog.dev/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/", tag: "engineering" },
-    { title: "Bradley Terry Model", date: "15 Feb, 2026", iso: "2026-02-15", url: "https://defygrad.bearblog.dev/bradley-terry-model/", tag: "engineering" },
-    { title: "From Points to Token: A 3D Learning Log - Part 1", date: "05 Jan, 2026", iso: "2026-01-05", url: "https://defygrad.bearblog.dev/from-points-to-token-a-3d-learning-log/", tag: "engineering" },
-    { title: "Engineering Fully Local Retrieval-Augmented Generation Systems", date: "29 Nov, 2025", iso: "2025-11-29", url: "https://defygrad.bearblog.dev/engineering-fully-local-retrieval-augmented-generation-systems/", tag: "engineering" },
-    { title: "SDXL something", date: "19 Nov, 2025", iso: "2025-11-19", url: "https://defygrad.bearblog.dev/sdxl-something/", tag: "engineering" },
-    { title: "Log Number System for Low Precision Training", date: "09 Oct, 2025", iso: "2025-10-09", url: "https://defygrad.bearblog.dev/lns/", tag: "engineering" },
-    { title: "Automatic Differentiation", date: "29 Sep, 2025", iso: "2025-09-29", url: "https://defygrad.bearblog.dev/automatic-differentiation/", tag: "engineering" },
-    { title: "ResNet, So Simple Your Grandma Could Understand", date: "18 Sep, 2025", iso: "2025-09-18", url: "https://defygrad.bearblog.dev/resnet-so-simple-your-grandma-could-understand/", tag: "engineering" },
-    { title: "Wolpert's No Free Lunch Theorem", date: "16 Sep, 2025", iso: "2025-09-16", url: "https://defygrad.bearblog.dev/wolperts-no-free-lunch-theorem/", tag: "engineering" },
-    { title: "Improving Data Quality", date: "10 Mar, 2025", iso: "2025-03-10", url: "https://defygrad.bearblog.dev/improving-data-quality/", tag: "engineering" },
-    { title: "Advanced Keras Techniques", date: "22 Feb, 2025", iso: "2025-02-22", url: "https://defygrad.bearblog.dev/advanced-keras-techniques/", tag: "engineering" },
-    { title: "Data and Concept Drift", date: "26 Jan, 2025", iso: "2025-01-26", url: "https://defygrad.bearblog.dev/data-and-concept-drift/", tag: "engineering" }
-  ];
+  /* The writing archive list is generated from content/writing/posts.json
+     (see tools/build-writing.mjs) into writing/posts.js. */
+  var POSTS = (typeof window !== "undefined" && window.WRITING_POSTS) || [];
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
@@ -1123,6 +1094,8 @@
     var wchips = $$("[data-wfilter]");
     if (!list || !POSTS.length) return;
 
+    if (search) search.placeholder = "Search " + POSTS.length + " posts…";
+
     var PREVIEW = 8;
     var state = { tag: "all", query: "", expanded: false };
 
@@ -1148,8 +1121,11 @@
         var a = document.createElement("a");
         a.className = "post-link";
         a.href = post.url;
-        a.target = "_blank";
-        a.rel = "noopener";
+        /* Local posts stay in the tab; outbound links open a new one. */
+        if (/^https?:/i.test(post.url)) {
+          a.target = "_blank";
+          a.rel = "noopener";
+        }
 
         var date = document.createElement("span");
         date.className = "post-date";

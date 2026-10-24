@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeepSeek V3 Deep Dive — Habeeb</title>
+<meta name="description" content="Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/studying-about-deepseek-v3/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DeepSeek V3 Deep Dive">
+<meta property="og:description" content="Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/studying-about-deepseek-v3/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2026-03-09">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="DeepSeek V3 Deep Dive">
+<meta name="twitter:description" content="Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "DeepSeek V3 Deep Dive",
+  "description": "Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training…",
+  "datePublished": "2026-03-09",
+  "url": "https://habibsnippets.github.io/writing/studying-about-deepseek-v3/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>DeepSeek V3 Deep Dive</h1>
+      <p class="post-meta">
+        <time datetime="2026-03-09">09 Mar, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>12 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=deepseek-v3-engineering-deep-dive>DeepSeek V3 - Engineering Deep Dive</h2><p>Large language models have hit a wall. Not a intelligence wall, but a physical one—memory bandwidth, GPU utilization, and the sheer economics of training. While everyone was busy scaling up parameters and throwing more compute at the problem, DeepSeek asked a different question: <em>what if the bottleneck isn't the model size, but how we move data around?</em> This post is a technical walkthrough of how DeepSeek V3 rethinks transformer architecture from first principles, not by making the model bigger, but by making every byte of memory and every FLOP count.</p>
+<h3 id=1-architecture-mla>1. Architecture - MLA</h3><p>At the time of inference the main bottleneck is loading the KV Cache which poses a memory bandwith and not compute. If we use standard MHA - the size of the KV Cache will be huge and it will kill the throughput.</p>
+<h4 id=the-innovation>The innovation:</h4><p>The paper uses multi head latent attention in which the KV Cache is compressed into a latent vector (low rank compression).</p>
+<p><strong>Maths</strong>
+Instead of storing the d-dim keys and values we project them into a much smaller latent space</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>h</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>W</mi><mrow><mi>D</mi><mi>K</mi><mi>V</mi></mrow></msub><mi>&#x000B7;</mi><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup></mrow></math></p>
+<p>Example:</p>
+<p>Let us say you have a hidden dimension of 512. You store a 512 dimension key vector and 512 dimension value vector thus making the total stored to be 1024. This is what happens in standard MHA.</p>
+<p>DeepSeek MLA compresses the 512-dim vector into a latent vector of size 64. So during your inference you just carry this 64-dim vector and when you need to do any math you "up-project" it back to 512.</p>
+<p>How does it happen (in detail):</p>
+<ol>
+<li>The Compression (Down-Projection):
+In a standard transformer, for every token, you generate a Key (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>K</mi></mrow></math>) and a Value (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi></mrow></math>). If your model dimension (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>d</mi><mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>e</mi><mi>l</mi></mrow></msub></mrow></math>) is 512, you're looking at:
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>K</mi></mrow></math> vector: 512 elements
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>V</mi></mrow></math> vector: 512 elements
+Total: 1024 floating-point numbers stored in GPU VRAM for every single token in the context.
+MLA says: "That's redundant." Most of those 512 dimensions are highly correlated. So, instead of storing them, MLA projects the input into a compressed latent vector (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup></mrow></math>).</li>
+</ol>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup><mo>&#x0003D;</mo><msub><mi>W</mi><mrow><mi>D</mi><mi>K</mi><mi>V</mi></mrow></msub><mi>&#x000B7;</mi><msub><mi>x</mi><mi>t</mi></msub></mrow></math></p>
+<p>Where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mrow><mi>D</mi><mi>K</mi><mi>V</mi></mrow></msub></mrow></math> is a down-projection matrix.</p>
+<p>If the latent dimension is 64, we just squeezed 1024 units of information into a 64-dimensional bottleneck. This 64-dim vector is the only thing that stays in the KV cache.</p>
+<ol start="2">
+<li><p>The Reconstruction (Up-Projection):
+When the model needs to actually perform the Attention mechanism (Query <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x000D7;</mi></mrow></math> Key), it can't do it with a 64-dim vector if the Query is 512-dim. It needs the dimensions to match. At inference time, right before the math happens, MLA "unpacks" the latent vector using an up-projection matrix (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mrow><mi>U</mi><mi>K</mi></mrow></msub></mrow></math> for Keys and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mrow><mi>U</mi><mi>V</mi></mrow></msub></mrow></math> for Values):Key Reconstruction: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>K</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>W</mi><mrow><mi>U</mi><mi>K</mi></mrow></msub><mi>&#x000B7;</mi><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup></mrow></math>Value Reconstruction: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>V</mi><mi>t</mi></msub><mo>&#x0003D;</mo><msub><mi>W</mi><mrow><mi>U</mi><mi>V</mi></mrow></msub><mi>&#x000B7;</mi><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup></mrow></math>
+The "aha!" moment here is that these up-projection matrices are part of the model weights, not the KV cache. They stay static on the GPU. You only "pay" the memory price for the 64-dim vector per token.</p>
+</li>
+<li><p>Absorbing the Weights (The Inference Hack):
+DeepSeek takes this a step further to avoid the compute overhead of up-projecting every single time. In the Attention equation:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>S</mi><mi>c</mi><mi>o</mi><mi>r</mi><mi>e</mi><mo>&#x0003D;</mo><mi>Q</mi><mi>&#x000B7;</mi><msup><mi>K</mi><mi>T</mi></msup></mrow></math><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>S</mi><mi>c</mi><mi>o</mi><mi>r</mi><mi>e</mi><mo>&#x0003D;</mo><mi>Q</mi><mi>&#x000B7;</mi><mo stretchy="false">&#x00028;</mo><msub><mi>W</mi><mrow><mi>U</mi><mi>K</mi></mrow></msub><mi>&#x000B7;</mi><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup><msup><mo stretchy="false">&#x00029;</mo><mi>T</mi></msup></mrow></math>Because of the associative property of matrix multiplication, we can pre-multiply the Query (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>Q</mi></mrow></math>) by the up-projection matrix (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>W</mi><mrow><mi>U</mi><mi>K</mi></mrow></msub></mrow></math>) before looking at the KV cache.Project the Query: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>Q</mi><mi>&#x02032;</mi></msup><mo>&#x0003D;</mo><mi>Q</mi><mi>&#x000B7;</mi><msub><mi>W</mi><mrow><mi>U</mi><mi>K</mi></mrow></msub></mrow></math>
+Direct Match: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>S</mi><mi>c</mi><mi>o</mi><mi>r</mi><mi>e</mi><mo>&#x0003D;</mo><msup><mi>Q</mi><mi>&#x02032;</mi></msup><mi>&#x000B7;</mi><msubsup><mi>c</mi><mi>t</mi><mrow><mi>K</mi><mi>V</mi></mrow></msubsup></mrow></math>
+Now, you are doing the attention math directly against the compressed 64-dim latent vector. You never actually "materialize" the full 512-dim Key in memory.</p>
+</li>
+</ol>
+<h3 id=2-the-moe-strategy>2. The MOE Strategy</h3><p>In standard architectures like GPT-3 (dense models) every single parameter is involved in calculating every single token. MoE is a "sparse" architecture which splits the one giant FFN into smaller layers called "experts".</p>
+<p>So think like this, you have many small experts that will handle tokens. So before the tokens arrive to these experts they should go somewhere from where they will be alloted an expert right? For this we have "router". It is a tiny learnable neural network who has one job : "Look at the token and decide - which expert is good enough to handle this".
+Now for the experts, these are normal FFNs which are good at different things. Some might be good at solving C++ code, while some might be good at writing english passages.
+And last but not the least - what makes MoE sparse? So for each token only some of these experts are fired up, not all of them and that is why it is considered sparse in nature.</p>
+<p>In DeepSeek-V3 we have 671B parameters but only 37B are activated.</p>
+<h4 id=the-problem-route-collapsing>The Problem : Route Collapsing</h4><p>Think of it like this, initially everything is random so all the experts are random, this means that for the first few tokens "expert 1" might be better than all the other experts and the router will keep on sending the tokens to it and since expert 1 gets more data it trains and becomes even more smarter. This leads to overloading on expert 1 while the other experts are idle and become wasted VRAM.</p>
+<p>Traditional fix for the above problem was simple. If you think about it, the most basic way to counter this issue was to see if the model is doing this (giving tokens to just one expert and not equally distributing tokens) then at that time you will penalize the model. But this fix is dumb because you are trying to</p>
+<p>DeepSeek's Aux-Loss-Free Strategy</p>
+<p>Very simple. Do not force the balance between the experts using the loss function but through "Dynamic Routing Bias". Fancy term simple explanation. Instead of using a fixed penalty use an affinity score for each expert that adjusts during fly during training.</p>
+<p>Normally, the Router calculates a score (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>s</mi></mrow></math>) for each expert <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>i</mi></mrow></math>:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>&#x0003D;</mo><mtext>Softmax</mtext><mo stretchy="false">&#x00028;</mo><mtext>Router</mtext><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo stretchy="false">&#x00029;</mo></mrow></math></p>
+<p>DeepSeek adds a bias term (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>b</mi><mi>i</mi></msub></mrow></math>) to this score:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mover><mrow><mi>s</mi></mrow><mo stretchy="false">&#x0005E;</mo></mover><mi>i</mi></msub><mo>&#x0003D;</mo><mtext>Router</mtext><mo stretchy="false">&#x00028;</mo><mi>x</mi><mo stretchy="false">&#x00029;</mo><mo>&#x0002B;</mo><msub><mi>b</mi><mi>i</mi></msub></mrow></math></p>
+<ul>
+<li>If an expert is overloaded (taking too much traffic), the system automatically decreases its <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>b</mi><mi>i</mi></msub></mrow></math>.</li>
+<li>If an expert is underutilized, the system increases its <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>b</mi><mi>i</mi></msub></mrow></math> to make it more "attractive" to the router.</li>
+</ul>
+<p>Why is this beautiful?
+Because now the model just focuses on being smart. Previously adding a loss term the model's gradient (learning process) used to focus on both being smart and being fair. But now since a bias term the balancing happens on the routing level and not during the training.</p>
+<h3 id=3-the-training-objective-multi-token-predictionmtp>3. The Training Objective : Multi-Token Prediction(MTP):</h3><p>Again as the name suggest - don't go for the "next token prediction" but for "multiple token prediction". What good is in this? Well, we make the model a bit far sighted.</p>
+<p>In a standard transformer the hidden state <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>h</mi><mi>i</mi></msub></mrow></math> at position <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>i</mi></mrow></math> is used to predict token <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>t</mi><mrow><mi>i</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub></mrow></math>. In DeepSeek-V3, they add extra "MTP modules."</p>
+<p>For each additional token you want to predict (let's say we want to predict 2 tokens at once), the model does the following:
+Main Path: Calculates <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>h</mi><mi>i</mi></msub></mrow></math> and predicts <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>t</mi><mrow><mi>i</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub></mrow></math> (Standard NTP).
+MTP Path: Takes that same hidden state <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>h</mi><mi>i</mi></msub></mrow></math>, combines it with the embedding of the predicted token <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>t</mi><mrow><mi>i</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></msub></mrow></math>, and runs it through an additional MTP Module (a shared transformer block) to predict <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>t</mi><mrow><mi>i</mi><mo>&#x0002B;</mo><mn>2</mn></mrow></msub></mrow></math>.</p>
+<p>The loss function becomes a weighted sum:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>&#x02112;</mi><mo>&#x0003D;</mo><msub><mi>&#x02112;</mi><mrow><mi>N</mi><mi>T</mi><mi>P</mi></mrow></msub><mo>&#x0002B;</mo><mi>&#x003BB;</mi><msubsup><mo>&#x02211;</mo><mrow><mi>k</mi><mo>&#x0003D;</mo><mn>1</mn></mrow><mrow><mi>K</mi></mrow></msubsup><msubsup><mi>&#x02112;</mi><mrow><mi>M</mi><mi>T</mi><mi>P</mi></mrow><mrow><mo stretchy="false">&#x00028;</mo><mi>k</mi><mo stretchy="false">&#x00029;</mo></mrow></msubsup></mrow></math>Where <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>K</mi></mrow></math> is the number of future tokens being predicted.</p>
+<p>Think of this as "Information Compression."</p>
+<p>Standard NTP: The model might learn that after "The cat sat on...", the next word is probably "the". It doesn't need to know what the cat sat on yet; it just needs to get the next word right.</p>
+<p>MTP: The model is forced to predict "the" AND "mat" simultaneously. To do this, the internal representation (the vector <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>h</mi><mi>i</mi></msub></mrow></math>) must encode the concept of the "mat" much earlier in the computation.</p>
+<p>The most genius part of MTP isn't just that it makes the model smarter—it makes it faster. Usually, LLMs are autoregressive, meaning they generate one token at a time. To get 10 tokens, you have to run the model 10 times. This is the "Memory Wall" problem you see in inference optimization.</p>
+<p>Speculative Decoding with MTP works like this:</p>
+<ul>
+<li>The model generates token <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>n</mi><mo>&#x0002B;</mo><mn>1</mn></mrow></math>.</li>
+<li>Simultaneously, the MTP modules "guess" tokens <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>n</mi><mo>&#x0002B;</mo><mn>2</mn><mo>&#x0002C;</mo><mi>n</mi><mo>&#x0002B;</mo><mn>3</mn></mrow></math>, etc.</li>
+<li>Because these guesses are produced in a single forward pass, they are "free" (computationally speaking).</li>
+<li>In the next step, the model verifies these guesses. If they are correct, you just generated 3 tokens for the price of 1.</li>
+</ul>
+<h2 id=4-the-infra-layer>4. The Infra Layer</h2><p>In a 671B model, memory bandwidth is the killer. Standard (BF16) takes 2 bytes per number while DeepSeek used FP8 which takes 1 byte per number.</p>
+<p>So again think like this, you reduced the precision by half - now you have saved memory thus doubled your compute throughput but if you just reduce the bits the model's grads will vanish or explode. To solve this DeepSeek uses  "fine-grained scaling". Instead of using a single scale factor for an entire layer, they divided the tensor into many small blocks and each of these blocks receive their own scaling factor.</p>
+<p>The intuition behind this is very simple. Each part of the weight matrix has different value ranges. If one region has numbers between -0.1 and 0.1 while the other has between -20 and 20, a single global scaling factor cannot do justice to both of them. Block wise scaling allows each region of the tensor to use the FP8 range efficiently.</p>
+<p>The next part is : DualPipe</p>
+<p>A 671B param model cannot fit on a single GPU. It needs to be split acorss many GPUs. One common strategy that is used is pipeline parallelism.</p>
+<p>In pipeline parallelism the model is divided into stages across the GPUs. A micro batch flows throught the pipeline:</p>
+<p>GPU1 → GPU2 → GPU3 → GPU4</p>
+<p>First the forward pass moves through it followed by the backward pass.
+The inefficiency appears because GPUs often sit idle while waiting for data from another stage. For example, GPU1 may finish the forward computation and send the result to GPU2. While GPU2 processes the data, GPU1 may have nothing to do. These idle periods are called pipeline bubbles.</p>
+<p>In large systems these bubbles can waste 30–50% of available compute.</p>
+<p>DeepSeek addresses this with DualPipe, a bidirectional pipeline strategy.</p>
+<p>Instead of running only forward passes in sequence and then backward passes, the system overlaps different operations. While one micro-batch is moving forward through later pipeline stages, earlier GPUs begin processing the forward pass of another micro-batch or the backward pass of a previous one.</p>
+<p>As a result, forward and backward computations are happening simultaneously across the pipeline. Work flows in both directions. The idle gaps are filled with useful computation, and the GPUs remain busy almost all the time.</p>
+<p>The result is much higher utilization of the hardware.</p>
+<p>DeepSeek engineers also noticed that waiting for NVLink (GPU-to-GPU communication) is another bottleneck. In DualPipe, they hide the communication behind the computation.</p>
+<p>While the GPU is crunching the numbers for the "Attention" layer, the "All-to-All" communication for the next "MoE" layer is already happening in the background.</p>
+<p>By the time the math is done, the data for the next step is already there.</p>
+<h2 id=grpo-ppo-killer>GRPO - PPO Killer</h2><ol>
+<li><p>The First Principle: Why do we need RL?</p>
+<p>In standard training (SFT), we tell the model: "Here is the prompt, and here is exactly what you should say." In Reinforcement Learning (RL), we tell the model: "Here is the prompt. Try a few things, and I will give you a score (Reward) based on how well you did."</p>
+<p>RL is essential for reasoning (like in DeepSeek-R1) because there isn't always one "correct" path to a solution; the model needs to explore different ways of "thinking" to find the most efficient one.</p>
+</li>
+<li><p>The PPO Bottleneck (The "Critic" Problem)</p>
+<p>In standard PPO, you have to maintain at least two massive models in VRAM:</p>
+<p>The Actor (Policy): The model you are actually training (e.g., DeepSeek-V3 671B).</p>
+<p>The Critic (Value Function): A separate model of the same size that tries to predict how much reward the Actor will get.</p>
+<p>Why do we need the Critic? To calculate the Advantage.</p>
+<p>If the model gets a reward of 0.8, is that good? We don't know unless the Critic tells us, "Normally, for this prompt, you only get 0.5." Now we know 0.8 is great (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>0.8</mn><mo>&#x02212;</mo><mn>0.5</mn><mo>&#x0003D;</mo><mo>&#x0002B;</mo><mn>0.3</mn></mrow></math> advantage).</p>
+<p>The Cost: Keeping a 671B Critic in memory alongside a 671B Actor is practically impossible for most labs. It's a "Memory Tax" that doubles your hardware requirements.</p>
+</li>
+<li><p>The GRPO Solution: Intelligence via Comparison</p>
+<p>GRPO's "Aha!" moment is realizing that you don't need a Critic model to tell you what's "normal." You can just look at what the model is currently doing.</p>
+<p>How it works:</p>
+<p>Group Generation: For a single prompt, you ask the model to generate a group of outputs (let's say <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>G</mi><mo>&#x0003D;</mo><mn>8</mn></mrow></math> different responses).</p>
+<p>The Reward: You pass all 8 responses through your Reward Model (or a rule-based checker).</p>
+<p>You get 8 scores: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x0007B;</mo><msub><mi>r</mi><mn>1</mn></msub><mo>&#x0002C;</mo><msub><mi>r</mi><mn>2</mn></msub><mo>&#x0002C;</mo><mo>&#x02026;</mo><mo>&#x0002C;</mo><msub><mi>r</mi><mn>8</mn></msub><mo stretchy="false">&#x0007D;</mo></mrow></math>.</p>
+<p>The Advantage (The Math): Instead of comparing a response to a Critic's prediction, you compare it to its peers.<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>A</mi><mi>i</mi></msub><mo>&#x0003D;</mo><mfrac><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>&#x02212;</mo><mtext>mean</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>r</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mo>&#x02026;</mo><mo>&#x0002C;</mo><msub><mi>r</mi><mn>8</mn></msub><mo stretchy="false">&#x00029;</mo></mrow><mrow><mtext>std</mtext><mo stretchy="false">&#x00028;</mo><msub><mi>r</mi><mn>1</mn></msub><mo>&#x0002C;</mo><mo>&#x02026;</mo><mo>&#x0002C;</mo><msub><mi>r</mi><mn>8</mn></msub><mo stretchy="false">&#x00029;</mo></mrow></mfrac></mrow></math>Where:<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow></math> is the reward of the current output.</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>mean</mtext></mrow></math> is the average of the group.</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>std</mtext></mrow></math> is the standard deviation (to keep the numbers stable).</p>
+</li>
+<li><p>Why this works</p>
+<p>Self-Correction: If the model generates 8 solutions to a math problem and 2 are correct while 6 are wrong, the 2 correct ones will have a much higher reward than the group average. The model is forced to "shift its weight" toward the logic used in those 2 responses.</p>
+<p>VRAM Efficiency: By deleting the Critic model, DeepSeek saved nearly 50% of the VRAM required for RLHF. This allowed them to allocate that memory to larger batch sizes or higher-resolution training.</p>
+<p>Reduced Training Noise: Because the "baseline" is derived from the actual current outputs of the model (not a lagging Critic model's prediction), the training signal is often much cleaner and more stable.</p>
+</li>
+<li><p>GRPO in the Context of DeepSeek-R1 (Reasoning)GRPO is what made the "Aha!" moment possible for DeepSeek-R1. When training for reasoning, the "Reward" isn't a human's opinion—it's a Rule-Based Reward.Accuracy Reward: Does the code run? Is the math answer correct?Format Reward: Did the model put its thinking process inside 	ags?Because GRPO allows for very large group sizes (sampling 16 or 32 versions of the same thought process), the model can "see" a wide variety of reasoning paths and quickly learn which ones lead to the correct answer.</p>
+</li>
+</ol>
+<h3 id=conclusion>Conclusion</h3><p>DeepSeek V3 isn't just another scale-up with more parameters and bigger clusters. It's a ground-up reimagining of what actually slows down modern LLMs. By compressing the KV cache through MLA, they solved the inference memory wall. By ditching auxiliary losses for dynamic routing biases in MoE, they kept training stable without gradient interference. MTP forces the model to think ahead, not just predict next, turning training into a multi-step compression game. FP8 with fine-grained scaling and DualPipe squeezes every drop of performance from the hardware, hiding latency behind computation. And GRPO? It deletes the Critic entirely, replacing a bloated value network with simple, elegant group comparison.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/math-ai-say-no/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">i tried to teach a math ai to say no</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/simplifying-ddp/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">simplifying DDP</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!-- Imported from https://defygrad.bearblog.dev/advanced-keras-techniques/ on 2026-10-24. Edit freely. -->
+<p>In this blog, we’ll explore some advanced Keras techniques that can help you improve your model’s performance, flexibility, and efficiency during training. These techniques go beyond the basics of <strong>model.fit()</strong> and allow you to take full control of the training process.
+We’ll cover custom training loops, accuracy metrics, and custom callbacks, with easy-to-understand explanations and code snippets.</p>
+<h3 id=custom-training-loops>Custom Training Loops:</h3><p>Why Use Custom Training Loops?</p>
+<p>By default, Keras provides the <strong>model.fit()</strong> method, which handles the entire training process for you. However, sometimes you need more control over how your model trains. This is where custom training loops come in. They allow you to:</p>
+<ol>
+<li><p>Implement custom logic (e.g., custom loss functions, multi-task learning).</p>
+</li>
+<li><p>Debug and inspect intermediate values (e.g., gradients, predictions).</p>
+</li>
+<li><p>Handle advanced use cases like GANs or reinforcement learning.</p>
+</li>
+</ol>
+<p>Let’s start by implementing a basic neural network and then build a custom training loop.</p>
+<p>First let us implement a basic neural network:</p>
+<div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span>
+    <span class="n">Flatten</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)),</span>
+    <span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>
+    <span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="p">])</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SparseCategoricalCrossentropy</span><span class="p">(</span><span class="n">from_logits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> 
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">()</span>
+</pre></div>
+<h4 id=implementing-a-custom-training-loop>Implementing a custom training loop:</h4><div class="highlight"><pre><span></span><span class="n">epochs</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">((</span><span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">))</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Start of epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">y_batch_train</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Forward pass and logits stores the model&#39;s prediction for the particular batch</span>
+            <span class="n">loss_value</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">y_batch_train</span><span class="p">,</span> <span class="n">logits</span><span class="p">)</span>  <span class="c1"># Computes the loss</span>
+
+        <span class="c1"># Compute gradients and update weights</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss_value</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">)</span>
+<span class="c1">#tape.gradient(loss, model.trainable_weights) computes the gradients of the loss with respect to the model&#39;s trainable weights</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">))</span>
+
+        <span class="c1"># Logging the loss every 200 steps</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">200</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> Step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">: Loss = </span><span class="si">{</span><span class="n">loss_value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+<h4 id=whats-happening-here>What's happening here?</h4><ol>
+<li>Forward Pass: The model makes predictions (logits) for the current batch.</li>
+<li>Loss Calculation: The loss is computed between the predictions and true labels.</li>
+<li>Gradient Computation: Gradients of the loss with respect to the model’s weights are calculated using tape.gradient().</li>
+<li>Weight Update: The optimizer applies the gradients to update the model’s weights.</li>
+<li>Logging: The loss is printed every 200 steps to monitor progress.</li>
+</ol>
+<h3 id=enhancing-the-above-loop-by-adding-accuracy-metric>Enhancing the above loop by adding accuracy metric:</h3><p>While the above loop works, it only tracks the loss. Let’s enhance it by adding an accuracy metric to monitor model performance.</p>
+<h4 id=define-the-model>Define the model:</h4><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Sequential</span><span class="p">([</span> 
+    <span class="n">Flatten</span><span class="p">(</span><span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">)),</span>  <span class="c1"># Flatten the input to a 1D vector</span>
+    <span class="n">Dense</span><span class="p">(</span><span class="mi">128</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">),</span>  <span class="c1"># First hidden layer with 128 neurons and ReLU activation</span>
+    <span class="n">Dense</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Output layer with 10 neurons for the 10 classes (digits 0-9)</span>
+<span class="p">])</span>
+</pre></div>
+<h4 id=define-loss-function-optimizer-and-metric>Define loss function, optimizer and metric:</h4><div class="highlight"><pre><span></span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">SparseCategoricalCrossentropy</span><span class="p">(</span><span class="n">from_logits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">()</span> 
+<span class="n">accuracy_metric</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">SparseCategoricalAccuracy</span><span class="p">()</span>  <span class="c1"># Metric to track accuracy during training</span>
+</pre></div>
+<h4 id=implementation-of-custom-training-loop-with-accuracy>Implementation of custom training loop with accuracy:</h4><div class="highlight"><pre><span></span><span class="n">epochs</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># Number of epochs for training</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Start of epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">y_batch_train</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+            <span class="c1"># Forward pass: Compute predictions</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># Compute loss</span>
+            <span class="n">loss_value</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">y_batch_train</span><span class="p">,</span> <span class="n">logits</span><span class="p">)</span>
+         
+        <span class="c1"># Compute gradients</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss_value</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">)</span>
+        <span class="c1"># Apply gradients to update model weights</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">))</span>
+        
+        <span class="c1"># Update the accuracy metric</span>
+        <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">y_batch_train</span><span class="p">,</span> <span class="n">logits</span><span class="p">)</span>
+
+        <span class="c1"># Log the loss and accuracy every 200 steps</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">200</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> Step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">: Loss = </span><span class="si">{</span><span class="n">loss_value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s1"> Accuracy = </span><span class="si">{</span><span class="n">accuracy_metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Reset the metric at the end of each epoch</span>
+    <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">reset_state</span><span class="p">()</span>
+</pre></div>
+<h4 id=whats-new-here>What's new here?</h4><ol>
+<li>Accuracy Tracking: The accuracy_metric.update_state() method updates the accuracy for each batch.</li>
+<li>Logging: Both loss and accuracy are printed every 200 steps.</li>
+<li>Reset Metric: The accuracy metric is reset at the end of each epoch to avoid mixing results across epochs.</li>
+</ol>
+<h3 id=custom-callbacks>Custom Callbacks:</h3><p>Create a custom callback to log additional metrics at the end of each epoch.</p>
+<div class="highlight"><pre><span></span><span class="c1"># Step 4: Implement the Custom Callback </span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CustomCallback</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">logs</span> <span class="o">=</span> <span class="n">logs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;End of epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">, loss: </span><span class="si">{</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">, accuracy: </span><span class="si">{</span><span class="n">logs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+<h4 id=implementation-of-custom-training-loop-with-custom-callback>Implementation of custom training loop with Custom Callback</h4><div class="highlight"><pre><span></span><span class="c1"># Step 5: Implement the Custom Training Loop with Custom Callback</span>
+
+<span class="n">epochs</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">custom_callback</span> <span class="o">=</span> <span class="n">CustomCallback</span><span class="p">()</span>  <span class="c1"># Initialize the custom callback</span>
+
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Start of epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">y_batch_train</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+            <span class="c1"># Forward pass: Compute predictions</span>
+            <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x_batch_train</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># Compute loss</span>
+            <span class="n">loss_value</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">y_batch_train</span><span class="p">,</span> <span class="n">logits</span><span class="p">)</span>
+        
+        <span class="c1"># Compute gradients</span>
+        <span class="n">grads</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss_value</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">)</span>
+        <span class="c1"># Apply gradients to update model weights</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">grads</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">trainable_weights</span><span class="p">))</span>
+        
+        <span class="c1"># Update the accuracy metric</span>
+        <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">update_state</span><span class="p">(</span><span class="n">y_batch_train</span><span class="p">,</span> <span class="n">logits</span><span class="p">)</span>
+
+        <span class="c1"># Log the loss and accuracy every 200 steps</span>
+        <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">200</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> Step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1">: Loss = </span><span class="si">{</span><span class="n">loss_value</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s1"> Accuracy = </span><span class="si">{</span><span class="n">accuracy_metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Call the custom callback at the end of each epoch</span>
+    <span class="n">custom_callback</span><span class="o">.</span><span class="n">on_epoch_end</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;loss&#39;</span><span class="p">:</span> <span class="n">loss_value</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span> <span class="s1">&#39;accuracy&#39;</span><span class="p">:</span> <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">result</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()})</span>
+    
+    <span class="c1"># Reset the metric at the end of each epoch</span>
+    <span class="n">accuracy_metric</span><span class="o">.</span><span class="n">reset_state</span><span class="p">()</span>  <span class="c1"># Use reset_state() instead of reset_states()</span>
+</pre></div>
+<h4 id=whats-new-here-1>What's new here?</h4><ol>
+<li><p>Custom Callback: The CustomCallback class logs the loss and accuracy at the end of each epoch.</p>
+</li>
+<li><p>Integration: The callback is invoked at the end of each epoch using custom_callback.on_epoch_end().</p>
+</li>
+</ol>
+<h4 id=></h4>

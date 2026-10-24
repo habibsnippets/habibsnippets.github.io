@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bradley Terry Model — Habeeb</title>
+<meta name="description" content="The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear &quot;score.&quot; If you've ever wondered how sports teams are ranked…">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<link rel="canonical" href="https://habibsnippets.github.io/writing/bradley-terry-model/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Bradley Terry Model">
+<meta property="og:description" content="The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear &quot;score.&quot; If you've ever wondered how sports teams are ranked…">
+<meta property="og:url" content="https://habibsnippets.github.io/writing/bradley-terry-model/">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="article:published_time" content="2026-02-15">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@habeebstwt">
+<meta name="twitter:title" content="Bradley Terry Model">
+<meta name="twitter:description" content="The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear &quot;score.&quot; If you've ever wondered how sports teams are ranked…">
+
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/assets/brand-logo.png">
+
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css?v=13">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bradley Terry Model",
+  "description": "The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear \"score.\" If you've ever wondered how sports teams are ranked…",
+  "datePublished": "2026-02-15",
+  "url": "https://habibsnippets.github.io/writing/bradley-terry-model/",
+  "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
+  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+}
+</script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="/" aria-label="Home">
+      <img class="brand-logo" src="/assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
+
+    <nav class="nav-links" aria-label="Sections">
+      <a href="/#focus">Focus</a>
+      <a href="/#experience">Experience</a>
+      <a href="/#work">Work</a>
+      <a href="/#writing">Writing</a>
+      <a href="/#articles">Articles</a>
+      <a href="/#notes">Notes</a>
+      <a href="/#contact">Contact</a>
+    </nav>
+
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="post-main">
+  <article class="post-page">
+    <header class="post-head">
+      <a class="post-back" href="/#writing">← All writing</a>
+      <h1>Bradley Terry Model</h1>
+      <p class="post-meta">
+        <time datetime="2026-02-15">15 Feb, 2026</time>
+        <span class="sep" aria-hidden="true">·</span>
+        <span>3 min read</span>
+      </p>
+    </header>
+
+    <div class="prose">
+<h2 id=introduction>Introduction</h2><p>The Bradley-Terry model is the secret sauce behind how we rank things that don't have a clear "score." If you've ever wondered how sports teams are ranked when they haven't all played each other, or how Netflix knows which movie is "better" based on your clicks, you’ve met the Bradley-Terry model</p>
+<p><a href='https://bt-visualizer-blue.vercel.app'>Visualization Tool Link</a></p>
+<h2 id=the-problem-incomplete-universe>The Problem - Incomplete Universe!</h2><p>Imagine you are running a massive ping-pong tournament with 1,000 players. To find out exactly who is the best using a traditional leaderboard, everyone would have to play everyone else. That is 499,500 matches.</p>
+<p>If each player only plays 5 matches, your leaderboard is a lie. Player A might have 5 wins against newbies, while Player B has 2 wins against professionals. Who is actually better?</p>
+<p>This is why we need the Bradley-Terry Model (BTM). It doesn't care about your win-loss record; it cares about the quality of your opposition. It turns a messy web of random encounters into a single, clean "Power Ranking."</p>
+<h2 id=core-philosophy-the-latent-worth>Core Philosophy - "The Latent Worth"</h2><p>It assumes that every team/player/option has a latent (hidden) worth we can think of it as strength called β (beta). And the thing about this term beta is that you can physically measure it. You can see it only when two things collide - which has a higher value of beta!</p>
+<h3 id=the-winning-probability>The winning probability</h3><p>The BTM defines the probability of i beating j as:</p>
+<p>P(i > j) = βᵢ / (βᵢ + βⱼ)</p>
+<p>But in modern machine learning,β is a bit of a nightmare. It has to be a positive number, which is hard for a neural network to output consistently without a lot of extra math. Instead, we use Reward, r. Think of the reward as the "internal score" a model gives to an answer. It can be any number—positive, negative, or zero. We link them using the exponential constant:
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>&#x003B2;</mi><mi>i</mi></msub><mo>&#x0003D;</mo><msup><mi>e</mi><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow></msup></mrow></math></p>
+<h2 id=the-genius-of-sigmoid>The Genius of "Sigmoid"</h2><p>By substituting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>e</mi><mrow><mi>r</mi></mrow></msup></mrow></math> into our original Bradley-Terry formula, we get a beautiful mathematical transformation. If we want the probability of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>i</mi></mrow></math> beating <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mi>j</mi></mrow></math>:</p>
+<p>P(i > j) = eʳᵢ / (eʳᵢ + eʳⱼ)</p>
+<p>If we divide both the numerator and denominator by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msup><mi>e</mi><mrow><msub><mi>r</mi><mi>i</mi></msub></mrow></msup></mrow></math>, the equation collapses into the Sigmoid Function:</p>
+<p>P(i > j) = 1 / (1 + e⁻⁽ʳᵢ − ʳⱼ⁾) = σ(rᵢ − rⱼ)</p>
+<p>Why is this a breakthrough? Because the model no longer cares about the absolute value of the rewards. It only cares about the difference between them (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>&#x02212;</mo><msub><mi>r</mi><mi>j</mi></msub></mrow></math>). This turns a comparison problem into a simple distance problem on a number line.</p>
+<h2 id=training-scolding-the-model-with-loss>Training: "Scolding" the Model with Loss</h2><p>This is where the Bradley-Terry model becomes an instructor. During training, we show the model a "Winner" (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>y</mi><mi>w</mi></msub></mrow></math>) and a "Loser" (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>y</mi><mi>l</mi></msub></mrow></math>). We want the probability of the winner beating the loser to be as close to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mn>1.0</mn></mrow></math> (100%) as possible.To do this, we use a Negative Log-Loss function:</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>Loss</mtext><mo>&#x0003D;</mo><mo>&#x02212;</mo><mi>ln</mi><mo stretchy="false">&#x00028;</mo><mi>&#x003C3;</mi><mo stretchy="false">&#x00028;</mo><msub><mi>r</mi><mi>w</mi></msub><mo>&#x02212;</mo><msub><mi>r</mi><mi>l</mi></msub><mo stretchy="false">&#x00029;</mo><mo stretchy="false">&#x00029;</mo></mrow></math></p>
+<h2 id=lets-look-at-the-scold-in-action>Let's look at the "Scold" in action</h2><p>Imagine the model gets cocky and assigns these rewards:</p>
+<ul>
+<li>Actual Loser (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>l</mi></msub></mrow></math>): 3</li>
+<li>Actual Winner (<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><msub><mi>r</mi><mi>w</mi></msub></mrow></math>): 2</li>
+</ul>
+<p>The difference is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x00028;</mo><mn>2</mn><mo>&#x02212;</mo><mn>3</mn><mo stretchy="false">&#x00029;</mo><mo>&#x0003D;</mo><mo>&#x02212;</mo><mn>1</mn></mrow></math>.</p>
+<p>The Sigmoid of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo>&#x02212;</mo><mn>1</mn></mrow></math> is roughly 0.27.</p>
+<p>This means the model thinks the winner only had a 27% chance of winning. It’s wrong.When we plug that into our loss function:</p>
+<p><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mtext>Loss</mtext><mo>&#x0003D;</mo><mo>&#x02212;</mo><mi>ln</mi><mo stretchy="false">&#x00028;</mo><mn>0.27</mn><mo stretchy="false">&#x00029;</mo><mo>&#x02248;</mo><mn>1.30</mn><mtext>&#x000A0;(High&#x000A0;Loss)</mtext></mrow></math></p>
+<p>This high loss value acts like a "scold" from the optimizer. It tells the model: "You were way off! Increase the reward for the winner and drop the reward for the loser." The model adjusts its weights, the gap <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><mrow><mo stretchy="false">&#x00028;</mo><msub><mi>r</mi><mi>w</mi></msub><mo>&#x02212;</mo><msub><mi>r</mi><mi>l</mi></msub><mo stretchy="false">&#x00029;</mo></mrow></math> grows positive, the Sigmoid moves toward 1, and the Loss drops toward 0. This is how AI learns to prefer "good" answers over "bad" ones.</p>
+    </div>
+
+    <nav class="post-pager" aria-label="More writing">
+      <a class="pager-link pager-prev" href="/writing/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/">
+        <span class="pager-dir">← Newer</span>
+        <span class="pager-title">PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard</span>
+      </a>
+      <a class="pager-link pager-next" href="/writing/from-points-to-token-a-3d-learning-log/">
+        <span class="pager-dir">Older →</span>
+        <span class="pager-title">From Points to Token: A 3D Learning Log - Part 1</span>
+      </a>
+    </nav>
+  </article>
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="/" class="footer-top">Back home ↑</a>
+  </div>
+</footer>
+
+<script src="/main.js?v=11"></script>
+</body>
+</html>
