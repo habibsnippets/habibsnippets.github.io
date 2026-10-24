@@ -142,6 +142,7 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
   /* `clip` (not `hidden`) — `hidden` would turn body into a scroll container
      and stop the window from scrolling at all. */
   overflow-x: clip;
@@ -186,6 +187,9 @@ body::before {
 img, svg { display: block; max-width: 100%; }
 
 a { color: inherit; text-decoration: none; }
+
+/* Touch: no 300 ms tap delay on phones. */
+button, a, input, [role="button"] { touch-action: manipulation; }
 
 h1, h2, h3, h4 {
   font-weight: 600;
@@ -845,7 +849,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 /* ── Focus ─────────────────────────────────────────────────── */
 .focus-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -1366,7 +1370,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .toolkit-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 16px;
   margin-top: 48px;
   padding-top: 36px;
@@ -1425,7 +1429,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 /* ── Work ──────────────────────────────────────────────────── */
 .work-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr));
   gap: 14px;
 }
 
@@ -1571,6 +1575,8 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 .search-wrap input {
   flex: 1;
   min-width: 0;
+  /* Fill the 38 px (44 px on phones) shell so the whole pill is tappable. */
+  height: 100%;
   background: none;
   border: 0;
   outline: none;
@@ -1653,7 +1659,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 /* ── Articles ──────────────────────────────────────────────── */
 .article-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr));
   gap: 14px;
 }
 
@@ -1770,7 +1776,7 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 /* ── Contact ───────────────────────────────────────────────── */
 .contact-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(255px, 100%), 1fr));
   gap: 14px;
 }
 
@@ -1896,8 +1902,24 @@ html.is-theming *::after {
     -webkit-overflow-scrolling: touch;
   }
   .nav-links::-webkit-scrollbar { display: none; }
-  .nav-links a { padding: 6px 9px; font-size: 12.5px; white-space: nowrap; }
+  .nav-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .nav-links a.is-active::after { left: 10px; right: 10px; }
+  .brand { min-height: 40px; }
+  .theme-toggle { width: 40px; height: 40px; }
   .search-hint { display: none; }
+  /* Finger-sized controls for anything tablet-width and below. */
+  .search-wrap { height: 44px; }
+  .search-wrap input { font-size: 16px; }
+  .chips-sm .chip { min-height: 38px; padding: 8px 14px; font-size: 12px; }
+  .more-link { padding-block: 10px; }
+  .footer-top { padding-block: 10px; }
   .section { padding: 78px 0; }
   .notes-card { flex-direction: column; align-items: flex-start; gap: 20px; }
   .notes-action { padding-left: 64px; }
@@ -1908,26 +1930,99 @@ html.is-theming *::after {
   .toolkit-grid { gap: 12px; margin-top: 34px; }
 }
 
-@media (max-width: 560px) {
-  .container { padding-inline: 18px; }
-  .nav-inner { padding-inline: 18px; }
+@media (max-width: 620px) {
+  /* Too many sections to fit beside the brand on a phone, so the links get
+     their own full-width row — scrollable, but 2.5× the strip width the
+     single-row header had at this size. */
+  :root { --nav-h: 96px; }
+  .nav { height: auto; }
+  .nav-inner {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    padding-block: 7px 5px;
+  }
+  .brand { order: 1; }
+  .theme-toggle { order: 2; margin-left: auto; }
+  .nav-links {
+    order: 3;
+    flex: 1 0 100%;
+    margin: 2px -10px 0;
+    scroll-snap-type: x proximity;
+    /* Fades the clipped edge so a half-visible link reads as scrollable. */
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent);
+  }
+  .nav-links a { scroll-snap-align: start; }
+  /* The header is taller here; keep the hero's top gap proportional. */
   .hero { padding-top: calc(var(--nav-h) + 44px); }
-  .hero h1 { letter-spacing: -0.04em; }
-  .cta-row { gap: 8px; }
-  .btn { padding: 10px 15px; font-size: 13.5px; }
-  .stats { gap: 16px 0; }
-  .stats > div { flex: 1 1 40%; padding-right: 0; margin-right: 0; border-right: 0; }
+}
+
+@media (max-width: 560px) {
+  .container { padding-inline: 16px; }
+  .nav-inner { padding-inline: 16px; }
+  .section { padding: 64px 0; }
+  .section-head { margin-bottom: 28px; }
+  .section h2 { margin-bottom: 8px; }
+  .section-sub { font-size: 15px; }
+  .hero {
+    padding-top: calc(var(--nav-h) + 34px);
+    padding-bottom: 64px;
+  }
+  .hero h1 {
+    font-size: clamp(1.95rem, 8.7vw, 2.6rem);
+    letter-spacing: -0.04em;
+  }
+  .intro-wrap { gap: 16px; }
+  .lede { line-height: 1.68; margin-bottom: 28px; }
+  .cta-row { gap: 8px; margin-bottom: 38px; }
+  .btn { padding: 11px 16px; font-size: 14px; }
+  .stats { gap: 14px 0; padding-top: 18px; }
+  .stats > div {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 0;
+    margin-right: 0;
+    border-right: 0;
+  }
   .scroll-cue { display: none; }
   .work-grid { grid-template-columns: 1fr; }
+  /* Explicit placement: with only the arrow given a row, the grid placed it
+     in column 1 first and squeezed every post title into the 20px arrow cell. */
   .post-link { grid-template-columns: 1fr 20px; row-gap: 4px; }
-  .post-date { grid-column: 1 / -1; font-size: 10px; }
-  .post-arrow { grid-row: 2; }
+  .post-date { grid-column: 1 / -1; grid-row: 1; font-size: 11px; }
+  .post-title { grid-column: 1; grid-row: 2; font-size: 15px; }
+  .post-arrow { grid-column: 2; grid-row: 2; }
+  .post-badge { font-size: 10.5px; }
   .writing-tools { gap: 10px; }
   .search-wrap { max-width: none; }
-  .notes-card { padding: 22px; }
+  .notes-card { padding: 20px; gap: 16px; }
   .notes-left { flex-direction: column; gap: 14px; }
   .notes-action { padding-left: 0; }
+  .timeline-item { padding-left: 16px; }
+  .timeline-when { font-size: 11px; }
+  .timeline-body h3 { font-size: 17.5px; }
+  .timeline-org { font-size: 12px; }
+  /* Micro-labels are decorative at 10.5px on a phone — a step up keeps the
+     metadata legible without touching the hero typography. */
+  .mini-tags li { font-size: 11px; }
+  .work-foot { font-size: 11px; }
+  .tag, .badge { font-size: 10.5px; }
+  .article-top time { font-size: 11px; }
+  .article-card { padding: 20px; }
+  .contact-label { font-size: 10.5px; }
+  .contact-hint { font-size: 11.5px; }
   .footer-inner { justify-content: flex-start; }
+}
+
+/* Touch screens never fire hover, so the reveal panels on the Focus cards
+   are permanently invisible there — stop their loops from burning frames. */
+@media (hover: none) {
+  .focus-card-interactive .card-anim *,
+  .focus-card-interactive .card-anim *::before,
+  .focus-card-interactive .card-anim *::after {
+    animation-play-state: paused !important;
+  }
 }
 
 /* ── Motion preferences ────────────────────────────────────── */

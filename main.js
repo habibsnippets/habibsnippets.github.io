@@ -147,9 +147,11 @@
 
     function resize() {
       var rect = canvas.getBoundingClientRect();
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = Math.max(1, rect.width);
       h = Math.max(1, rect.height);
+      /* A phone repaints this full-bleed canvas every frame. Past 1.5× the
+         extra pixels are invisible at that size but cost real fill rate. */
+      dpr = Math.min(window.devicePixelRatio || 1, w < 520 ? 1.5 : 2);
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1006,12 +1008,18 @@
     }
 
     canvas.addEventListener("pointermove", function (e) {
+      /* Touch has no cursor: without this a scroll gesture leaves the
+         dashed "cursor" box parked wherever the finger last was. */
+      if (e.pointerType === "touch") return;
       var r = canvas.getBoundingClientRect();
       mouse.x = e.clientX - r.left;
       mouse.y = e.clientY - r.top;
       mouse.active = true;
     });
     canvas.addEventListener("pointerleave", function () {
+      mouse.active = false;
+    });
+    canvas.addEventListener("pointercancel", function () {
       mouse.active = false;
     });
 
@@ -1058,6 +1066,8 @@
     var nav = document.getElementById("nav");
     var bar = document.getElementById("progressBar");
     var links = $$(".nav-links a");
+    var linkStrip = document.querySelector(".nav-links");
+    var lastActive = null;
     var sections = links.map(function (a) {
       return document.getElementById(a.getAttribute("href").slice(1));
     }).filter(Boolean);
@@ -1078,6 +1088,18 @@
       links.forEach(function (a) {
         a.classList.toggle("is-active", a === current);
       });
+
+      /* On phones the strip scrolls, so keep the active link in view. */
+      if (current && current !== lastActive && linkStrip) {
+        var box = linkStrip.getBoundingClientRect();
+        var rect = current.getBoundingClientRect();
+        if (rect.left < box.left + 4) {
+          linkStrip.scrollLeft -= box.left + 4 - rect.left;
+        } else if (rect.right > box.right - 18) {
+          linkStrip.scrollLeft += rect.right - (box.right - 18);
+        }
+      }
+      lastActive = current;
       ticking = false;
     }
 
