@@ -4,6 +4,14 @@
    .draw-surface or .write-surface.
    ============================================================ */
 
+@font-face {
+  font-family: "Virgil";
+  src: url("./fonts/Virgil.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* --- pane header / mode switch ----------------------------- */
 
 .write-head {
@@ -480,7 +488,6 @@
 @media (max-width: 900px) {
   .draw-export-btn { margin-left: 0; }
   .draw-styles { gap: 5px 9px; }
-  .style-font { display: none; }
   .draw-hint { display: none; }
   .export-panel { grid-template-columns: 56px minmax(0, 1fr); width: calc(100% - 16px); }
   .export-thumb-wrap { width: 56px; height: 48px; }

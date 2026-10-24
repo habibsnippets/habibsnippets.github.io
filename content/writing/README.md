@@ -43,11 +43,15 @@ preview still on the right. Scenes autosave in the browser (`localStorage`, one
 per post) while you work; only the exported PNG is committed.
 
 - Tools: select `V`, pan `H`, rectangle `R`, diamond `D`, ellipse `O`, line `L`,
-  arrow `A`, text `T`. Shift-click to multi-select, drag a box on empty canvas
-  to marquee-select, and drag a selection's handles to resize.
+  arrow `A`, pen `P`, text `T`. Shift-click to multi-select, drag a box on empty
+  canvas to marquee-select, and drag a selection's handles to resize. The pen
+  draws freehand strokes; those can be selected, moved and scaled like shapes.
 - Style the selection from the toolbar: stroke and fill colours (including
   custom swatches), none/solid/hachure fill, stroke width and style, sketch
-  roughness, opacity, and font family, size and alignment for text.
+  roughness, opacity, and font family, size and alignment for text. Text can
+  use the bundled **Virgil** hand-drawn font, along with Sans, Mono and Serif.
+  Virgil is included under the SIL Open Font License
+  (`tools/studio/fonts/Virgil-LICENSE.md`).
 - `Space`-drag or the hand tool pans. `⌘/Ctrl`+wheel or the zoom buttons zoom;
   **fit** frames the drawing. `⌘/Ctrl+Z` / `⇧⌘/Ctrl+Z` undo and redo,
   `⌘/Ctrl+C` / `V` / `D` copy, paste and duplicate, `Delete` removes.

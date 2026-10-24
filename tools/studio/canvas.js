@@ -31,12 +31,13 @@ const FONTS = {
   sans: '"Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   mono: '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace',
   serif: 'Georgia, "Times New Roman", serif',
+  hand: '"Virgil", "Comic Sans MS", "Segoe Print", cursive',
 };
 
 const TOOL_KEYS = {
   v: "select", h: "hand",
   r: "rect", d: "diamond", o: "ellipse",
-  l: "line", a: "arrow", t: "text",
+  l: "line", a: "arrow", p: "pen", t: "text",
 };
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
@@ -106,9 +107,11 @@ function refreshTextHeight(el) {
 /* --- geometry ---------------------------------------------- */
 
 function boundsOf(el) {
-  if (el.type === "line" || el.type === "arrow") {
-    const xs = (el.points || []).map((p) => el.x + p.x);
-    const ys = (el.points || []).map((p) => el.y + p.y);
+  if (el.type === "line" || el.type === "arrow" || el.type === "pen") {
+    const pts = el.points || [];
+    if (!pts.length) return { x: el.x, y: el.y, w: el.w, h: el.h };
+    const xs = pts.map((p) => el.x + p.x);
+    const ys = pts.map((p) => el.y + p.y);
     const x = Math.min(...xs);
     const y = Math.min(...ys);
     return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
@@ -177,8 +180,12 @@ function snapLine(start, end, enabled) {
 
 function hitTest(el, x, y, tol) {
   const b = boundsOf(el);
-  if (el.type === "line" || el.type === "arrow") {
-    return distanceToPolyline(x, y, absPoints(el)) <= tol + el.strokeWidth / 2;
+  if (el.type === "line" || el.type === "arrow" || el.type === "pen") {
+    const pts = absPoints(el);
+    if (pts.length === 1) {
+      return Math.hypot(x - pts[0].x, y - pts[0].y) <= tol + el.strokeWidth / 2;
+    }
+    return distanceToPolyline(x, y, pts) <= tol + el.strokeWidth / 2;
   }
   if (x < b.x - tol || x > b.x + b.w + tol || y < b.y - tol || y > b.y + b.h + tol) return false;
   if (el.type === "ellipse") {
@@ -246,6 +253,9 @@ function blankElement(type, x, y, w = 0, h = 0, style = {}) {
   }
   if (type === "line" || type === "arrow") {
     el.points = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+  }
+  if (type === "pen") {
+    el.points = [{ x: 0, y: 0 }];
   }
   return el;
 }
@@ -684,6 +694,38 @@ export function mountCanvas(opts = {}) {
     g.stroke();
   }
 
+  function drawPen(g, item) {
+    const pts = absPoints(item);
+    if (!pts.length) return;
+    applyStroke(g, item);
+
+    /* A click with the pen is a dot, not an invisible zero-length path. */
+    if (pts.length === 1) {
+      g.fillStyle = item.stroke;
+      g.beginPath();
+      g.arc(pts[0].x, pts[0].y, Math.max(1, item.strokeWidth / 2), 0, Math.PI * 2);
+      g.fill();
+      return;
+    }
+
+    g.beginPath();
+    g.moveTo(pts[0].x, pts[0].y);
+    if (pts.length === 2) {
+      g.lineTo(pts[1].x, pts[1].y);
+    } else {
+      /* Quadratic smoothing through the midpoint of each segment —
+         keeps the stroke soft without needing the full point list. */
+      for (let i = 1; i < pts.length - 1; i++) {
+        const mx = (pts[i].x + pts[i + 1].x) / 2;
+        const my = (pts[i].y + pts[i + 1].y) / 2;
+        g.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+      }
+      const last = pts[pts.length - 1];
+      g.lineTo(last.x, last.y);
+    }
+    g.stroke();
+  }
+
   function drawLinear(g, item) {
     const pts = absPoints(item);
     if (pts.length < 2) return;
@@ -720,6 +762,7 @@ export function mountCanvas(opts = {}) {
     g.save();
     g.globalAlpha = clamp(item.opacity ?? 1, 0, 1);
     if (item.type === "text") drawText(g, item);
+    else if (item.type === "pen") drawPen(g, item);
     else if (item.type === "line" || item.type === "arrow") drawLinear(g, item);
     else drawBox(g, item);
     g.restore();
@@ -864,6 +907,8 @@ export function mountCanvas(opts = {}) {
         : "Drag a box around the diagram · Esc to cancel";
     } else if (state.tool === "text") {
       text = "Click to place text · Esc to finish";
+    } else if (state.tool === "pen") {
+      text = "Drag to draw freehand · P to keep drawing · V to select";
     } else if (state.tool === "hand") {
       text = "Drag to pan · scroll to move";
     } else if (state.selected.size) {
@@ -949,7 +994,7 @@ export function mountCanvas(opts = {}) {
   }
 
   function setTool(tool) {
-    if (!["select", "hand", "rect", "diamond", "ellipse", "line", "arrow", "text"].includes(tool)) return;
+    if (!["select", "hand", "rect", "diamond", "ellipse", "line", "arrow", "pen", "text"].includes(tool)) return;
     if (state.editingId) commitText();
     state.tool = tool;
     if (tool !== "select" && tool !== "hand") {
@@ -975,6 +1020,16 @@ export function mountCanvas(opts = {}) {
     if (!a || !state.draft) return;
     const item = state.draft;
     const start = a.start;
+
+    if (item.type === "pen") {
+      const last = item.points[item.points.length - 1];
+      const step = 1.5 / state.view.zoom;
+      if (!last || Math.hypot(p.x - start.x - last.x, p.y - start.y - last.y) >= step) {
+        item.points.push({ x: p.x - start.x, y: p.y - start.y });
+      }
+      render();
+      return;
+    }
 
     if (item.type === "line" || item.type === "arrow") {
       const end = event.shiftKey ? snapLine(start, { x: p.x, y: p.y }, true) : { x: p.x, y: p.y };
@@ -1008,7 +1063,9 @@ export function mountCanvas(opts = {}) {
     state.draft = null;
     if (!item) return;
 
-    if (item.type === "line" || item.type === "arrow") {
+    if (item.type === "pen") {
+      setLinePoints(item, absPoints(item));
+    } else if (item.type === "line" || item.type === "arrow") {
       if (item.w < 2 && item.h < 2) {
         setLinePoints(item, [{ x: item.x, y: item.y }, { x: item.x + 180, y: item.y }]);
       }
@@ -1139,6 +1196,14 @@ export function mountCanvas(opts = {}) {
       }
     }
 
+    if (item.type === "pen") {
+      const nextW = Math.max(1, right - left);
+      const nextH = Math.max(1, bottom - top);
+      const scaleX = b.w > 0 ? nextW / b.w : 1;
+      const scaleY = b.h > 0 ? nextH / b.h : 1;
+      item.points = a.points.map((pt) => ({ x: pt.x * scaleX, y: pt.y * scaleY }));
+    }
+
     item.x = left;
     item.y = top;
     item.w = Math.max(1, right - left);
@@ -1256,6 +1321,24 @@ export function mountCanvas(opts = {}) {
     scheduleSave();
   }
 
+  /* Text height depends on the font that actually loaded. The hand
+     font arrives after first paint, so re-measure once it is ready. */
+  function recomputeTextHeights() {
+    let changed = false;
+    for (const item of state.elements) {
+      if (item.type !== "text") continue;
+      const before = item.h;
+      refreshTextHeight(item);
+      if (Math.abs(item.h - before) > 0.01) changed = true;
+    }
+    if (state.editingId) {
+      const item = state.elements.find((e) => e.id === state.editingId);
+      if (item) positionTextEditor(item);
+    }
+    if (changed) scheduleSave();
+    if (state.isOpen) render();
+  }
+
   /* --- selection helpers ----------------------------------- */
 
   function deleteSelected() {
@@ -1334,13 +1417,29 @@ export function mountCanvas(opts = {}) {
   }
 
   function cropBlob() {
-    return new Promise((resolve, reject) => {
-      if (!state.exportRect) return reject(new Error("Select an area first"));
-      renderCrop(state.exportRect, 2).toBlob((blob) => {
-        if (blob) resolve(blob);
-        else reject(new Error("Could not render the PNG"));
-      }, "image/png");
+    const rect = state.exportRect;
+    if (!rect) return Promise.reject(new Error("Select an area first"));
+
+    /* Wait for the diagram fonts (including Virgil) before rasterising,
+       otherwise a text element can fall back to a different face. */
+    return ensureExportFonts().then(() => {
+      const out = renderCrop(rect, 2);
+      return new Promise((resolve, reject) => {
+        out.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Could not render the PNG"));
+        }, "image/png");
+      });
     });
+  }
+
+  async function ensureExportFonts() {
+    if (!document.fonts?.load) return;
+    const specs = new Set(['20px "Virgil"']);
+    for (const item of state.elements) {
+      if (item.type === "text") specs.add(fontSpec(item));
+    }
+    await Promise.all([...specs].map((spec) => document.fonts.load(spec).catch(() => {})));
   }
 
   async function copyText(text) {
@@ -1404,9 +1503,11 @@ export function mountCanvas(opts = {}) {
     render();
   }
 
-  function showExportPanel() {
+  async function showExportPanel() {
     const r = state.exportRect;
     if (!r) return;
+    await ensureExportFonts();
+    if (state.exportRect !== r) return;
     const thumbScale = Math.min(1, 150 / Math.max(1, r.w), 110 / Math.max(1, r.h));
     el.exportThumb.src = renderCrop(r, thumbScale).toDataURL("image/png");
     el.exportTitle.textContent = `Selection · ${Math.round(r.w)} × ${Math.round(r.h)}`;
@@ -1982,6 +2083,11 @@ export function mountCanvas(opts = {}) {
       if ("textAlign" in patch) item.textAlign = patch.textAlign;
     }
 
+    if (state.editingId) {
+      const editing = state.elements.find((item) => item.id === state.editingId);
+      if (editing) positionTextEditor(editing);
+    }
+
     render();
     syncStyleUI();
     if (items.length && commit && !live) commitHistory();
@@ -2118,10 +2224,10 @@ export function mountCanvas(opts = {}) {
     });
     observer.observe(stage);
 
-    if (document.fonts?.ready) {
-      document.fonts.ready.then(() => {
-        if (state.isOpen) render();
-      });
+    if (document.fonts) {
+      document.fonts.load('20px "Virgil"').catch(() => {});
+      document.fonts.ready.then(recomputeTextHeights).catch(() => {});
+      document.fonts.addEventListener?.("loadingdone", recomputeTextHeights);
     }
   }
 

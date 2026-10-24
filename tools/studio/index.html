@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/tools/studio/fonts/Virgil.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/tools/studio/studio.css">
 <link rel="stylesheet" href="/tools/studio/canvas.css">
 </head>
@@ -150,6 +151,9 @@
               <button class="draw-tool" data-tool="arrow" type="button" title="Arrow (A)" aria-label="Arrow">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M12.5 4H20v7.5"/></svg>
               </button>
+              <button class="draw-tool" data-tool="pen" type="button" title="Pen (P)" aria-label="Pen">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1.1L19.6 7.5a2.2 2.2 0 0 0-3.1-3.1L5.1 15.8 4 20Z"/><path d="m14.7 6.3 3 3"/></svg>
+              </button>
               <button class="draw-tool" data-tool="text" type="button" title="Text (T)" aria-label="Text">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v13M9 19h6"/></svg>
               </button>
@@ -231,6 +235,7 @@
                 <option value="sans">Sans</option>
                 <option value="mono">Mono</option>
                 <option value="serif">Serif</option>
+                <option value="hand">Virgil</option>
               </select>
               <select id="fontSize" aria-label="Font size">
                 <option value="16">S</option>
@@ -251,7 +256,7 @@
 
             <div class="draw-empty" id="drawEmpty">
               <strong>Draw the thing.</strong>
-              <span>Pick a shape above, then drag on the canvas. Export it straight into the post.</span>
+              <span>Pick a shape or the pen above, then drag on the canvas. Export it straight into the post.</span>
             </div>
 
             <div class="draw-hint" id="drawHint">Drag to draw · Space to pan · ⌘/Ctrl + scroll to zoom</div>
