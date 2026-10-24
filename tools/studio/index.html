@@ -12,6 +12,7 @@
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/tools/studio/studio.css">
+<link rel="stylesheet" href="/tools/studio/canvas.css">
 </head>
 <body>
 
@@ -79,34 +80,211 @@
 
     <div class="panes" id="panes">
 
-      <section class="pane write">
-        <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
-          <button data-cmd="h2" title="Heading">H2</button>
-          <span class="sep"></span>
-          <button data-cmd="bold" title="Bold (⌘B)"><b>B</b></button>
-          <button data-cmd="italic" title="Italic (⌘I)"><i>I</i></button>
-          <button data-cmd="strike" title="Strikethrough"><s>S</s></button>
-          <button data-cmd="code" title="Inline code">`code`</button>
-          <span class="sep"></span>
-          <button data-cmd="link" title="Link (⌘K)">Link</button>
-          <button data-cmd="image" title="Upload image">Image</button>
-          <span class="sep"></span>
-          <button data-cmd="math" title="Inline maths">∑</button>
-          <button data-cmd="mathblock" title="Display maths">∑ block</button>
-          <span class="sep"></span>
-          <button data-cmd="ul" title="Bulleted list">• List</button>
-          <button data-cmd="ol" title="Numbered list">1. List</button>
-          <button data-cmd="quote" title="Quote">❝</button>
-          <button data-cmd="codeblock" title="Code block">```</button>
-          <button data-cmd="table" title="Table">Table</button>
-          <button data-cmd="hr" title="Divider">—</button>
+      <section class="pane write" id="writePane">
+        <div class="pane-head write-head">
+          <div class="mode-tabs" role="tablist" aria-label="Middle pane">
+            <button class="mode-tab is-active" id="modeWrite" type="button" role="tab" aria-selected="true">Write</button>
+            <button class="mode-tab" id="modeDraw" type="button" role="tab" aria-selected="false">Draw</button>
+          </div>
+          <span id="paneHint">markdown</span>
         </div>
 
-        <textarea id="editor" spellcheck="true" placeholder="Write in markdown. Drop an image anywhere, or paste one from the clipboard."></textarea>
+        <div class="write-surface" id="writeSurface">
+          <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
+            <button data-cmd="h2" title="Heading">H2</button>
+            <span class="sep"></span>
+            <button data-cmd="bold" title="Bold (⌘B)"><b>B</b></button>
+            <button data-cmd="italic" title="Italic (⌘I)"><i>I</i></button>
+            <button data-cmd="strike" title="Strikethrough"><s>S</s></button>
+            <button data-cmd="code" title="Inline code">`code`</button>
+            <span class="sep"></span>
+            <button data-cmd="link" title="Link (⌘K)">Link</button>
+            <button data-cmd="image" title="Upload image">Image</button>
+            <span class="sep"></span>
+            <button data-cmd="math" title="Inline maths">∑</button>
+            <button data-cmd="mathblock" title="Display maths">∑ block</button>
+            <span class="sep"></span>
+            <button data-cmd="ul" title="Bulleted list">• List</button>
+            <button data-cmd="ol" title="Numbered list">1. List</button>
+            <button data-cmd="quote" title="Quote">❝</button>
+            <button data-cmd="codeblock" title="Code block">```</button>
+            <button data-cmd="table" title="Table">Table</button>
+            <button data-cmd="hr" title="Divider">—</button>
+          </div>
 
-        <div class="write-foot">
-          <span id="stats">0 words</span>
-          <span id="savedState" class="saved-state"></span>
+          <textarea id="editor" spellcheck="true" placeholder="Write in markdown. Drop an image anywhere, or paste one from the clipboard."></textarea>
+
+          <div class="write-foot">
+            <span id="stats">0 words</span>
+            <span id="savedState" class="saved-state"></span>
+          </div>
+        </div>
+
+        <!-- -----------------------------------------------------
+             Diagram canvas. Everything in here is controlled by
+             tools/studio/canvas.js; the markup is kept static so
+             the styles stay inspectable.
+             ----------------------------------------------------- -->
+        <div class="draw-surface" id="drawSurface" hidden>
+          <div class="draw-toolbar">
+            <div class="draw-tools" id="drawTools" role="toolbar" aria-label="Drawing tools">
+              <button class="draw-tool is-active" data-tool="select" type="button" title="Select (V)" aria-label="Select">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5 19 12l-6.1 1.4L9.7 20 5 3.5Z"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="hand" type="button" title="Pan (H)" aria-label="Pan">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11m0-1V5a1.5 1.5 0 0 1 3 0v6m0-1V6a1.5 1.5 0 0 1 3 0v7m0-1V9a1.5 1.5 0 0 1 3 0v6.5c0 3.3-2.5 5.5-5.7 5.5H13c-2.1 0-3.4-.8-4.5-2.4L5.2 14a1.6 1.6 0 0 1 2.5-1.9L8 12Z"/></svg>
+              </button>
+              <span class="draw-sep"></span>
+              <button class="draw-tool" data-tool="rect" type="button" title="Rectangle (R)" aria-label="Rectangle">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="diamond" type="button" title="Diamond (D)" aria-label="Diamond">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 12l-9 9-9-9 9-9Z"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="ellipse" type="button" title="Ellipse (O)" aria-label="Ellipse">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="7"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="line" type="button" title="Line (L)" aria-label="Line">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="arrow" type="button" title="Arrow (A)" aria-label="Arrow">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M12.5 4H20v7.5"/></svg>
+              </button>
+              <button class="draw-tool" data-tool="text" type="button" title="Text (T)" aria-label="Text">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v13M9 19h6"/></svg>
+              </button>
+            </div>
+
+            <div class="draw-history">
+              <button class="draw-icon" id="drawUndo" type="button" title="Undo (⌘Z)" aria-label="Undo" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7 4 11l4 4M4 11h9a6 6 0 0 1 0 12"/></svg>
+              </button>
+              <button class="draw-icon" id="drawRedo" type="button" title="Redo (⌘⇧Z)" aria-label="Redo" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 7 4 4-4 4M20 11h-9a6 6 0 0 0 0 12"/></svg>
+              </button>
+            </div>
+
+            <button class="btn btn-primary draw-export-btn" id="drawExport" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/></svg>
+              Export area
+            </button>
+          </div>
+
+          <div class="draw-styles" id="drawStyles" aria-label="Shape styles">
+            <div class="style-group">
+              <span class="style-label">Stroke</span>
+              <div class="swatches" id="strokeSwatches"></div>
+              <label class="custom-swatch" title="Custom stroke colour"><input type="color" id="strokeCustom" value="#1e1e1e"></label>
+            </div>
+
+            <div class="style-group">
+              <span class="style-label">Fill</span>
+              <div class="swatches" id="fillSwatches"></div>
+              <label class="custom-swatch" title="Custom fill colour"><input type="color" id="fillCustom" value="#a5d8ff"></label>
+            </div>
+
+            <div class="style-group">
+              <span class="style-label">Fill type</span>
+              <div class="seg" id="fillStyles">
+                <button data-fill="none" type="button" title="No fill">—</button>
+                <button data-fill="solid" type="button" title="Solid fill"><span class="fill-solid" aria-hidden="true"></span></button>
+                <button data-fill="hachure" type="button" title="Hachure fill"><span class="fill-hatch" aria-hidden="true"></span></button>
+              </div>
+            </div>
+
+            <div class="style-group">
+              <span class="style-label">Width</span>
+              <div class="seg" id="strokeWidths">
+                <button data-width="1" type="button" title="Thin"><span class="line-thin" aria-hidden="true"></span></button>
+                <button data-width="2" type="button" title="Bold"><span class="line-bold" aria-hidden="true"></span></button>
+                <button data-width="4" type="button" title="Extra bold"><span class="line-extra" aria-hidden="true"></span></button>
+              </div>
+            </div>
+
+            <div class="style-group">
+              <span class="style-label">Line</span>
+              <div class="seg" id="strokeStyles">
+                <button data-stroke="solid" type="button" title="Solid">—</button>
+                <button data-stroke="dashed" type="button" title="Dashed">╌</button>
+                <button data-stroke="dotted" type="button" title="Dotted">···</button>
+              </div>
+            </div>
+
+            <div class="style-group">
+              <span class="style-label">Sketch</span>
+              <div class="seg" id="roughness">
+                <button data-rough="0" type="button" title="Clean lines">clean</button>
+                <button data-rough="1" type="button" title="Hand-drawn">artist</button>
+                <button data-rough="2" type="button" title="Architect sketch">architect</button>
+              </div>
+            </div>
+
+            <div class="style-group style-opacity">
+              <span class="style-label">Opacity</span>
+              <input type="range" id="opacity" min="10" max="100" step="5" value="100" aria-label="Opacity">
+              <span class="style-value" id="opacityValue">100%</span>
+            </div>
+
+            <div class="style-group style-font">
+              <span class="style-label">Font</span>
+              <select id="fontFamily" aria-label="Font family">
+                <option value="sans">Sans</option>
+                <option value="mono">Mono</option>
+                <option value="serif">Serif</option>
+              </select>
+              <select id="fontSize" aria-label="Font size">
+                <option value="16">S</option>
+                <option value="20" selected>M</option>
+                <option value="28">L</option>
+                <option value="36">XL</option>
+              </select>
+              <div class="seg" id="textAlign">
+                <button data-align="left" type="button" title="Align left">L</button>
+                <button data-align="center" type="button" title="Align centre">C</button>
+                <button data-align="right" type="button" title="Align right">R</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="draw-stage" id="drawStage">
+            <canvas id="drawCanvas" tabindex="0" aria-label="Diagram drawing canvas"></canvas>
+
+            <div class="draw-empty" id="drawEmpty">
+              <strong>Draw the thing.</strong>
+              <span>Pick a shape above, then drag on the canvas. Export it straight into the post.</span>
+            </div>
+
+            <div class="draw-hint" id="drawHint">Drag to draw · Space to pan · ⌘/Ctrl + scroll to zoom</div>
+
+            <textarea class="draw-text-editor" id="drawTextEditor" hidden spellcheck="true" aria-label="Diagram text"></textarea>
+
+            <div class="export-panel" id="exportPanel" hidden>
+              <div class="export-thumb-wrap"><img id="exportThumb" alt="Export preview"></div>
+              <div class="export-info">
+                <span class="export-title" id="exportTitle">Selection</span>
+                <code id="exportSnippet">Save to post to get the markdown path.</code>
+              </div>
+              <div class="export-actions">
+                <button class="btn btn-primary" id="exportSave" type="button">Save to post</button>
+                <button class="btn" id="exportCopy" type="button">Copy image</button>
+                <button class="btn" id="exportDownload" type="button">Download</button>
+                <button class="btn" id="exportInsert" type="button" hidden>Insert</button>
+                <button class="linkish" id="exportRetake" type="button">Retake</button>
+                <button class="linkish" id="exportCancel" type="button">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="draw-foot">
+            <span id="drawCount">0 elements</span>
+            <span class="draw-status" id="drawStatus">Saved locally</span>
+            <div class="draw-zoom">
+              <button id="drawZoomOut" type="button" title="Zoom out" aria-label="Zoom out">−</button>
+              <button id="drawZoomLabel" type="button" title="Reset to 100%">100%</button>
+              <button id="drawZoomIn" type="button" title="Zoom in" aria-label="Zoom in">+</button>
+              <button id="drawFit" type="button" title="Fit diagram to the pane">fit</button>
+            </div>
+          </div>
         </div>
       </section>
 

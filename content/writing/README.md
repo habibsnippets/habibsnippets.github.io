@@ -36,6 +36,31 @@ Published posts stay editable in the studio; **Update** republishes them.
 **Move back to drafts** pulls the page out of the next build. Imported `.html`
 posts are preview-only — edit those files directly.
 
+## Diagrams
+
+**Draw** opens a small Excalidraw-style canvas in place of the editor, with the
+preview still on the right. Scenes autosave in the browser (`localStorage`, one
+per post) while you work; only the exported PNG is committed.
+
+- Tools: select `V`, pan `H`, rectangle `R`, diamond `D`, ellipse `O`, line `L`,
+  arrow `A`, text `T`. Shift-click to multi-select, drag a box on empty canvas
+  to marquee-select, and drag a selection's handles to resize.
+- Style the selection from the toolbar: stroke and fill colours (including
+  custom swatches), none/solid/hachure fill, stroke width and style, sketch
+  roughness, opacity, and font family, size and alignment for text.
+- `Space`-drag or the hand tool pans. `⌘/Ctrl`+wheel or the zoom buttons zoom;
+  **fit** frames the drawing. `⌘/Ctrl+Z` / `⇧⌘/Ctrl+Z` undo and redo,
+  `⌘/Ctrl+C` / `V` / `D` copy, paste and duplicate, `Delete` removes.
+- **Export** → drag a box around the diagram. The panel previews the crop at 2×
+  with a transparent background. **Save to post** writes
+  `assets/writing/<slug>/diagram-<timestamp>.png`, copies the markdown snippet,
+  and offers **Insert** to paste it at the cursor. **Copy image** and
+  **Download** work without saving.
+
+Give a new post a title before saving its diagram — the studio needs a slug to
+know which asset folder to use. Imported `.html` posts are read-only, so their
+Draw tab is disabled.
+
 ## Without the studio
 
 1. Add an entry to the **top** of `posts.json`:

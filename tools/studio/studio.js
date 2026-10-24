@@ -6,6 +6,8 @@
    shows what came back.
    ============================================================ */
 
+import { mountCanvas } from "./canvas.js";
+
 const $ = (id) => document.getElementById(id);
 
 const el = {
@@ -29,6 +31,11 @@ const el = {
   desc: $("desc"),
   banner: $("banner"),
   panes: $("panes"),
+  modeWrite: $("modeWrite"),
+  modeDraw: $("modeDraw"),
+  paneHint: $("paneHint"),
+  writeSurface: $("writeSurface"),
+  drawSurface: $("drawSurface"),
   toolbar: $("toolbar"),
   editor: $("editor"),
   stats: $("stats"),
@@ -48,9 +55,28 @@ const state = {
   saving: false,
   slugLocked: false,
   previewOn: true,
+  mode: "write", // write | draw
   words: 0,
   minutes: 1,
 };
+
+/* The diagram canvas owns its own scene. It asks us for the slug,
+   calls save() when an export needs a post to live under, and hands
+   the finished markdown back for insertion. */
+const canvasStudio = mountCanvas({
+  root: el.drawSurface,
+  getSlug: () => state.meta?.slug || null,
+  ensureSlug: async () => {
+    if (state.meta?.slug) return state.meta.slug;
+    await save({ silent: true });
+    return state.meta?.slug || null;
+  },
+  insertMarkdown: (markdown) => {
+    setMode("write");
+    insert(markdown);
+  },
+  notify: toast,
+});
 
 /* --- tiny helpers ----------------------------------------- */
 
@@ -124,6 +150,34 @@ async function copy(text) {
   }
   toast("Copied");
 }
+
+/* --- write / draw ------------------------------------------ */
+
+function setMode(mode) {
+  const drawing = mode === "draw";
+  if (drawing && (state.legacy || el.modeDraw.disabled)) return;
+  if (mode === state.mode) return;
+
+  state.mode = drawing ? "draw" : "write";
+  el.writeSurface.hidden = drawing;
+  el.drawSurface.hidden = !drawing;
+  el.modeWrite.classList.toggle("is-active", !drawing);
+  el.modeDraw.classList.toggle("is-active", drawing);
+  el.modeWrite.setAttribute("aria-selected", String(!drawing));
+  el.modeDraw.setAttribute("aria-selected", String(drawing));
+  el.paneHint.textContent = drawing ? "diagram · png" : "markdown";
+
+  if (drawing) {
+    el.editor.blur();
+    canvasStudio.open();
+  } else {
+    canvasStudio.close();
+    el.editor.focus({ preventScroll: true });
+  }
+}
+
+el.modeWrite.addEventListener("click", () => setMode("write"));
+el.modeDraw.addEventListener("click", () => setMode("draw"));
 
 /* --- list -------------------------------------------------- */
 
@@ -207,6 +261,14 @@ async function openPost(slug) {
     el.preview.removeAttribute("src");
     renderPreview();
   }
+
+  /* Each post gets its own local diagram scene. */
+  el.modeDraw.disabled = state.legacy;
+  el.modeDraw.title = state.legacy
+    ? "Imported HTML posts are read-only"
+    : "Draw diagrams — the editable scene stays in this browser";
+  if (state.legacy) setMode("write");
+  canvasStudio.setSlug(slug);
 
   updateChrome();
   markClean();
@@ -312,6 +374,8 @@ async function save({ silent = false } = {}) {
     if (wasNew) {
       el.slug.value = data.meta.slug;
       el.slug.disabled = false;
+      /* The scene was created under the scratch key; carry it over. */
+      canvasStudio.setSlug(data.meta.slug, { migrate: true });
     }
     await refreshList();
     if (!silent) toast("Saved");
@@ -534,9 +598,25 @@ el.editor.addEventListener("drop", (event) => {
 
 el.editor.addEventListener("paste", (event) => {
   const file = Array.from(event.clipboardData?.files || []).find((f) => f.type.startsWith("image/"));
-  if (!file) return;
-  event.preventDefault();
-  insertImage(file);
+  if (file) {
+    event.preventDefault();
+    insertImage(file);
+    return;
+  }
+
+  /* The canvas copies a full ![diagram](path) snippet, but if only a
+     bare image path is on the clipboard, wrap it automatically.
+     Relative names keep working — the build resolves them against
+     the post's asset folder. */
+  const text = event.clipboardData?.getData("text/plain")?.trim() || "";
+  if (
+    text &&
+    !text.includes("](") &&
+    /^(?:https?:\/\/|\/|\.\/)?[^\s]+\.(?:png|jpe?g|gif|webp|avif|svg)$/i.test(text)
+  ) {
+    event.preventDefault();
+    insert(`![diagram](${text})`);
+  }
 });
 
 /* --- publish ----------------------------------------------- */
@@ -644,6 +724,11 @@ function resetEditor() {
   el.preview.removeAttribute("srcdoc");
 
   hideBanner();
+  el.modeDraw.disabled = false;
+  el.modeDraw.title = "Draw diagrams — the editable scene stays in this browser";
+  canvasStudio.setSlug(null, { reset: true });
+  if (state.mode === "draw") setMode("write");
+
   updateChrome();
   markClean();
   renderList();
