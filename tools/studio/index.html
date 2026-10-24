@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Studio — writing</title>
+<link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon.png">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/tools/studio/studio.css">
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="rail">
+    <div class="rail-head">
+      <span class="mark">writing<em>studio</em></span>
+      <button class="btn btn-primary btn-new" id="newPost" type="button">
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        New post
+      </button>
+    </div>
+
+    <div class="rail-search">
+      <input id="search" type="search" placeholder="Filter posts" autocomplete="off" aria-label="Filter posts">
+    </div>
+
+    <div class="rail-list" id="list" role="list"></div>
+
+    <div class="rail-foot">
+      <span id="gitState" class="git-state">reading repo…</span>
+      <button class="linkish" id="copyPush" type="button">copy push command</button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div class="title-wrap">
+        <input id="title" class="title" placeholder="Post title" aria-label="Post title" autocomplete="off" spellcheck="true">
+        <div class="subline">
+          <span class="chip" id="statusChip" data-state="draft">Draft</span>
+          <span id="metaLine">nothing open</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="saveBtn" type="button" title="Save (⌘S)">Save</button>
+        <button class="btn btn-primary" id="publishBtn" type="button" title="Build the site with this post">Publish</button>
+        <div class="menu-wrap">
+          <button class="btn btn-icon" id="menuBtn" type="button" aria-label="More actions" aria-expanded="false">⋯</button>
+          <div class="menu" id="menu" hidden>
+            <a id="openPost" href="#" target="_blank" rel="noopener">Open live page ↗</a>
+            <button id="unpublishBtn" type="button">Move back to drafts</button>
+            <button id="deleteBtn" type="button" class="danger">Delete post…</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="meta-row">
+      <label class="field">Slug
+        <input id="slug" autocomplete="off" spellcheck="false" placeholder="post-url">
+      </label>
+      <label class="field">Date
+        <input id="date" type="date">
+      </label>
+      <label class="field field-grow">Description <span class="hint">blank = first paragraph</span>
+        <input id="desc" autocomplete="off" placeholder="one line for search results and link previews">
+      </label>
+    </div>
+
+    <div class="banner" id="banner" hidden></div>
+
+    <div class="panes" id="panes">
+
+      <section class="pane write">
+        <div class="toolbar" id="toolbar" role="toolbar" aria-label="Formatting">
+          <button data-cmd="h2" title="Heading">H2</button>
+          <span class="sep"></span>
+          <button data-cmd="bold" title="Bold (⌘B)"><b>B</b></button>
+          <button data-cmd="italic" title="Italic (⌘I)"><i>I</i></button>
+          <button data-cmd="strike" title="Strikethrough"><s>S</s></button>
+          <button data-cmd="code" title="Inline code">`code`</button>
+          <span class="sep"></span>
+          <button data-cmd="link" title="Link (⌘K)">Link</button>
+          <button data-cmd="image" title="Upload image">Image</button>
+          <span class="sep"></span>
+          <button data-cmd="math" title="Inline maths">∑</button>
+          <button data-cmd="mathblock" title="Display maths">∑ block</button>
+          <span class="sep"></span>
+          <button data-cmd="ul" title="Bulleted list">• List</button>
+          <button data-cmd="ol" title="Numbered list">1. List</button>
+          <button data-cmd="quote" title="Quote">❝</button>
+          <button data-cmd="codeblock" title="Code block">```</button>
+          <button data-cmd="table" title="Table">Table</button>
+          <button data-cmd="hr" title="Divider">—</button>
+        </div>
+
+        <textarea id="editor" spellcheck="true" placeholder="Write in markdown. Drop an image anywhere, or paste one from the clipboard."></textarea>
+
+        <div class="write-foot">
+          <span id="stats">0 words</span>
+          <span id="savedState" class="saved-state"></span>
+        </div>
+      </section>
+
+      <section class="pane preview">
+        <div class="pane-head">
+          <span>Preview</span>
+          <button class="linkish" id="toggleSplit" type="button">hide</button>
+        </div>
+        <iframe id="preview" title="Rendered preview" loading="lazy"></iframe>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden>
+<div class="toast" id="toast" hidden></div>
+
+<script src="/tools/studio/studio.js" type="module"></script>
+</body>
+</html>

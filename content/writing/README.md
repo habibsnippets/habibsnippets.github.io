@@ -1,18 +1,44 @@
 # Writing
 
-Source of truth for the `/writing/` pages. Nothing here is served directly —
+Source of truth for `/writing/`. Nothing here is served directly —
 `tools/build-writing.mjs` renders it into `writing/<slug>/index.html`.
 
 ```
-content/writing/posts.json     metadata, newest first
-content/writing/<slug>.html    post body (raw HTML, no <html> wrapper)
+content/writing/posts.json     metadata + draft flag, newest first
+content/writing/<slug>.md      post body, written in markdown
+content/writing/<slug>.html    legacy posts imported from Bearblog (raw HTML)
 assets/writing/<slug>/         images for that post
+writing/<slug>/index.html      generated — committed, served by Pages
+writing/posts.js               generated — the homepage list reads this
 ```
 
-## Add a post
+## The studio (usual way)
 
-1. Pick a slug, e.g. `kernel-fusion`.
-2. Add an entry to the **top** of `posts.json`:
+```bash
+npm install          # once: marked + katex, only needed by the local tools
+npm run studio       # http://127.0.0.1:4321
+```
+
+- **New post** → write → the draft autosaves into `content/writing/<slug>.md`.
+- **Image** button, drag-and-drop, or paste: the file lands in
+  `assets/writing/<slug>/` and the markdown link is inserted for you.
+- **Preview** is rendered by the same code as the build, so it is the page.
+- **Publish** flips the post out of drafts and rebuilds everything. It does not
+  touch git — the banner shows the exact command:
+
+  ```bash
+  git add -A && git commit -m "…" && git push origin main
+  ```
+
+GitHub Pages serves the committed files, so that push is what goes live.
+
+Published posts stay editable in the studio; **Update** republishes them.
+**Move back to drafts** pulls the page out of the next build. Imported `.html`
+posts are preview-only — edit those files directly.
+
+## Without the studio
+
+1. Add an entry to the **top** of `posts.json`:
 
    ```json
    {
@@ -20,30 +46,58 @@ assets/writing/<slug>/         images for that post
      "title": "Kernel Fusion, Slowly",
      "date": "02 Nov, 2026",
      "dateISO": "2026-11-02",
-     "minutes": 6,
-     "description": "One sentence for search results and link previews."
+     "description": "One sentence for search results and link previews.",
+     "draft": true
    }
    ```
 
-3. Write `content/writing/kernel-fusion.html` — the body only, starting at `<h2>`
-   (the page supplies the `<h1>`). Drop images in `assets/writing/kernel-fusion/`
-   and reference them as `/assets/writing/kernel-fusion/name.png`.
-4. Run:
+2. Write `content/writing/kernel-fusion.md`. Start at `##` — the page supplies
+   the `<h1>`. Drop `"draft": true` (or set it to `false`) to publish.
+3. `npm run build`
+4. Commit the markdown, the metadata, the images **and** the generated
+   `writing/` output.
 
-   ```bash
-   node tools/build-writing.mjs
-   ```
+`words` and `minutes` are computed at build time when absent, so you can leave
+them out.
 
-5. Commit the fragment, the metadata, the images **and** the generated
-   `writing/` output. GitHub Pages serves the generated files.
+## Markdown
+
+Standard markdown plus tables, fenced code and maths:
+
+````markdown
+## Heading
+
+**bold** *italic* ~~strike~~ `code`
+
+- list           1. list           > quote          ---
+
+| a | b |
+|---|---|
+
+```python
+code block
+```
+
+Inline $E = mc^2$ and display:
+
+$$
+\int_0^1 x \, dx = \frac{1}{2}
+$$
+
+![alt text](/assets/writing/<slug>/plot.png)
+````
+
+`\(…\)` and `\[…\]` work too. Maths is rendered by KaTeX **at build time** into
+plain HTML, so readers download no maths JavaScript; posts that contain maths
+also pull in KaTeX's stylesheet from a CDN. A bare filename
+(`![plot](plot.png)`) resolves to that post's asset folder.
 
 ## Notes
 
-- `writing/posts.js` is generated from `posts.json`; the homepage list reads it.
-  Never edit it by hand.
-- `bearblog-canonical.md` is generated too: the canonical URL to paste into each
-  original bearblog post so search engines credit the copy here.
+- `writing/posts.js` and `bearblog-canonical.md` are generated. Never edit them.
+- The build also keeps the "Essays 23" style counts in `index.html` in sync.
 - `tools/import-bearblog.mjs` is the one-off migration tool (`--force` re-imports
   and overwrites local edits). You shouldn't need it again.
-- Prose styling lives under `.prose` in `styles.css`; lists, tables, code blocks
-  and images are already handled.
+- Editing `styles.css` or `main.js` means bumping `CSS_V` / `JS_V` in
+  `tools/post-page.mjs` (and the two `?v=` values in `index.html`).
+- Prose styling lives under `.prose` in `styles.css`.

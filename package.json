@@ -1,0 +1,14 @@
+{
+  "name": "habibsnippets.github.io",
+  "private": true,
+  "type": "module",
+  "description": "Static portfolio + writing archive. The studio and the writing build are local tools only.",
+  "scripts": {
+    "studio": "node tools/studio.mjs",
+    "build": "node tools/build-writing.mjs"
+  },
+  "devDependencies": {
+    "katex": "^0.16.47",
+    "marked": "^15.0.12"
+  }
+}
