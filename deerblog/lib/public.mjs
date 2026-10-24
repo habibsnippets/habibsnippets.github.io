@@ -29,7 +29,7 @@ function feedHref(prefix, path = "feed/") {
   return publicPath(prefix, path);
 }
 
-function renderContent(markdown, { blog, post = null, prefix, publicPosts = [] }) {
+export function renderContent(markdown, { blog, post = null, prefix, publicPosts = [] }) {
   const result = renderMarkdown(markdown, { assetBase: `/media/${blog.id}/` });
   const html = applyDirectives(result.html, {
     blog,
@@ -87,7 +87,7 @@ ${metaTag || ""}
 }
 
 function blogHead({ blog, ctx, title, description, canonical, image, type, feedTitle }) {
-  const favicon = blog.favicon && /^https?:\/\//i.test(blog.favicon)
+  const favicon = blog.favicon && /^(https?:|data:|\/)/i.test(blog.favicon)
     ? blog.favicon
     : `${publicPath(ctx.prefix, "favicon.svg")}`;
   return `<meta charset="utf-8">
@@ -117,7 +117,8 @@ function blogBody({ blog, ctx, content, nav, footer, bodyClass, preview = false,
   const theme = blog.overwriteStyles ? "theme-custom" : `theme-${blog.theme || "default"}`;
   const navHtml = nav === undefined ? renderContent(blog.nav || "", { blog, prefix: ctx.prefix, publicPosts: ctx.publicPosts }).html : nav;
   return `<body class="deer ${theme} ${bodyClass || ""}">
-${preview ? `<div class="deer-preview">Preview — not public. Links and scripts are disabled in the dashboard preview.</div>` : ""}
+${preview ? `<div class="deer-preview">Preview — not public. Scripts and forms are disabled in this sandbox.</div>` : ""}
+${ctx.fallback ? `<div class="deer-fallback">Path preview. Scripts and forms are disabled on this shared address. <a href="${esc(ctx.origin)}/">Open the blog on its own address</a>.</div>` : ""}
 <header class="deer-header">
   <a class="deer-title" href="${esc(publicPath(ctx.prefix))}"><span class="deer-mark" aria-hidden="true">${esc(blog.favicon || "🦌")}</span> ${esc(blog.title)}</a>
   <nav class="deer-nav">${navHtml}</nav>
@@ -215,7 +216,7 @@ export function renderPostPage({ blog, post, posts, ctx, preview = false, upvote
   const description = post.metaDescription || (post.content || "").replace(/[#>*_`\[\]()!]/g, "").slice(0, 155);
   const content = [
     preview ? "" : "",
-    !isPage ? `<h1>${esc(post.title)}</h1><p class="deer-date"><time datetime="${esc(post.publishedDate || "")}">${esc(displayDate(post.publishedDate, blog))}</time>${post.firstPublishedAt && post.lastModified ? ` · updated ${esc(displayDate(post.lastModified, blog))}` : ""}</p>` : "",
+    !isPage ? `<h1>${esc(post.title)}</h1><p class="deer-date"><time datetime="${esc(post.publishedDate || "")}">${esc(displayDate(post.publishedDate, blog))}</time>${post.publishedDate && post.lastModified && displayDate(post.lastModified, blog) !== displayDate(post.publishedDate, blog) ? ` · updated ${esc(displayDate(post.lastModified, blog))}` : ""}</p>` : "",
     renderContent(post.content, { blog, post, prefix: ctx.prefix, publicPosts: posts }).html,
     post.canonicalUrl && canonical !== fullPath ? `<p><small><a href="${esc(canonical)}" rel="canonical">View original</a></small></p>` : "",
     !preview && post.tags?.length
@@ -441,8 +442,8 @@ export function renderLogin({ email = "", error = "", next = "", user, origin, c
   return renderAuth({ title: "Log in", description: "Log in to Deerblog.", body, user, origin, csrf, path: "/login/" });
 }
 
-export function renderForgot({ error = "", link = "", user, origin, csrf }) {
-  const body = `<h1>Reset password</h1>${error ? `<div class="error-box"><p>${esc(error)}</p></div>` : ""}
+export function renderForgot({ error = "", link = "", notice = "", user, origin, csrf }) {
+  const body = `<h1>Reset password</h1>${error ? `<div class="error-box"><p>${esc(error)}</p></div>` : ""}${notice ? `<p class="notice">${esc(notice)}</p>` : ""}
 <p>Enter the email you signed up with.</p>
 <form method="post" action="/forgot/" class="form">${csrfField(csrf)}<label>Email<input type="email" name="email" required autocomplete="email"></label><button class="button" type="submit">Send reset link</button></form>
 ${link ? `<div class="notice"><p>Local demo: no email is sent. Use this link:</p><p><a href="${esc(link)}">${esc(link)}</a></p></div>` : ""}

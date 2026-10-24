@@ -5,7 +5,9 @@
   "description": "Static portfolio + writing archive. The studio and the writing build are local tools only.",
   "scripts": {
     "studio": "node tools/studio.mjs",
-    "build": "node tools/build-writing.mjs"
+    "build": "node tools/build-writing.mjs",
+    "deerblog": "node deerblog/server.mjs",
+    "deerblog:reset": "node deerblog/server.mjs --reset"
   },
   "devDependencies": {
     "katex": "^0.16.47",

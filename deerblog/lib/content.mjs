@@ -234,6 +234,7 @@ export function postFromRaw(raw, { blog, posts, current = null, publish = false,
     value: {
       ...(current || {}),
       ...data,
+      publish: Boolean(publish),
       firstPublishedAt: firstPublished,
     },
     errors,

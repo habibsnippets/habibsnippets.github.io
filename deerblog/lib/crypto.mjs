@@ -38,6 +38,14 @@ export const randomToken = (bytes = 32) => crypto.randomBytes(bytes).toString("b
 export const sha256 = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
 export const uid = (length = 12) => crypto.randomBytes(length).toString("base64url").slice(0, length);
 
+/* Compare two short secrets without leaking their length through an early
+   return. Used for preview links; session and CSRF checks use the same idea. */
+export function safeEqual(a, b) {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  return left.length === right.length && crypto.timingSafeEqual(left, right);
+}
+
 export function normalizeEmail(value) {
   return String(value || "").trim().toLowerCase();
 }

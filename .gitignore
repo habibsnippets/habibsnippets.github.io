@@ -1,2 +1,4 @@
 node_modules/
 .DS_Store
+deerblog/data/store.json
+deerblog/data/uploads/

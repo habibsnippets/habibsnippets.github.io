@@ -1,6 +1,7 @@
 import { escapeHtml as esc } from "./markdown.mjs";
 import { displayDate } from "./dates.mjs";
 import { SITE_NAME } from "./public.mjs";
+import { blogOrigin } from "./web.mjs";
 
 export function dashboardPath(blog, suffix = "") {
   return `/${blog.subdomain}/dashboard${suffix ? `/${String(suffix).replace(/^\/+/, "")}` : "/"}`;
@@ -140,7 +141,7 @@ export function renderAccount({ user, csrf, mainOrigin, error, notice }) {
   });
 }
 
-export function renderUpgrade({ user, csrf, mainOrigin, notice }) {
+export function renderUpgrade({ user, csrf, mainOrigin, notice, error = "" }) {
   const pro = user.plan === "pro";
   const body = `<div class="card plan-card">
 <p class="eyebrow">${pro ? "Current plan" : "Free plan"}</p>
@@ -160,6 +161,7 @@ export function renderUpgrade({ user, csrf, mainOrigin, notice }) {
     csrf,
     mainOrigin,
     notice,
+    error,
   });
 }
 
@@ -222,6 +224,9 @@ export function renderPostsList({ user, blog, posts, csrf, mainOrigin, error, no
 export function renderEditor({ user, blog, post, raw, csrf, mainOrigin, error, notice, pageMode = false }) {
   const isNew = !post?.id;
   const publish = post?.publish;
+  const previewHref = post?.id && !publish && post.previewToken
+    ? `${blogOrigin(blog)}/${post.slug}/?preview=${encodeURIComponent(post.previewToken)}`
+    : "";
   const body = `<form method="post" action="${esc(isNew ? dashboardPath(blog, "posts/new/") : dashboardPath(blog, `posts/${post.uid}/`))}" class="editor-form">
 <input type="hidden" name="is_page" value="${pageMode || post?.isPage ? "1" : "0"}">
 <input type="hidden" name="preview_uid" value="${esc(post?.uid || "")}">
@@ -231,6 +236,7 @@ export function renderEditor({ user, blog, post, raw, csrf, mainOrigin, error, n
   <button class="button ghost" type="submit" formaction="${esc(dashboardPath(blog, "preview/"))}" formtarget="_blank">Preview</button>
   <a class="button ghost small" href="${esc(dashboardPath(blog, post?.isPage ? "pages/" : "posts/"))}">← Back</a>
   <span class="toolbar-spacer"></span>
+  ${previewHref ? `<a class="button ghost small" href="${esc(previewHref)}" target="_blank" rel="noopener">Draft link</a><button class="button ghost small" type="button" data-copy="${esc(previewHref)}">Copy link</button>` : ""}
   ${post?.id ? `<button class="button danger small" type="submit" form="delete-post">Delete</button>` : ""}
 </div>
 <div class="editor-tools">
