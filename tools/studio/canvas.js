@@ -908,7 +908,7 @@ export function mountCanvas(opts = {}) {
     } else if (state.tool === "text") {
       text = "Click to place text · Esc to finish";
     } else if (state.tool === "pen") {
-      text = "Drag to draw freehand · P to keep drawing · V to select";
+      text = "Drag to draw freehand · V to select · Esc to finish";
     } else if (state.tool === "hand") {
       text = "Drag to pan · scroll to move";
     } else if (state.selected.size) {
@@ -1075,9 +1075,17 @@ export function mountCanvas(opts = {}) {
     }
 
     state.elements.push(item);
-    state.selected = new Set([item.id]);
-    state.tool = "select";
-    syncToolUI();
+
+    /* Freehand drawing stays active so several strokes can be drawn in a
+       row. Unlike shapes, the new stroke is not selected automatically. */
+    if (item.type === "pen") {
+      state.selected.clear();
+    } else {
+      state.selected = new Set([item.id]);
+      state.tool = "select";
+      syncToolUI();
+    }
+
     commitHistory();
     syncStyleUI();
     updateUI();

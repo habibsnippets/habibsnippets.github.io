@@ -45,7 +45,8 @@ per post) while you work; only the exported PNG is committed.
 - Tools: select `V`, pan `H`, rectangle `R`, diamond `D`, ellipse `O`, line `L`,
   arrow `A`, pen `P`, text `T`. Shift-click to multi-select, drag a box on empty
   canvas to marquee-select, and drag a selection's handles to resize. The pen
-  draws freehand strokes; those can be selected, moved and scaled like shapes.
+  draws freehand strokes and stays active between them; press `V` or `Esc` when
+  you're done. Strokes can be selected, moved and scaled like shapes.
 - Style the selection from the toolbar: stroke and fill colours (including
   custom swatches), none/solid/hachure fill, stroke width and style, sketch
   roughness, opacity, and font family, size and alignment for text. Text can
