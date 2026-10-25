@@ -293,6 +293,20 @@
 .draw-stage.is-select { cursor: default; }
 .draw-stage.is-text { cursor: text; }
 
+.draw-stage.is-drop-target::after {
+  content: "Drop the image to add it to the canvas";
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--sky);
+  border-radius: 14px;
+  background: rgba(11, 98, 196, 0.06);
+  color: var(--sky);
+  font: 600 13px/1.4 var(--font);
+  pointer-events: none;
+}
+
 #drawCanvas {
   position: absolute;
   inset: 0;

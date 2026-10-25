@@ -430,7 +430,7 @@ export function mountCanvas(opts = {}) {
     });
   }
 
-  function addImage(src, naturalW, naturalH) {
+  function addImage(src, naturalW, naturalH, at = null) {
     if (state.editingId) commitText();
     const { w: vw, h: vh } = stageSize();
     const maxW = Math.max(160, Math.min(720, vw - 80));
@@ -438,12 +438,15 @@ export function mountCanvas(opts = {}) {
     const fit = Math.min(1, maxW / naturalW, maxH / naturalH);
     const w = Math.max(40, Math.round(naturalW * fit));
     const h = Math.max(30, Math.round(naturalH * fit));
+    /* Dropped images land under the cursor; pasted ones sit in the middle. */
+    const cx = at ? at.x : wx(vw / 2);
+    const cy = at ? at.y : wy(vh / 2);
     const item = {
       id: uid(),
       type: "image",
       src,
-      x: wx(vw / 2) - w / 2,
-      y: wy(vh / 2) - h / 2,
+      x: cx - w / 2,
+      y: cy - h / 2,
       w,
       h,
       opacity: 1,
@@ -458,15 +461,22 @@ export function mountCanvas(opts = {}) {
     updateUI();
     render();
     scheduleSave();
-    notify(`Screenshot added · ${naturalW} × ${naturalH}`);
+    notify(`Image added · ${naturalW} × ${naturalH}`);
   }
 
-  async function insertImageFile(file) {
+  async function insertImageFile(file, at = null) {
     try {
       const { src, naturalW, naturalH } = await readClipboardImage(file);
-      addImage(src, naturalW, naturalH);
+      addImage(src, naturalW, naturalH, at);
     } catch (err) {
-      notify(err.message || "Could not paste the image");
+      notify(err.message || "Could not add the image");
+    }
+  }
+
+  async function insertImageFiles(files, at = null) {
+    for (const [i, file] of files.entries()) {
+      const point = at ? { x: at.x + i * 24, y: at.y + i * 24 } : null;
+      await insertImageFile(file, point);
     }
   }
 
@@ -1026,7 +1036,7 @@ export function mountCanvas(opts = {}) {
   }
 
   function updateHint() {
-    let text = "Drag to draw · Paste a screenshot · Space to pan · V R D O L A P T pick a tool";
+    let text = "Drag to draw · Drop or paste a screenshot · Space to pan · V R D O L A P T pick a tool";
     if (state.exportMode) {
       text = state.exportRect
         ? "Save to post, or copy/download the PNG · Esc to cancel"
@@ -2212,6 +2222,36 @@ export function mountCanvas(opts = {}) {
     }
   }
 
+  /* --- dropped images -------------------------------------- */
+
+  function onDragOver(event) {
+    if (!state.isOpen) return;
+    if (!Array.from(event.dataTransfer?.types || []).includes("Files")) return;
+    /* Without this the browser navigates away to the dropped file. */
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    stage.classList.add("is-drop-target");
+  }
+
+  function onDragLeave(event) {
+    if (!stage.contains(event.relatedTarget)) stage.classList.remove("is-drop-target");
+  }
+
+  function onDrop(event) {
+    if (!state.isOpen) return;
+    stage.classList.remove("is-drop-target");
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (!files.length) return;
+
+    event.preventDefault();
+    const images = files.filter((file) => file.type.startsWith("image/"));
+    if (!images.length) {
+      notify("That file is not an image");
+      return;
+    }
+    insertImageFiles(images, pointerPos(event));
+  }
+
   /* --- style panel ----------------------------------------- */
 
   function buildSwatches(container, colors, onPick) {
@@ -2411,6 +2451,9 @@ export function mountCanvas(opts = {}) {
     canvas.addEventListener("pointercancel", onPointerCancel);
     canvas.addEventListener("wheel", onWheel, { passive: false });
     canvas.addEventListener("dblclick", onDoubleClick);
+    stage.addEventListener("dragover", onDragOver);
+    stage.addEventListener("dragleave", onDragLeave);
+    stage.addEventListener("drop", onDrop);
     document.addEventListener("paste", onPaste);
 
     el.textEditor.addEventListener("blur", commitText);
