@@ -11,6 +11,8 @@ import { mountCanvas } from "./canvas.js";
 const $ = (id) => document.getElementById(id);
 
 const el = {
+  app: document.querySelector(".app"),
+  toggleRail: $("toggleRail"),
   newPost: $("newPost"),
   search: $("search"),
   list: $("list"),
@@ -55,6 +57,7 @@ const state = {
   saving: false,
   slugLocked: false,
   previewOn: true,
+  railOn: true,
   mode: "write", // write | draw
   words: 0,
   minutes: 1,
@@ -764,12 +767,35 @@ document.addEventListener("click", (event) => {
   if (!el.menu.contains(event.target) && event.target !== el.menuBtn) closeMenu();
 });
 
-el.toggleSplit.addEventListener("click", () => {
-  state.previewOn = !state.previewOn;
-  el.panes.classList.toggle("no-preview", !state.previewOn);
-  el.toggleSplit.textContent = state.previewOn ? "hide" : "preview";
-  if (state.previewOn) renderPreview();
-});
+function setPreview(on, { render = true } = {}) {
+  state.previewOn = on;
+  el.panes.classList.toggle("no-preview", !on);
+  el.toggleSplit.classList.toggle("is-on", on);
+  el.toggleSplit.setAttribute("aria-pressed", String(on));
+  const label = on ? "Hide preview" : "Show preview";
+  el.toggleSplit.title = label;
+  el.toggleSplit.setAttribute("aria-label", label);
+  if (on && render) renderPreview();
+}
+
+el.toggleSplit.addEventListener("click", () => setPreview(!state.previewOn));
+
+const RAIL_KEY = "writing-studio:rail-hidden";
+
+function setRail(on, { persist = true } = {}) {
+  state.railOn = on;
+  el.app.classList.toggle("rail-hidden", !on);
+  el.toggleRail.setAttribute("aria-expanded", String(on));
+  const label = on ? "Hide sidebar" : "Show sidebar";
+  el.toggleRail.title = label;
+  el.toggleRail.setAttribute("aria-label", label);
+  if (!persist) return;
+  try {
+    localStorage.setItem(RAIL_KEY, on ? "0" : "1");
+  } catch {}
+}
+
+el.toggleRail.addEventListener("click", () => setRail(!state.railOn));
 
 el.copyPush.addEventListener("click", () =>
   copy(`git add -A && git commit -m "writing update" && git push origin ${state.git?.branch || "main"}`)
@@ -799,13 +825,15 @@ window.addEventListener("beforeunload", (event) => {
 /* --- boot -------------------------------------------------- */
 
 (async function boot() {
+  try {
+    setRail(localStorage.getItem(RAIL_KEY) !== "1", { persist: false });
+  } catch {
+    setRail(true, { persist: false });
+  }
+
   /* below 900px the panes stack, so start on the editor and let the
      toggle switch to the preview instead of the other way round */
-  if (window.innerWidth <= 900) {
-    state.previewOn = false;
-    el.panes.classList.add("no-preview");
-    el.toggleSplit.textContent = "preview";
-  }
+  setPreview(window.innerWidth > 900, { render: false });
 
   try {
     await refreshList();

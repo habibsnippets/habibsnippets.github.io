@@ -43,6 +43,10 @@
   <main class="main">
 
     <header class="topbar">
+      <button class="btn btn-icon rail-toggle" id="toggleRail" type="button" aria-label="Hide sidebar" aria-expanded="true" title="Hide sidebar">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6 3v10" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+      </button>
+
       <div class="title-wrap">
         <input id="title" class="title" placeholder="Post title" aria-label="Post title" autocomplete="off" spellcheck="true">
         <div class="subline">
@@ -52,6 +56,10 @@
       </div>
 
       <div class="actions">
+        <button class="btn is-on" id="toggleSplit" type="button" aria-pressed="true" aria-label="Hide preview" title="Hide preview">
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M1.5 8s2.4-4 6.5-4 6.5 4 6.5 4-2.4 4-6.5 4-6.5-4-6.5-4Z" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+          Preview
+        </button>
         <button class="btn" id="saveBtn" type="button" title="Save (⌘S)">Save</button>
         <button class="btn btn-primary" id="publishBtn" type="button" title="Build the site with this post">Publish</button>
         <div class="menu-wrap">
@@ -129,32 +137,32 @@
         <div class="draw-surface" id="drawSurface" hidden>
           <div class="draw-toolbar">
             <div class="draw-tools" id="drawTools" role="toolbar" aria-label="Drawing tools">
-              <button class="draw-tool is-active" data-tool="select" type="button" title="Select (V)" aria-label="Select">
+              <button class="draw-tool is-active" data-tool="select" type="button" title="Select (V)" aria-label="Select" aria-keyshortcuts="V">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3.5 19 12l-6.1 1.4L9.7 20 5 3.5Z"/></svg>
               </button>
-              <button class="draw-tool" data-tool="hand" type="button" title="Pan (H)" aria-label="Pan">
+              <button class="draw-tool" data-tool="hand" type="button" title="Pan (H)" aria-label="Pan" aria-keyshortcuts="H">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11m0-1V5a1.5 1.5 0 0 1 3 0v6m0-1V6a1.5 1.5 0 0 1 3 0v7m0-1V9a1.5 1.5 0 0 1 3 0v6.5c0 3.3-2.5 5.5-5.7 5.5H13c-2.1 0-3.4-.8-4.5-2.4L5.2 14a1.6 1.6 0 0 1 2.5-1.9L8 12Z"/></svg>
               </button>
               <span class="draw-sep"></span>
-              <button class="draw-tool" data-tool="rect" type="button" title="Rectangle (R)" aria-label="Rectangle">
+              <button class="draw-tool" data-tool="rect" type="button" title="Rectangle (R)" aria-label="Rectangle" aria-keyshortcuts="R">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/></svg>
               </button>
-              <button class="draw-tool" data-tool="diamond" type="button" title="Diamond (D)" aria-label="Diamond">
+              <button class="draw-tool" data-tool="diamond" type="button" title="Diamond (D)" aria-label="Diamond" aria-keyshortcuts="D">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 21 12l-9 9-9-9 9-9Z"/></svg>
               </button>
-              <button class="draw-tool" data-tool="ellipse" type="button" title="Ellipse (O)" aria-label="Ellipse">
+              <button class="draw-tool" data-tool="ellipse" type="button" title="Ellipse (O)" aria-label="Ellipse" aria-keyshortcuts="O">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="7"/></svg>
               </button>
-              <button class="draw-tool" data-tool="line" type="button" title="Line (L)" aria-label="Line">
+              <button class="draw-tool" data-tool="line" type="button" title="Line (L)" aria-label="Line" aria-keyshortcuts="L">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4"/></svg>
               </button>
-              <button class="draw-tool" data-tool="arrow" type="button" title="Arrow (A)" aria-label="Arrow">
+              <button class="draw-tool" data-tool="arrow" type="button" title="Arrow (A)" aria-label="Arrow" aria-keyshortcuts="A">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M12.5 4H20v7.5"/></svg>
               </button>
-              <button class="draw-tool" data-tool="pen" type="button" title="Pen (P)" aria-label="Pen">
+              <button class="draw-tool" data-tool="pen" type="button" title="Pen (P)" aria-label="Pen" aria-keyshortcuts="P">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1.1L19.6 7.5a2.2 2.2 0 0 0-3.1-3.1L5.1 15.8 4 20Z"/><path d="m14.7 6.3 3 3"/></svg>
               </button>
-              <button class="draw-tool" data-tool="text" type="button" title="Text (T)" aria-label="Text">
+              <button class="draw-tool" data-tool="text" type="button" title="Text (T)" aria-label="Text" aria-keyshortcuts="T">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M12 6v13M9 19h6"/></svg>
               </button>
             </div>
@@ -256,10 +264,10 @@
 
             <div class="draw-empty" id="drawEmpty">
               <strong>Draw the thing.</strong>
-              <span>Pick a shape or the pen above, then drag on the canvas. Export it straight into the post.</span>
+              <span>Pick a shape or the pen above, then drag on the canvas. Paste a screenshot with ⌘/Ctrl + V, and export it straight into the post.</span>
             </div>
 
-            <div class="draw-hint" id="drawHint">Drag to draw · Space to pan · ⌘/Ctrl + scroll to zoom</div>
+            <div class="draw-hint" id="drawHint">Drag to draw · Paste a screenshot · Space to pan · V R D O L A P T pick a tool</div>
 
             <textarea class="draw-text-editor" id="drawTextEditor" hidden spellcheck="true" aria-label="Diagram text"></textarea>
 
@@ -296,7 +304,6 @@
       <section class="pane preview">
         <div class="pane-head">
           <span>Preview</span>
-          <button class="linkish" id="toggleSplit" type="button">hide</button>
         </div>
         <iframe id="preview" title="Rendered preview" loading="lazy"></iframe>
       </section>

@@ -338,6 +338,7 @@ export function mountCanvas(opts = {}) {
     editingId: null,
     editingNew: false,
     clipboard: [],
+    pasteHandled: false,
     space: false,
     lastPointer: null,
     history: [],
@@ -357,6 +358,124 @@ export function mountCanvas(opts = {}) {
   function setStatus(text, tone = "saved") {
     el.status.textContent = text;
     el.status.dataset.state = tone;
+  }
+
+  /* --- pasted screenshots ---------------------------------- */
+
+  const IMAGE_MAX = 1600;
+  const IMAGE_MAX_BYTES = 2_500_000;
+  const imageCache = new Map();
+
+  function imageEntry(src) {
+    let entry = imageCache.get(src);
+    if (entry) return entry;
+    const img = new Image();
+    let settle = () => {};
+    const ready = new Promise((resolve) => { settle = resolve; });
+    entry = { img, ready };
+    imageCache.set(src, entry);
+    img.onload = () => {
+      if (state.isOpen) render();
+      settle();
+    };
+    img.onerror = () => settle();
+    img.src = src;
+    return entry;
+  }
+
+  function drawableImage(src) {
+    const { img } = imageEntry(src);
+    return img.complete && img.naturalWidth ? img : null;
+  }
+
+  function readClipboardImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const src = String(reader.result || "");
+        const img = new Image();
+        img.onload = () => {
+          const naturalW = img.naturalWidth || img.width;
+          const naturalH = img.naturalHeight || img.height;
+          if (!naturalW || !naturalH) {
+            reject(new Error("That image has no size"));
+            return;
+          }
+          const scale = Math.min(1, IMAGE_MAX / Math.max(naturalW, naturalH));
+          if (scale === 1 && src.length <= IMAGE_MAX_BYTES) {
+            resolve({ src, naturalW, naturalH });
+            return;
+          }
+          /* Screenshots are often bigger than localStorage can hold, so
+             keep a high-resolution but sane copy of the bitmap. */
+          const w = Math.max(1, Math.round(naturalW * scale));
+          const h = Math.max(1, Math.round(naturalH * scale));
+          const copy = document.createElement("canvas");
+          copy.width = w;
+          copy.height = h;
+          const g = copy.getContext("2d");
+          g.imageSmoothingQuality = "high";
+          g.drawImage(img, 0, 0, w, h);
+          let out = src;
+          try {
+            out = copy.toDataURL(/^data:image\/jpe?g/i.test(src) ? "image/jpeg" : "image/png", 0.92);
+          } catch {}
+          resolve({ src: out, naturalW, naturalH });
+        };
+        img.onerror = () => reject(new Error("That image could not be decoded"));
+        img.src = src;
+      };
+      reader.onerror = () => reject(new Error("Could not read the pasted image"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function addImage(src, naturalW, naturalH) {
+    if (state.editingId) commitText();
+    const { w: vw, h: vh } = stageSize();
+    const maxW = Math.max(160, Math.min(720, vw - 80));
+    const maxH = Math.max(120, Math.min(560, vh - 80));
+    const fit = Math.min(1, maxW / naturalW, maxH / naturalH);
+    const w = Math.max(40, Math.round(naturalW * fit));
+    const h = Math.max(30, Math.round(naturalH * fit));
+    const item = {
+      id: uid(),
+      type: "image",
+      src,
+      x: wx(vw / 2) - w / 2,
+      y: wy(vh / 2) - h / 2,
+      w,
+      h,
+      opacity: 1,
+      seed: (Math.random() * 2147483647) | 0,
+    };
+    state.elements.push(item);
+    state.selected = new Set([item.id]);
+    state.tool = "select";
+    syncToolUI();
+    syncStyleUI();
+    commitHistory();
+    updateUI();
+    render();
+    scheduleSave();
+    notify(`Screenshot added · ${naturalW} × ${naturalH}`);
+  }
+
+  async function insertImageFile(file) {
+    try {
+      const { src, naturalW, naturalH } = await readClipboardImage(file);
+      addImage(src, naturalW, naturalH);
+    } catch (err) {
+      notify(err.message || "Could not paste the image");
+    }
+  }
+
+  async function ensureImages() {
+    await Promise.all(
+      state.elements
+        .filter((item) => item.type === "image" && item.src)
+        .map((item) => imageEntry(item.src).ready)
+    );
   }
 
   /* --- persistence ----------------------------------------- */
@@ -758,10 +877,17 @@ export function mountCanvas(opts = {}) {
     }
   }
 
+  function drawImageElement(g, item) {
+    const img = item.src ? drawableImage(item.src) : null;
+    if (!img) return;
+    g.drawImage(img, item.x, item.y, item.w, item.h);
+  }
+
   function drawElement(g, item) {
     g.save();
     g.globalAlpha = clamp(item.opacity ?? 1, 0, 1);
     if (item.type === "text") drawText(g, item);
+    else if (item.type === "image") drawImageElement(g, item);
     else if (item.type === "pen") drawPen(g, item);
     else if (item.type === "line" || item.type === "arrow") drawLinear(g, item);
     else drawBox(g, item);
@@ -900,7 +1026,7 @@ export function mountCanvas(opts = {}) {
   }
 
   function updateHint() {
-    let text = "Drag to draw · Space to pan · ⌘/Ctrl + scroll to zoom";
+    let text = "Drag to draw · Paste a screenshot · Space to pan · V R D O L A P T pick a tool";
     if (state.exportMode) {
       text = state.exportRect
         ? "Save to post, or copy/download the PNG · Esc to cancel"
@@ -1204,6 +1330,20 @@ export function mountCanvas(opts = {}) {
       }
     }
 
+    /* Images keep their aspect ratio; otherwise a screenshot turns
+       into a squashed rectangle the moment you resize it. */
+    if (item.type === "image" && b.w > 0 && b.h > 0) {
+      const ratio = b.w / b.h;
+      let w = right - left;
+      let h = bottom - top;
+      if (w / Math.max(1, h) > ratio) w = h * ratio;
+      else h = w / ratio;
+      if (a.handle.includes("w")) left = right - w;
+      else right = left + w;
+      if (a.handle.includes("n")) top = bottom - h;
+      else bottom = top + h;
+    }
+
     if (item.type === "pen") {
       const nextW = Math.max(1, right - left);
       const nextH = Math.max(1, bottom - top);
@@ -1430,7 +1570,7 @@ export function mountCanvas(opts = {}) {
 
     /* Wait for the diagram fonts (including Virgil) before rasterising,
        otherwise a text element can fall back to a different face. */
-    return ensureExportFonts().then(() => {
+    return Promise.all([ensureExportFonts(), ensureImages()]).then(() => {
       const out = renderCrop(rect, 2);
       return new Promise((resolve, reject) => {
         out.toBlob((blob) => {
@@ -1514,7 +1654,7 @@ export function mountCanvas(opts = {}) {
   async function showExportPanel() {
     const r = state.exportRect;
     if (!r) return;
-    await ensureExportFonts();
+    await Promise.all([ensureExportFonts(), ensureImages()]);
     if (state.exportRect !== r) return;
     const thumbScale = Math.min(1, 150 / Math.max(1, r.w), 110 / Math.max(1, r.h));
     el.exportThumb.src = renderCrop(r, thumbScale).toDataURL("image/png");
@@ -1920,7 +2060,16 @@ export function mountCanvas(opts = {}) {
   function onKeyDown(event) {
     if (!state.isOpen) return;
     const tag = (event.target?.tagName || "").toLowerCase();
-    const typing = tag === "input" || tag === "textarea" || tag === "select" || event.target?.isContentEditable;
+    const inputType = String(event.target?.type || "").toLowerCase();
+    const typing =
+      !!event.target?.isContentEditable || tag === "input" || tag === "textarea" || tag === "select";
+    /* Sliders and colour pickers can keep focus after a change, but they do
+       not consume letters — tool shortcuts should still work there. */
+    const toolTyping =
+      !!event.target?.isContentEditable ||
+      tag === "textarea" ||
+      tag === "select" ||
+      (tag === "input" && !["range", "color", "checkbox", "radio", "button", "submit"].includes(inputType));
 
     if (event.key === " " && !typing) {
       if (!event.repeat) {
@@ -1930,10 +2079,18 @@ export function mountCanvas(opts = {}) {
       event.preventDefault();
       return;
     }
-    if (typing) return;
+    if (typing && toolTyping) return;
 
     const mod = event.metaKey || event.ctrlKey;
     const key = event.key.toLowerCase();
+
+    if (typing) {
+      if (!mod && TOOL_KEYS[key]) {
+        event.preventDefault();
+        setTool(TOOL_KEYS[key]);
+      }
+      return;
+    }
 
     if (mod) {
       if (key === "z") {
@@ -1952,7 +2109,18 @@ export function mountCanvas(opts = {}) {
         return;
       }
       if (key === "c") { event.preventDefault(); copySelected(); return; }
-      if (key === "v") { event.preventDefault(); pasteClipboard(); return; }
+      if (key === "v") {
+        /* Let the browser fire a paste event first so a screenshot on the
+           clipboard wins; fall back to the in-memory element clipboard
+           when no paste event arrives. */
+        state.pasteHandled = false;
+        if (state.clipboard.length) {
+          setTimeout(() => {
+            if (!state.pasteHandled && state.isOpen) pasteClipboard();
+          }, 0);
+        }
+        return;
+      }
       if (key === "d") { event.preventDefault(); duplicateSelected(); return; }
       return;
     }
@@ -2004,6 +2172,43 @@ export function mountCanvas(opts = {}) {
     if (event.key === " ") {
       state.space = false;
       updateCursor();
+    }
+  }
+
+  function clipboardImageFile(data) {
+    if (!data) return null;
+    for (const item of Array.from(data.items || [])) {
+      if (item.kind === "file" && item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) return file;
+      }
+    }
+    return Array.from(data.files || []).find((file) => file.type.startsWith("image/")) || null;
+  }
+
+  function onPaste(event) {
+    if (!state.isOpen) return;
+    state.pasteHandled = true;
+
+    const target = event.target;
+    const tag = (target?.tagName || "").toLowerCase();
+    const inputType = String(target?.type || "").toLowerCase();
+    const textTarget =
+      !!target?.isContentEditable ||
+      tag === "textarea" ||
+      tag === "select" ||
+      (tag === "input" && !["range", "color", "checkbox", "radio", "button", "submit"].includes(inputType));
+    if (state.editingId || textTarget) return;
+
+    const file = clipboardImageFile(event.clipboardData);
+    if (file) {
+      event.preventDefault();
+      insertImageFile(file);
+      return;
+    }
+    if (state.clipboard.length) {
+      event.preventDefault();
+      pasteClipboard();
     }
   }
 
@@ -2162,9 +2367,11 @@ export function mountCanvas(opts = {}) {
 
     el.fontFamily.addEventListener("change", (event) => {
       applyStyle({ fontFamily: event.target.value });
+      canvas.focus({ preventScroll: true });
     });
     el.fontSize.addEventListener("change", (event) => {
       applyStyle({ fontSize: Number(event.target.value) });
+      canvas.focus({ preventScroll: true });
     });
 
     syncStyleUI();
@@ -2204,6 +2411,7 @@ export function mountCanvas(opts = {}) {
     canvas.addEventListener("pointercancel", onPointerCancel);
     canvas.addEventListener("wheel", onWheel, { passive: false });
     canvas.addEventListener("dblclick", onDoubleClick);
+    document.addEventListener("paste", onPaste);
 
     el.textEditor.addEventListener("blur", commitText);
     el.textEditor.addEventListener("input", autoGrowText);

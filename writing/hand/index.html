@@ -21,7 +21,7 @@
 <meta property="og:title" content="HAND">
 <meta property="og:description" content="A new activation function for detection models">
 <meta property="og:url" content="https://habibsnippets.github.io/writing/hand/">
-<meta property="og:image" content="https://habibsnippets.github.io/assets/brand-logo.png">
+<meta property="og:image" content="https://habibsnippets.github.io/assets/writing/hand/image.png">
 <meta property="article:published_time" content="2026-10-24">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@habeebstwt">
@@ -48,7 +48,7 @@
   "datePublished": "2026-10-24",
   "url": "https://habibsnippets.github.io/writing/hand/",
   "author": { "@type": "Person", "name": "Habeeb", "url": "https://habibsnippets.github.io/" },
-  "image": "https://habibsnippets.github.io/assets/brand-logo.png"
+  "image": "https://habibsnippets.github.io/assets/writing/hand/image.png"
 }
 </script>
 </head>
@@ -94,7 +94,23 @@
     </header>
 
     <div class="prose">
-
+<ul>
+<li><p>teach NN not to just predict the exact answer but also teach it how two samples compare to each other</p>
+</li>
+<li><p>makes learning much more data efficient when labeled data is scarce</p>
+</li>
+<li><p>dataset might look like this :</p>
+</li>
+</ul>
+<p><img src="/assets/writing/hand/image.png" alt="image" loading="lazy" decoding="async"></p>
+<ul>
+<li><p>collapsing to low varince predictions - meaning that the predicted values have less variance as compared to the actual values</p>
+</li>
+<li><p>model plays it safe - predicts values near to the center rather than learning the individual differences that actually matter</p>
+</li>
+<li><p><em>Solution</em> : instead of asking the model - hwo old is the person ? we ask it &quot;which of these two are older?&quot;</p>
+</li>
+</ul>
     </div>
 
     <nav class="post-pager" aria-label="More writing">

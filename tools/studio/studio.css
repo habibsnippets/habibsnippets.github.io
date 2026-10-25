@@ -64,6 +64,8 @@ button { cursor: pointer; }
   height: 100vh;
   height: 100dvh;
 }
+.app.rail-hidden { grid-template-columns: minmax(0, 1fr); }
+.app.rail-hidden .rail { display: none; }
 
 /* --- rail ------------------------------------------------- */
 
@@ -116,6 +118,10 @@ button { cursor: pointer; }
 .btn:hover { background: var(--panel-hi); border-color: var(--line-hi); }
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn.is-on { background: var(--wash); border-color: var(--line-hi); }
+.btn svg { flex: none; }
+
+.rail-toggle { flex: none; margin-top: 2px; }
 
 .btn-primary {
   background: var(--fg);
@@ -397,6 +403,7 @@ button { cursor: pointer; }
   gap: 16px;
 }
 .panes.no-preview { grid-template-columns: minmax(0, 1fr); }
+.panes.no-preview .preview { display: none; }
 
 .pane {
   display: flex;
@@ -531,12 +538,16 @@ button { cursor: pointer; }
   .group { display: none; }
   .item { width: 190px; flex: none; }
   .rail-foot { display: none; }
-  .topbar { padding: 14px 16px 10px; }
+  .topbar { padding: 14px 16px 10px; gap: 12px; }
+  .rail-toggle { width: 30px; }
+  .actions { gap: 6px; }
+  #toggleSplit { width: 34px; padding: 0; gap: 0; font-size: 0; }
+  #toggleSplit svg { width: 14px; height: 14px; }
   .meta-row { flex-wrap: wrap; padding: 0 16px 12px; }
   .field:nth-child(1), .field:nth-child(2) { width: calc(50% - 8px); }
   .field-grow { flex-basis: 100%; }
+  .app.rail-hidden { grid-template-rows: minmax(0, 1fr); }
   .panes { padding: 12px 16px 16px; grid-template-columns: minmax(0, 1fr); }
-  .panes.no-preview .preview { display: none; }
   .panes:not(.no-preview) .write { display: none; }
   .title { font-size: 21px; }
   .banner { margin: 12px 16px 0; }
