@@ -17,6 +17,13 @@ const GRID = 24;
 const HANDLE = 8;
 const TEXT_WIDTH = 260;
 const STORE_PREFIX = "writing-studio:canvas:";
+const IMAGE_DB_NAME = "writing-studio";
+const IMAGE_DB_STORE = "images";
+const IMAGE_DB_PREFIX = "idb:";
+const PDF_JS_ROOT = "/node_modules/pdfjs-dist/";
+const PDF_MAX_PAGES = 20;
+const PDF_RENDER_EDGE = 1400;
+const PDF_DISPLAY_WIDTH = 660;
 
 const STROKE_COLORS = [
   "#1e1e1e", "#5c5f66", "#e03131", "#2f9e44", "#1971c2",
@@ -307,6 +314,15 @@ export function mountCanvas(opts = {}) {
     exportInsert: $("exportInsert"),
     exportRetake: $("exportRetake"),
     exportCancel: $("exportCancel"),
+    pdfTrigger: $("drawPdf"),
+    pdfInput: $("pdfInput"),
+    pdfPanel: $("pdfPanel"),
+    pdfName: $("pdfName"),
+    pdfMeta: $("pdfMeta"),
+    pdfPages: $("pdfPages"),
+    pdfNote: $("pdfNote"),
+    pdfImport: $("pdfImport"),
+    pdfCancel: $("pdfCancel"),
   };
 
   const state = {
@@ -366,6 +382,50 @@ export function mountCanvas(opts = {}) {
   const IMAGE_MAX_BYTES = 2_500_000;
   const imageCache = new Map();
 
+  /* Page-sized bitmaps outgrow localStorage, so imported PDF pages live
+     in IndexedDB. The scene only keeps a small "idb:" token for them. */
+  let imageDbPromise = null;
+
+  function openImageDB() {
+    if (!imageDbPromise) {
+      imageDbPromise = new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error("IndexedDB is not available"));
+          return;
+        }
+        const req = indexedDB.open(IMAGE_DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          if (!req.result.objectStoreNames.contains(IMAGE_DB_STORE)) {
+            req.result.createObjectStore(IMAGE_DB_STORE);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error || new Error("Could not open browser storage"));
+      }).catch((err) => {
+        imageDbPromise = null;
+        throw err;
+      });
+    }
+    return imageDbPromise;
+  }
+
+  async function imageDbTask(mode, run) {
+    const db = await openImageDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IMAGE_DB_STORE, mode);
+      const req = run(tx.objectStore(IMAGE_DB_STORE));
+      let value;
+      req.onsuccess = () => { value = req.result; };
+      req.onerror = () => reject(req.error || new Error("Browser storage failed"));
+      tx.oncomplete = () => resolve(value);
+      tx.onerror = () => reject(tx.error || new Error("Browser storage failed"));
+      tx.onabort = () => reject(tx.error || new Error("Browser storage was aborted"));
+    });
+  }
+
+  const putImageBlob = (id, blob) => imageDbTask("readwrite", (store) => store.put(blob, id));
+  const getImageBlob = (id) => imageDbTask("readonly", (store) => store.get(id));
+
   function imageEntry(src) {
     let entry = imageCache.get(src);
     if (entry) return entry;
@@ -379,7 +439,16 @@ export function mountCanvas(opts = {}) {
       settle();
     };
     img.onerror = () => settle();
-    img.src = src;
+    if (src.startsWith(IMAGE_DB_PREFIX)) {
+      getImageBlob(src.slice(IMAGE_DB_PREFIX.length))
+        .then((blob) => {
+          if (!blob) throw new Error("missing image");
+          img.src = URL.createObjectURL(blob);
+        })
+        .catch(() => settle());
+    } else {
+      img.src = src;
+    }
     return entry;
   }
 
@@ -488,6 +557,270 @@ export function mountCanvas(opts = {}) {
     );
   }
 
+  /* --- PDF pages -------------------------------------------- */
+
+  let pdfjsPromise = null;
+  const pdf = { file: null, doc: null, at: null, busy: false };
+
+  function loadPdfjs() {
+    if (!pdfjsPromise) {
+      pdfjsPromise = import(`${PDF_JS_ROOT}build/pdf.min.mjs`)
+        .then((lib) => {
+          lib.GlobalWorkerOptions.workerSrc = `${PDF_JS_ROOT}build/pdf.worker.min.mjs`;
+          return lib;
+        })
+        .catch((err) => {
+          pdfjsPromise = null;
+          throw new Error(`PDF support is not installed. Run npm install in the repo. (${err.message})`);
+        });
+    }
+    return pdfjsPromise;
+  }
+
+  function setPdfNote(text, tone = "") {
+    el.pdfNote.textContent = text;
+    el.pdfNote.dataset.tone = tone;
+  }
+
+  function closePdfPanel({ focus = true } = {}) {
+    if (pdf.busy) return;
+    const wasOpen = !el.pdfPanel.hidden;
+    el.pdfPanel.hidden = true;
+    el.pdfNote.dataset.tone = "";
+    el.pdfPages.value = "";
+    el.pdfPages.disabled = true;
+    el.pdfImport.disabled = true;
+    el.pdfCancel.disabled = false;
+    pdf.file = null;
+    pdf.at = null;
+    const doc = pdf.doc;
+    pdf.doc = null;
+    if (doc) doc.destroy?.();
+    /* Hand the keyboard back so tool shortcuts work right after an import. */
+    if (wasOpen && focus && state.isOpen) canvas.focus({ preventScroll: true });
+  }
+
+  async function openPdfPanel(file, at = null) {
+    if (!state.isOpen || !file) return;
+    if (pdf.busy) {
+      notify("Hold on — still importing the previous PDF");
+      return;
+    }
+    if (state.editingId) commitText();
+    if (state.exportMode) cancelExport();
+    closePdfPanel({ focus: false });
+
+    pdf.file = file;
+    pdf.at = at;
+    el.pdfPanel.hidden = false;
+    el.pdfName.textContent = file.name || "document.pdf";
+    el.pdfMeta.textContent = "";
+    el.pdfPages.value = "";
+    el.pdfPages.disabled = true;
+    el.pdfImport.disabled = true;
+    el.pdfCancel.disabled = false;
+    setPdfNote("Opening the document…");
+
+    try {
+      const data = await file.arrayBuffer();
+      const pdfjs = await loadPdfjs();
+      const doc = await pdfjs.getDocument({
+        data,
+        cMapUrl: `${PDF_JS_ROOT}cmaps/`,
+        cMapPacked: true,
+        standardFontDataUrl: `${PDF_JS_ROOT}standard_fonts/`,
+        wasmUrl: `${PDF_JS_ROOT}wasm/`,
+      }).promise;
+
+      /* The panel may have been closed while the document loaded. */
+      if (pdf.file !== file) {
+        doc.destroy?.();
+        return;
+      }
+
+      pdf.doc = doc;
+      const total = doc.numPages;
+      const first = Math.min(total, PDF_MAX_PAGES);
+      el.pdfMeta.textContent = `${total} page${total === 1 ? "" : "s"}`;
+      el.pdfPages.value = first === 1 ? "1" : `1-${first}`;
+      el.pdfPages.disabled = false;
+      el.pdfImport.disabled = false;
+      setPdfNote(
+        total > PDF_MAX_PAGES
+          ? `First ${PDF_MAX_PAGES} selected · up to ${PDF_MAX_PAGES} pages per import.`
+          : "All pages selected · narrow it down if you only need some."
+      );
+      el.pdfPages.focus({ preventScroll: true });
+      el.pdfPages.select();
+    } catch (err) {
+      pdf.file = null;
+      el.pdfMeta.textContent = "could not open";
+      setPdfNote(err.message || "That PDF could not be opened.", "error");
+    }
+  }
+
+  function parsePageRange(text, total) {
+    const pages = [];
+    for (const part of String(text || "").split(/[,;\s]+/).filter(Boolean)) {
+      const match = part.match(/^(\d+)(?:\s*[-–—]\s*(\d+))?$/);
+      if (!match) return [];
+      const from = Number(match[1]);
+      const to = match[2] ? Number(match[2]) : from;
+      if (from < 1 || to < from || to > total) return [];
+      for (let p = from; p <= to; p++) if (!pages.includes(p)) pages.push(p);
+    }
+    return pages;
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error("Could not encode that page"));
+      }, type, quality);
+    });
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read that page"));
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function importPdfPages() {
+    const doc = pdf.doc;
+    if (!doc || pdf.busy) return;
+    const total = doc.numPages;
+    const pages = parsePageRange(el.pdfPages.value, total);
+    if (!pages.length) {
+      setPdfNote(`Use page numbers from 1 to ${total}, like 1-3 or 2, 5.`, "error");
+      el.pdfPages.focus({ preventScroll: true });
+      return;
+    }
+    if (pages.length > PDF_MAX_PAGES) {
+      setPdfNote(`That is ${pages.length} pages — import at most ${PDF_MAX_PAGES} at once.`, "error");
+      return;
+    }
+
+    pdf.busy = true;
+    el.pdfPages.disabled = true;
+    el.pdfImport.disabled = true;
+    el.pdfCancel.disabled = true;
+
+    const made = [];
+    let inlineFallback = false;
+    try {
+      for (const [index, num] of pages.entries()) {
+        setPdfNote(`Rendering page ${num} · ${index + 1} of ${pages.length}…`);
+        const page = await doc.getPage(num);
+        try {
+          const base = page.getViewport({ scale: 1 });
+          const scale = clamp(PDF_RENDER_EDGE / Math.max(base.width, base.height), 0.5, 2.6);
+          const viewport = page.getViewport({ scale });
+          const bitmap = document.createElement("canvas");
+          bitmap.width = Math.max(1, Math.round(viewport.width));
+          bitmap.height = Math.max(1, Math.round(viewport.height));
+          const g = bitmap.getContext("2d", { alpha: false });
+          g.fillStyle = "#ffffff";
+          g.fillRect(0, 0, bitmap.width, bitmap.height);
+          await page.render({ canvasContext: g, viewport }).promise;
+
+          const blob = await canvasToBlob(bitmap, "image/jpeg", 0.9);
+          let src;
+          try {
+            const id = `pdf-${Date.now().toString(36)}-${num}-${Math.random().toString(36).slice(2, 7)}`;
+            await putImageBlob(id, blob);
+            src = `${IMAGE_DB_PREFIX}${id}`;
+          } catch {
+            src = await blobToDataUrl(blob);
+            inlineFallback = true;
+          }
+          made.push({ src, w: bitmap.width, h: bitmap.height });
+        } finally {
+          page.cleanup();
+        }
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    } catch (err) {
+      pdf.busy = false;
+      el.pdfPages.disabled = false;
+      el.pdfImport.disabled = false;
+      el.pdfCancel.disabled = false;
+      setPdfNote(err.message || "Could not render that PDF.", "error");
+      return;
+    }
+
+    pdf.busy = false;
+    const at = pdf.at;
+    closePdfPanel();
+    if (!made.length) {
+      notify("No pages were rendered");
+      return;
+    }
+    addPdfPages(made, at);
+    notify(
+      inlineFallback
+        ? `${made.length} page${made.length === 1 ? "" : "s"} added · browser storage was full, kept inline`
+        : `${made.length} page${made.length === 1 ? "" : "s"} added · draw on top, then export the area`
+    );
+  }
+
+  function addPdfPages(pages, at = null) {
+    const { w: vw, h: vh } = stageSize();
+    const width = Math.max(240, Math.min(PDF_DISPLAY_WIDTH, vw - 120));
+    const gap = 28;
+    const firstH = Math.round(width * (pages[0].h / pages[0].w));
+    const cx = at ? at.x : wx(vw / 2);
+    const cy = at ? at.y : wy(vh / 2);
+    const x = Math.round(cx - width / 2);
+    let y = Math.round(cy - firstH / 2);
+
+    const items = pages.map((page) => {
+      const h = Math.max(1, Math.round(width * (page.h / page.w)));
+      const item = {
+        id: uid(),
+        type: "image",
+        src: page.src,
+        x,
+        y,
+        w: width,
+        h,
+        opacity: 1,
+        seed: (Math.random() * 2147483647) | 0,
+      };
+      y += h + gap;
+      return item;
+    });
+
+    /* Pages go underneath existing strokes so annotations stay on top. */
+    state.elements = [...items, ...state.elements];
+    state.selected = new Set(items.map((item) => item.id));
+    state.tool = "select";
+    syncToolUI();
+    syncStyleUI();
+    commitHistory();
+    updateUI();
+    render();
+    scheduleSave();
+    revealBounds(boundsOf(items[0]));
+  }
+
+  function revealBounds(b) {
+    const { w } = stageSize();
+    if (w < 2) return;
+    const pad = 40;
+    const z = clamp(Math.min(state.view.zoom, (w - pad * 2) / Math.max(1, b.w)), MIN_ZOOM, MAX_ZOOM);
+    state.view.zoom = z;
+    state.view.x = b.x - pad / z;
+    state.view.y = b.y - pad / z;
+    updateZoomLabel();
+    render();
+    scheduleSave();
+  }
+
   /* --- persistence ----------------------------------------- */
 
   function writeScene() {
@@ -555,6 +888,7 @@ export function mountCanvas(opts = {}) {
 
     const oldKey = state.key;
     if (oldKey) flushScene();
+    if (!el.pdfPanel.hidden) closePdfPanel({ focus: false });
 
     if (reset) {
       try { localStorage.removeItem(nextKey); } catch {}
@@ -1036,7 +1370,7 @@ export function mountCanvas(opts = {}) {
   }
 
   function updateHint() {
-    let text = "Drag to draw · Drop or paste a screenshot · Space to pan · V R D O L A P T pick a tool";
+    let text = "Drag to draw · Drop or paste an image or PDF · Space to pan · V R D O L A P T pick a tool";
     if (state.exportMode) {
       text = state.exportRect
         ? "Save to post, or copy/download the PNG · Esc to cancel"
@@ -2069,6 +2403,11 @@ export function mountCanvas(opts = {}) {
 
   function onKeyDown(event) {
     if (!state.isOpen) return;
+    if (!el.pdfPanel.hidden && event.key === "Escape" && !pdf.busy) {
+      event.preventDefault();
+      closePdfPanel();
+      return;
+    }
     const tag = (event.target?.tagName || "").toLowerCase();
     const inputType = String(event.target?.type || "").toLowerCase();
     const typing =
@@ -2245,11 +2584,16 @@ export function mountCanvas(opts = {}) {
 
     event.preventDefault();
     const images = files.filter((file) => file.type.startsWith("image/"));
-    if (!images.length) {
-      notify("That file is not an image");
+    const pdfFile = files.find(
+      (file) => file.type === "application/pdf" || /\.pdf$/i.test(file.name || "")
+    );
+    if (!images.length && !pdfFile) {
+      notify("Drop an image or a PDF");
       return;
     }
-    insertImageFiles(images, pointerPos(event));
+    const at = pointerPos(event);
+    if (images.length) insertImageFiles(images, at);
+    if (pdfFile) openPdfPanel(pdfFile, at);
   }
 
   /* --- style panel ----------------------------------------- */
@@ -2439,6 +2783,21 @@ export function mountCanvas(opts = {}) {
     el.exportInsert.addEventListener("click", insertExport);
     el.exportRetake.addEventListener("click", retakeExport);
     el.exportCancel.addEventListener("click", cancelExport);
+
+    el.pdfTrigger.addEventListener("click", () => el.pdfInput.click());
+    el.pdfInput.addEventListener("change", () => {
+      const file = el.pdfInput.files?.[0];
+      el.pdfInput.value = "";
+      if (file) openPdfPanel(file);
+    });
+    el.pdfImport.addEventListener("click", importPdfPages);
+    el.pdfCancel.addEventListener("click", closePdfPanel);
+    el.pdfPages.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        importPdfPages();
+      }
+    });
     el.exportSnippet.addEventListener("click", () => {
       if (state.exportMarkdown) copyText(state.exportMarkdown).then((ok) => {
         if (ok) notify("Markdown copied");
@@ -2506,6 +2865,7 @@ export function mountCanvas(opts = {}) {
 
   function close() {
     if (state.editingId) commitText();
+    closePdfPanel({ focus: false });
     flushScene();
     state.isOpen = false;
     state.space = false;

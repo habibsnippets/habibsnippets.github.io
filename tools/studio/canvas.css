@@ -115,6 +115,15 @@
 }
 .draw-icon:disabled { opacity: 0.3; cursor: default; background: none; border-color: transparent; }
 
+.draw-pdf {
+  width: auto;
+  gap: 3px;
+  padding: 0 7px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
 .draw-sep {
   width: 1px;
   height: 16px;
@@ -294,7 +303,7 @@
 .draw-stage.is-text { cursor: text; }
 
 .draw-stage.is-drop-target::after {
-  content: "Drop the image to add it to the canvas";
+  content: "Drop the image or PDF to add it to the canvas";
   position: absolute;
   inset: 12px;
   display: grid;
@@ -457,6 +466,103 @@
 }
 .export-actions .btn { height: 26px; padding: 0 9px; font-size: 11px; }
 .export-actions .linkish { font-size: 10px; }
+
+/* --- PDF import panel -------------------------------------- */
+
+.pdf-panel {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  display: grid;
+  gap: 8px;
+  width: min(390px, calc(100% - 24px));
+  padding: 11px 12px;
+  border: 1px solid var(--line-hi);
+  border-radius: 11px;
+  background: var(--panel);
+  box-shadow: 0 18px 40px -24px rgba(72, 58, 34, 0.5);
+}
+.pdf-panel[hidden] { display: none !important; }
+
+.pdf-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.pdf-kicker {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.pdf-head strong {
+  overflow: hidden;
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pdf-head #pdfMeta {
+  flex: none;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--fg-faint);
+}
+
+.pdf-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+}
+.pdf-field input {
+  flex: 1;
+  min-width: 0;
+  height: 27px;
+  padding: 0 8px;
+  border: 1px solid var(--line-hi);
+  border-radius: 6px;
+  background: var(--panel-hi);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+.pdf-field input:focus {
+  outline: none;
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(11, 98, 196, 0.1);
+}
+.pdf-field input:disabled { opacity: 0.55; }
+
+.pdf-note {
+  margin: 0;
+  min-height: 14px;
+  color: var(--fg-faint);
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+.pdf-note[data-tone="error"] { color: var(--red); }
+
+.pdf-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pdf-actions .btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+}
 
 /* --- footer ------------------------------------------------ */
 
