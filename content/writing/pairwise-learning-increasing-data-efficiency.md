@@ -11,3 +11,5 @@
 * model plays it safe - predicts values near to the center rather than learning the individual differences that actually matter
 
 * *Solution* : instead of asking the model - hwo old is the person ? we ask it "which of these two are older?" 
+
+![image](/assets/writing/pairwise-learning-increasing-data-efficiency/image.png)

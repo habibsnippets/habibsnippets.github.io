@@ -24,6 +24,11 @@ const PDF_JS_ROOT = "/node_modules/pdfjs-dist/";
 const PDF_MAX_PAGES = 20;
 const PDF_RENDER_EDGE = 1400;
 const PDF_DISPLAY_WIDTH = 660;
+const HIGHLIGHT_COLOR = "#ffe066";
+const BINDABLE_TYPES = ["rect", "diamond", "ellipse", "image"];
+/* Curved edges bow out from their straight chord. The bulge is derived
+   from the two endpoints, so a curve needs no extra stored state. */
+const CURVE_BOW = 0.22;
 
 const STROKE_COLORS = [
   "#1e1e1e", "#5c5f66", "#e03131", "#2f9e44", "#1971c2",
@@ -114,11 +119,14 @@ function refreshTextHeight(el) {
 /* --- geometry ---------------------------------------------- */
 
 function boundsOf(el) {
-  if (el.type === "line" || el.type === "arrow" || el.type === "pen") {
+  if (el.type === "line" || el.type === "arrow" || el.type === "pen" || el.type === "highlight") {
     const pts = el.points || [];
     if (!pts.length) return { x: el.x, y: el.y, w: el.w, h: el.h };
-    const xs = pts.map((p) => el.x + p.x);
-    const ys = pts.map((p) => el.y + p.y);
+    const drawn = (el.type === "line" || el.type === "arrow") && el.curve
+      ? visualPoints(el)
+      : absPoints(el);
+    const xs = drawn.map((p) => p.x);
+    const ys = drawn.map((p) => p.y);
     const x = Math.min(...xs);
     const y = Math.min(...ys);
     return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y };
@@ -128,6 +136,64 @@ function boundsOf(el) {
 
 function absPoints(el) {
   return (el.points || []).map((p) => ({ x: el.x + p.x, y: el.y + p.y }));
+}
+
+function curveControlPoint(a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  return {
+    x: (a.x + b.x) / 2 - dy * CURVE_BOW,
+    y: (a.y + b.y) / 2 + dx * CURVE_BOW,
+  };
+}
+
+function quadraticPoints(a, control, b, count = 18) {
+  const out = [];
+  for (let i = 0; i <= count; i++) {
+    const t = i / count;
+    const mt = 1 - t;
+    out.push({
+      x: mt * mt * a.x + 2 * mt * t * control.x + t * t * b.x,
+      y: mt * mt * a.y + 2 * mt * t * control.y + t * t * b.y,
+    });
+  }
+  return out;
+}
+
+/* What the eye sees, which for a curved connector is the sampled curve
+   rather than the two anchor points that get stored. */
+function visualPoints(item) {
+  const pts = absPoints(item);
+  if (!item.curve || pts.length < 2) return pts;
+  return quadraticPoints(pts[0], curveControlPoint(pts[0], pts[pts.length - 1]), pts[pts.length - 1]);
+}
+
+function centerOf(item) {
+  const b = boundsOf(item);
+  return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+}
+
+/* Where a connector should touch an element, looking from its centre
+   towards the other end. Works for rectangles, images, diamonds and
+   ellipses; everything else is treated as a rectangle. */
+function outlinePoint(item, toward) {
+  const b = boundsOf(item);
+  const cx = b.x + b.w / 2;
+  const cy = b.y + b.h / 2;
+  const dx = toward.x - cx;
+  const dy = toward.y - cy;
+  if (!dx && !dy) return { x: cx, y: cy };
+  const rx = Math.max(1, b.w / 2);
+  const ry = Math.max(1, b.h / 2);
+  let t;
+  if (item.type === "ellipse") {
+    t = 1 / Math.sqrt((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry));
+  } else if (item.type === "diamond") {
+    t = 1 / (Math.abs(dx) / rx + Math.abs(dy) / ry);
+  } else {
+    t = Math.min(dx ? rx / Math.abs(dx) : Infinity, dy ? ry / Math.abs(dy) : Infinity);
+  }
+  return { x: cx + dx * t, y: cy + dy * t };
 }
 
 /* Normalise a point list into x/y + relative points, preserving order
@@ -187,12 +253,13 @@ function snapLine(start, end, enabled) {
 
 function hitTest(el, x, y, tol) {
   const b = boundsOf(el);
-  if (el.type === "line" || el.type === "arrow" || el.type === "pen") {
-    const pts = absPoints(el);
+  if (el.type === "line" || el.type === "arrow" || el.type === "pen" || el.type === "highlight") {
+    const pts = visualPoints(el);
+    const reach = el.type === "highlight" ? Math.max(8, el.strokeWidth * 3) : el.strokeWidth / 2;
     if (pts.length === 1) {
-      return Math.hypot(x - pts[0].x, y - pts[0].y) <= tol + el.strokeWidth / 2;
+      return Math.hypot(x - pts[0].x, y - pts[0].y) <= tol + reach;
     }
-    return distanceToPolyline(x, y, pts) <= tol + el.strokeWidth / 2;
+    return distanceToPolyline(x, y, pts) <= tol + reach;
   }
   if (x < b.x - tol || x > b.x + b.w + tol || y < b.y - tol || y > b.y + b.h + tol) return false;
   if (el.type === "ellipse") {
@@ -260,8 +327,11 @@ function blankElement(type, x, y, w = 0, h = 0, style = {}) {
   }
   if (type === "line" || type === "arrow") {
     el.points = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+    el.curve = !!style.curve;
+    el.startBinding = null;
+    el.endBinding = null;
   }
-  if (type === "pen") {
+  if (type === "pen" || type === "highlight") {
     el.points = [{ x: 0, y: 0 }];
   }
   return el;
@@ -292,6 +362,7 @@ export function mountCanvas(opts = {}) {
     fillStyles: $("fillStyles"),
     strokeWidths: $("strokeWidths"),
     strokeStyles: $("strokeStyles"),
+    pathStyles: $("pathStyles"),
     roughness: $("roughness"),
     opacity: $("opacity"),
     opacityValue: $("opacityValue"),
@@ -333,6 +404,7 @@ export function mountCanvas(opts = {}) {
       stroke: "#1e1e1e",
       fill: "#a5d8ff",
       fillStyle: "none",
+      curve: false,
       strokeWidth: 2,
       strokeStyle: "solid",
       opacity: 1,
@@ -347,6 +419,8 @@ export function mountCanvas(opts = {}) {
     key: null,
     action: null,
     draft: null,
+    pending: null,
+    bindHover: null,
     marquee: null,
     exportMode: false,
     exportRect: null,
@@ -859,6 +933,7 @@ export function mountCanvas(opts = {}) {
     }
 
     state.elements = Array.isArray(data?.elements) ? data.elements : [];
+    routeBoundArrows();
     const v = data?.view;
     state.view = v && isNum(v.x) && isNum(v.y) && isNum(v.zoom)
       ? { x: v.x, y: v.y, zoom: clamp(v.zoom, MIN_ZOOM, MAX_ZOOM) }
@@ -868,6 +943,8 @@ export function mountCanvas(opts = {}) {
     state.selected.clear();
     state.action = null;
     state.draft = null;
+    state.pending = null;
+    state.bindHover = null;
     state.marquee = null;
     state.exportMode = false;
     state.exportRect = null;
@@ -958,6 +1035,7 @@ export function mountCanvas(opts = {}) {
     if (index < 0 || index >= state.history.length) return;
     state.historyIndex = index;
     state.elements = JSON.parse(state.history[index]);
+    routeBoundArrows();
     state.selected.clear();
     state.action = null;
     state.draft = null;
@@ -1192,19 +1270,68 @@ export function mountCanvas(opts = {}) {
   function drawLinear(g, item) {
     const pts = absPoints(item);
     if (pts.length < 2) return;
+    const curved = !!item.curve && pts.length === 2;
+    const control = curved ? curveControlPoint(pts[0], pts[1]) : null;
+    const tip = pts[pts.length - 1];
+
     if (item.roughness > 0) {
-      roughStroke(g, item, pts, false);
+      roughStroke(g, item, curved ? quadraticPoints(pts[0], control, tip) : pts, false);
     } else {
       applyStroke(g, item);
       g.beginPath();
       g.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
+      if (curved) {
+        g.quadraticCurveTo(control.x, control.y, tip.x, tip.y);
+      } else {
+        for (let i = 1; i < pts.length; i++) g.lineTo(pts[i].x, pts[i].y);
+      }
       g.stroke();
     }
     if (item.type === "arrow") {
       applyStroke(g, item);
-      drawArrowHead(g, item, pts);
+      /* The head follows the curve's tangent rather than the chord. */
+      drawArrowHead(g, item, curved ? [control, tip] : pts);
     }
+  }
+
+  function drawHighlight(g, item) {
+    const pts = absPoints(item);
+    if (!pts.length) return;
+    g.save();
+    g.globalAlpha *= 0.42;
+    /* Multiply keeps whatever is underneath readable, which is exactly
+       what a marker over a PDF page or a screenshot should do. */
+    g.globalCompositeOperation = "multiply";
+    g.strokeStyle = item.stroke;
+    g.lineWidth = Math.max(8, Math.max(1, item.strokeWidth) * 5);
+    g.lineJoin = "round";
+    g.lineCap = "butt";
+    g.setLineDash([]);
+
+    if (pts.length === 1) {
+      g.beginPath();
+      g.arc(pts[0].x, pts[0].y, g.lineWidth / 2, 0, Math.PI * 2);
+      g.fillStyle = item.stroke;
+      g.fill();
+      g.restore();
+      return;
+    }
+
+    g.beginPath();
+    g.moveTo(pts[0].x, pts[0].y);
+    if (pts.length === 2) {
+      g.lineTo(pts[1].x, pts[1].y);
+    } else {
+      for (let i = 1; i < pts.length - 1; i++) {
+        const mx = (pts[i].x + pts[i + 1].x) / 2;
+        const my = (pts[i].y + pts[i + 1].y) / 2;
+        g.quadraticCurveTo(pts[i].x, pts[i].y, mx, my);
+      }
+      const last = pts[pts.length - 1];
+      g.lineTo(last.x, last.y);
+    }
+    g.stroke();
+    g.restore();
   }
 
   function drawText(g, item) {
@@ -1233,6 +1360,7 @@ export function mountCanvas(opts = {}) {
     if (item.type === "text") drawText(g, item);
     else if (item.type === "image") drawImageElement(g, item);
     else if (item.type === "pen") drawPen(g, item);
+    else if (item.type === "highlight") drawHighlight(g, item);
     else if (item.type === "line" || item.type === "arrow") drawLinear(g, item);
     else drawBox(g, item);
     g.restore();
@@ -1282,6 +1410,20 @@ export function mountCanvas(opts = {}) {
       const b = unionBounds(items);
       ctx.strokeRect(sx(b.x) - 2, sy(b.y) - 2, b.w * z + 4, b.h * z + 4);
     }
+    ctx.restore();
+  }
+
+  function drawBindHover() {
+    if (!state.bindHover) return;
+    const item = bindingById(state.bindHover);
+    if (!item) return;
+    const b = boundsOf(item);
+    const z = state.view.zoom;
+    ctx.save();
+    ctx.strokeStyle = "#0b62c4";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([]);
+    ctx.strokeRect(sx(b.x) - 3, sy(b.y) - 3, b.w * z + 6, b.h * z + 6);
     ctx.restore();
   }
 
@@ -1347,6 +1489,7 @@ export function mountCanvas(opts = {}) {
     if (state.draft) drawElement(ctx, state.draft);
     ctx.restore();
 
+    drawBindHover();
     drawSelection();
     drawMarquee();
     drawExportOverlay();
@@ -1370,8 +1513,10 @@ export function mountCanvas(opts = {}) {
   }
 
   function updateHint() {
-    let text = "Drag to draw · Drop or paste an image or PDF · Space to pan · V R D O L A P T pick a tool";
-    if (state.exportMode) {
+    let text = "Drag to draw · Drop or paste an image or PDF · Space to pan · V R D O L A P ⇧H pick a tool";
+    if (state.pending) {
+      text = "Click to place the far end · drop it on a shape to connect · Esc to cancel";
+    } else if (state.exportMode) {
       text = state.exportRect
         ? "Save to post, or copy/download the PNG · Esc to cancel"
         : "Drag a box around the diagram · Esc to cancel";
@@ -1379,6 +1524,10 @@ export function mountCanvas(opts = {}) {
       text = "Click to place text · Esc to finish";
     } else if (state.tool === "pen") {
       text = "Drag to draw freehand · V to select · Esc to finish";
+    } else if (state.tool === "highlight") {
+      text = "Drag over the page to highlight · pick a colour above · V to select";
+    } else if (state.tool === "arrow" || state.tool === "line") {
+      text = "Drag from one shape to another to connect them · or click, then click · Shift snaps";
     } else if (state.tool === "hand") {
       text = "Drag to pan · scroll to move";
     } else if (state.selected.size) {
@@ -1433,6 +1582,64 @@ export function mountCanvas(opts = {}) {
     return null;
   }
 
+  /* --- connector binding ----------------------------------- */
+
+  function bindingById(id) {
+    return id ? state.elements.find((item) => item.id === id) || null : null;
+  }
+
+  /* The element an arrow/line would attach to at this point: anything
+     under the cursor, or within a comfortable ring around a shape edge. */
+  function bindableAt(x, y, excludeId = null) {
+    const tol = 10 / state.view.zoom;
+    for (let i = state.elements.length - 1; i >= 0; i--) {
+      const item = state.elements[i];
+      if (item.id === excludeId || !BINDABLE_TYPES.includes(item.type)) continue;
+      if (hitTest(item, x, y, tol)) return item;
+    }
+    return null;
+  }
+
+  /* Re-route a connector so its endpoints sit on the edges of whatever it
+     is bound to. Called whenever either side moves or resizes. */
+  function routeLinear(item, startAt = null, endAt = null) {
+    const pts = absPoints(item);
+    if (!pts.length) return;
+    let start = startAt || pts[0];
+    let end = endAt || pts[pts.length - 1];
+    const s = bindingById(item.startBinding?.id);
+    const e = bindingById(item.endBinding?.id);
+    if (s && e) {
+      start = outlinePoint(s, centerOf(e));
+      end = outlinePoint(e, centerOf(s));
+    } else if (s) {
+      start = outlinePoint(s, end);
+    } else if (e) {
+      end = outlinePoint(e, start);
+    }
+    setLinePoints(item, [start, end]);
+  }
+
+  function routeBoundArrows() {
+    for (const item of state.elements) {
+      if ((item.type === "line" || item.type === "arrow") && (item.startBinding || item.endBinding)) {
+        routeLinear(item);
+      }
+    }
+  }
+
+  /* Copies keep their links only when both ends were copied together. */
+  function remapBindings(copies, sources) {
+    const map = new Map(sources.map((source, i) => [source.id, copies[i].id]));
+    for (const copy of copies) {
+      for (const side of ["startBinding", "endBinding"]) {
+        const id = copy[side]?.id;
+        if (!id) continue;
+        copy[side] = map.has(id) ? { id: map.get(id) } : null;
+      }
+    }
+  }
+
   function updateCursor() {
     if (state.action?.kind === "pan") {
       stage.style.cursor = "grabbing";
@@ -1464,9 +1671,17 @@ export function mountCanvas(opts = {}) {
   }
 
   function setTool(tool) {
-    if (!["select", "hand", "rect", "diamond", "ellipse", "line", "arrow", "pen", "text"].includes(tool)) return;
+    if (!["select", "hand", "rect", "diamond", "ellipse", "line", "arrow", "pen", "highlight", "text"].includes(tool)) return;
     if (state.editingId) commitText();
+    if (state.pending) cancelPendingDraw();
+    /* A highlighter that draws in the current ink colour is not much of a
+       highlighter, so pick a marker yellow unless a colour was chosen. */
+    if (tool === "highlight" && state.tool !== "highlight" && state.style.stroke === "#1e1e1e") {
+      state.style.stroke = HIGHLIGHT_COLOR;
+      syncStyleUI();
+    }
     state.tool = tool;
+    state.bindHover = null;
     if (tool !== "select" && tool !== "hand") {
       state.selected.clear();
       syncStyleUI();
@@ -1491,7 +1706,7 @@ export function mountCanvas(opts = {}) {
     const item = state.draft;
     const start = a.start;
 
-    if (item.type === "pen") {
+    if (item.type === "pen" || item.type === "highlight") {
       const last = item.points[item.points.length - 1];
       const step = 1.5 / state.view.zoom;
       if (!last || Math.hypot(p.x - start.x - last.x, p.y - start.y - last.y) >= step) {
@@ -1502,8 +1717,17 @@ export function mountCanvas(opts = {}) {
     }
 
     if (item.type === "line" || item.type === "arrow") {
-      const end = event.shiftKey ? snapLine(start, { x: p.x, y: p.y }, true) : { x: p.x, y: p.y };
-      setLinePoints(item, [{ x: start.x, y: start.y }, end]);
+      const free = event.shiftKey
+        ? snapLine({ x: start.x, y: start.y }, { x: p.x, y: p.y }, true)
+        : { x: p.x, y: p.y };
+      /* Snap the far end onto a shape as soon as the cursor is over one,
+         and outline that shape so the connection is obvious. */
+      const target = bindableAt(p.x, p.y, item.startBinding?.id || null);
+      item.endBinding = target ? { id: target.id } : null;
+      state.bindHover = target ? target.id : null;
+      routeLinear(item, { x: start.x, y: start.y }, free);
+      render();
+      return;
     } else {
       let x1 = start.x;
       let y1 = start.y;
@@ -1533,12 +1757,17 @@ export function mountCanvas(opts = {}) {
     state.draft = null;
     if (!item) return;
 
-    if (item.type === "pen") {
+    if (item.type === "pen" || item.type === "highlight") {
       setLinePoints(item, absPoints(item));
     } else if (item.type === "line" || item.type === "arrow") {
       if (item.w < 2 && item.h < 2) {
+        item.startBinding = null;
+        item.endBinding = null;
         setLinePoints(item, [{ x: item.x, y: item.y }, { x: item.x + 180, y: item.y }]);
+      } else {
+        routeLinear(item);
       }
+      state.bindHover = null;
     } else {
       if (item.w < 4) item.w = 160;
       if (item.h < 4) item.h = 100;
@@ -1548,7 +1777,7 @@ export function mountCanvas(opts = {}) {
 
     /* Freehand drawing stays active so several strokes can be drawn in a
        row. Unlike shapes, the new stroke is not selected automatically. */
-    if (item.type === "pen") {
+    if (item.type === "pen" || item.type === "highlight") {
       state.selected.clear();
     } else {
       state.selected = new Set([item.id]);
@@ -1561,6 +1790,40 @@ export function mountCanvas(opts = {}) {
     updateUI();
     render();
     scheduleSave();
+  }
+
+  /* --- click, then click again ----------------------------- */
+
+  /* A connector started with a click (rather than a drag) follows the
+     cursor until the next click, like Excalidraw's two-point arrows. */
+  function startPendingDraw(action) {
+    state.pending = { item: action.item, start: { x: action.start.x, y: action.start.y } };
+    state.draft = action.item;
+    state.bindHover = null;
+    updateHint();
+    render();
+  }
+
+  function cancelPendingDraw() {
+    if (!state.pending) return;
+    state.pending = null;
+    state.draft = null;
+    state.bindHover = null;
+    updateHint();
+    updateUI();
+    render();
+  }
+
+  function finishPendingDraw(p) {
+    const pending = state.pending;
+    if (!pending) return;
+    state.pending = null;
+    state.draft = pending.item;
+    const target = bindableAt(p.x, p.y, pending.item.startBinding?.id || null);
+    pending.item.endBinding = target ? { id: target.id } : null;
+    state.bindHover = null;
+    routeLinear(pending.item, pending.start, { x: p.x, y: p.y });
+    finishDraw();
   }
 
   /* --- moving / resizing ----------------------------------- */
@@ -1583,6 +1846,19 @@ export function mountCanvas(opts = {}) {
       if (Math.abs(dx) >= Math.abs(dy)) dy = 0;
       else dx = 0;
     }
+    /* Dragging a connector itself detaches it; otherwise re-routing would
+       pin it in place and the drag would feel broken. A plain click does
+       not move it, so its links survive selecting the arrow. */
+    if (!a.detached && Math.abs(dx) + Math.abs(dy) > 0.5) {
+      a.detached = true;
+      for (const original of a.items) {
+        const item = state.elements.find((e) => e.id === original.id);
+        if (item && (item.type === "line" || item.type === "arrow")) {
+          item.startBinding = null;
+          item.endBinding = null;
+        }
+      }
+    }
     for (const original of a.items) {
       const item = state.elements.find((e) => e.id === original.id);
       if (!item) continue;
@@ -1590,6 +1866,7 @@ export function mountCanvas(opts = {}) {
       item.y = original.y + dy;
     }
     if (Math.abs(dx) + Math.abs(dy) > 0.5) a.moved = true;
+    routeBoundArrows();
     render();
   }
 
@@ -1605,6 +1882,17 @@ export function mountCanvas(opts = {}) {
     stage.style.cursor = cursorForHandle(handle);
   }
 
+  function bindDraggedEnd(item, handle) {
+    const pts = absPoints(item);
+    const point = handle === "p0" ? pts[0] : pts[pts.length - 1];
+    const other = handle === "p0" ? item.endBinding?.id : item.startBinding?.id;
+    const target = bindableAt(point.x, point.y, other || null);
+    if (!target) return;
+    if (handle === "p0") item.startBinding = { id: target.id };
+    else item.endBinding = { id: target.id };
+    routeLinear(item);
+  }
+
   function updateResize(p, event) {
     const a = state.action;
     const item = a.item;
@@ -1612,6 +1900,10 @@ export function mountCanvas(opts = {}) {
     const shift = event.shiftKey;
 
     if (item.type === "line" || item.type === "arrow") {
+      /* Pulling an end away detaches that side; releasing it over another
+         shape re-binds there, which is handled in onPointerUp. */
+      if (a.handle === "p0") item.startBinding = null;
+      else item.endBinding = null;
       const abs = a.points.map((pt) => ({ x: b.x + pt.x, y: b.y + pt.y }));
       if (a.handle === "p0") {
         const fixed = abs[abs.length - 1];
@@ -1622,6 +1914,7 @@ export function mountCanvas(opts = {}) {
         const moving = shift ? snapLine(fixed, p, true) : { x: p.x, y: p.y };
         setLinePoints(item, [...abs.slice(0, -1), moving]);
       }
+      routeLinear(item);
       a.moved = true;
       render();
       return;
@@ -1688,7 +1981,7 @@ export function mountCanvas(opts = {}) {
       else bottom = top + h;
     }
 
-    if (item.type === "pen") {
+    if (item.type === "pen" || item.type === "highlight") {
       const nextW = Math.max(1, right - left);
       const nextH = Math.max(1, bottom - top);
       const scaleX = b.w > 0 ? nextW / b.w : 1;
@@ -1700,6 +1993,7 @@ export function mountCanvas(opts = {}) {
     item.y = top;
     item.w = Math.max(1, right - left);
     item.h = Math.max(1, bottom - top);
+    routeBoundArrows();
     a.moved = true;
     render();
   }
@@ -1835,7 +2129,12 @@ export function mountCanvas(opts = {}) {
 
   function deleteSelected() {
     if (!state.selected.size) return;
-    state.elements = state.elements.filter((item) => !state.selected.has(item.id));
+    const removed = new Set(state.selected);
+    state.elements = state.elements.filter((item) => !removed.has(item.id));
+    for (const item of state.elements) {
+      if (item.startBinding && removed.has(item.startBinding.id)) item.startBinding = null;
+      if (item.endBinding && removed.has(item.endBinding.id)) item.endBinding = null;
+    }
     state.selected.clear();
     commitHistory();
     syncStyleUI();
@@ -1864,7 +2163,9 @@ export function mountCanvas(opts = {}) {
       x: item.x + dx,
       y: item.y + dy,
     }));
+    remapBindings(copies, source);
     state.elements.push(...copies);
+    routeBoundArrows();
     state.selected = new Set(copies.map((item) => item.id));
     commitHistory();
     syncStyleUI();
@@ -1882,7 +2183,9 @@ export function mountCanvas(opts = {}) {
       x: item.x + 22,
       y: item.y + 22,
     }));
+    remapBindings(copies, items);
     state.elements.push(...copies);
+    routeBoundArrows();
     state.selected = new Set(copies.map((item) => item.id));
     commitHistory();
     syncStyleUI();
@@ -2176,6 +2479,11 @@ export function mountCanvas(opts = {}) {
     event.preventDefault();
     try { canvas.setPointerCapture(event.pointerId); } catch {}
 
+    if (state.pending) {
+      finishPendingDraw(p);
+      return;
+    }
+
     if (state.exportMode) {
       el.exportPanel.hidden = true;
       state.exportMarkdown = "";
@@ -2203,6 +2511,11 @@ export function mountCanvas(opts = {}) {
 
     if (state.tool !== "select") {
       state.draft = blankElement(state.tool, p.x, p.y, 0, 0, state.style);
+      /* Starting a connector on a shape attaches this end to it. */
+      if (state.tool === "arrow" || state.tool === "line") {
+        const target = bindableAt(p.x, p.y);
+        if (target) state.draft.startBinding = { id: target.id };
+      }
       state.action = {
         kind: "draw",
         start: { x: p.x, y: p.y },
@@ -2253,8 +2566,30 @@ export function mountCanvas(opts = {}) {
     const p = pointerPos(event);
     state.lastPointer = p;
 
+    if (state.pending) {
+      const item = state.pending.item;
+      const target = bindableAt(p.x, p.y, item.startBinding?.id || null);
+      item.endBinding = target ? { id: target.id } : null;
+      state.bindHover = target ? target.id : null;
+      routeLinear(item, state.pending.start, { x: p.x, y: p.y });
+      render();
+      return;
+    }
+
     const a = state.action;
     if (!a) {
+      /* With a connector tool, outline whatever a click would attach to. */
+      if (state.tool === "arrow" || state.tool === "line") {
+        const target = bindableAt(p.x, p.y);
+        const id = target ? target.id : null;
+        if (state.bindHover !== id) {
+          state.bindHover = id;
+          render();
+        }
+      } else if (state.bindHover) {
+        state.bindHover = null;
+        render();
+      }
       updateCursor();
       return;
     }
@@ -2313,8 +2648,17 @@ export function mountCanvas(opts = {}) {
     state.action = null;
 
     if (a?.kind === "draw") {
-      finishDraw();
+      const p = pointerPos(event);
+      const tiny = Math.hypot(p.x - a.start.x, p.y - a.start.y) < 5 / state.view.zoom;
+      if (tiny && (a.item.type === "arrow" || a.item.type === "line")) {
+        startPendingDraw(a);
+      } else {
+        finishDraw();
+      }
     } else if ((a?.kind === "move" || a?.kind === "resize") && a.moved) {
+      if (a.kind === "resize" && (a.item.type === "arrow" || a.item.type === "line")) {
+        bindDraggedEnd(a.item, a.handle);
+      }
       commitHistory();
       scheduleSave();
       syncStyleUI();
@@ -2337,7 +2681,9 @@ export function mountCanvas(opts = {}) {
   }
 
   function onPointerCancel() {
-    if (state.draft) state.draft = null;
+    state.draft = null;
+    state.pending = null;
+    state.bindHover = null;
     state.action = null;
     updateUI();
     updateCursor();
@@ -2397,6 +2743,7 @@ export function mountCanvas(opts = {}) {
       item.x += dx;
       item.y += dy;
     }
+    routeBoundArrows();
     commitHistory();
     render();
   }
@@ -2434,7 +2781,10 @@ export function mountCanvas(opts = {}) {
     const key = event.key.toLowerCase();
 
     if (typing) {
-      if (!mod && TOOL_KEYS[key]) {
+      if (!mod && event.shiftKey && key === "h") {
+        event.preventDefault();
+        setTool("highlight");
+      } else if (!mod && TOOL_KEYS[key]) {
         event.preventDefault();
         setTool(TOOL_KEYS[key]);
       }
@@ -2475,7 +2825,8 @@ export function mountCanvas(opts = {}) {
     }
 
     if (event.key === "Escape") {
-      if (state.exportMode) cancelExport();
+      if (state.pending) cancelPendingDraw();
+      else if (state.exportMode) cancelExport();
       else if (state.selected.size) {
         state.selected.clear();
         syncStyleUI();
@@ -2514,7 +2865,8 @@ export function mountCanvas(opts = {}) {
       return;
     }
 
-    if (TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
+    if (event.shiftKey && key === "h") setTool("highlight");
+    else if (TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
   }
 
   function onKeyUp(event) {
@@ -2645,6 +2997,7 @@ export function mountCanvas(opts = {}) {
     setActive(el.fillStyles, "fill", fillStyle);
     setActive(el.strokeWidths, "width", s.strokeWidth);
     setActive(el.strokeStyles, "stroke", s.strokeStyle || "solid");
+    setActive(el.pathStyles, "path", s.curve ? "curved" : "sharp");
     setActive(el.roughness, "rough", s.roughness ?? 1);
     setActive(el.textAlign, "align", s.textAlign || "left");
 
@@ -2667,6 +3020,7 @@ export function mountCanvas(opts = {}) {
       if ("fillStyle" in patch) item.fillStyle = patch.fillStyle;
       if ("strokeWidth" in patch) item.strokeWidth = patch.strokeWidth;
       if ("strokeStyle" in patch) item.strokeStyle = patch.strokeStyle;
+      if ("curve" in patch) item.curve = patch.curve;
       if ("opacity" in patch) item.opacity = clamp(patch.opacity, 0.1, 1);
       if ("roughness" in patch) item.roughness = patch.roughness;
       if ("fontSize" in patch) {
@@ -2734,6 +3088,9 @@ export function mountCanvas(opts = {}) {
     });
     el.strokeStyles.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => applyStyle({ strokeStyle: b.dataset.stroke }));
+    });
+    el.pathStyles.querySelectorAll("button").forEach((b) => {
+      b.addEventListener("click", () => applyStyle({ curve: b.dataset.path === "curved" }));
     });
     el.roughness.querySelectorAll("button").forEach((b) => {
       b.addEventListener("click", () => applyStyle({ roughness: Number(b.dataset.rough) }));
@@ -2810,6 +3167,12 @@ export function mountCanvas(opts = {}) {
     canvas.addEventListener("pointercancel", onPointerCancel);
     canvas.addEventListener("wheel", onWheel, { passive: false });
     canvas.addEventListener("dblclick", onDoubleClick);
+    canvas.addEventListener("pointerleave", () => {
+      if (state.bindHover && !state.pending && state.action?.kind !== "draw") {
+        state.bindHover = null;
+        render();
+      }
+    });
     stage.addEventListener("dragover", onDragOver);
     stage.addEventListener("dragleave", onDragLeave);
     stage.addEventListener("drop", onDrop);
@@ -2871,6 +3234,8 @@ export function mountCanvas(opts = {}) {
     state.space = false;
     state.action = null;
     state.draft = null;
+    state.pending = null;
+    state.bindHover = null;
     if (state.exportMode) cancelExport();
     updateCursor();
   }
