@@ -1334,9 +1334,8 @@
       cx = W / 2;
       cy = H / 2;
 
-      /* The same graph should not look crowded in the smaller box,
-         so nodes and springs scale down with the canvas. */
-      scale = Math.min(1, Math.max(0.55, W / 260));
+      /* The graph nodes and springs scale smoothly with the canvas. */
+      scale = Math.min(1, Math.max(0.65, W / 310));
       sizeNodes();
     }
 

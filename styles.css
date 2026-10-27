@@ -423,9 +423,9 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .brain-panel {
   position: relative;
-  flex: 0 0 216px;
-  width: 216px;
-  padding: 10px 10px 8px;
+  flex: 0 0 clamp(270px, 25vw, 310px);
+  width: clamp(270px, 25vw, 310px);
+  padding: 12px 12px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
@@ -448,19 +448,19 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--fg-dim);
 }
-.brain-title { display: inline-flex; align-items: center; gap: 6px; }
-.brain-meta { color: var(--fg-faint); letter-spacing: 0.05em; font-size: 9px; }
+.brain-title { display: inline-flex; align-items: center; gap: 7px; }
+.brain-meta { color: var(--fg-faint); letter-spacing: 0.06em; font-size: 9.5px; }
 
 .brain-canvas-wrap {
   position: relative;
-  margin-top: 8px;
+  margin-top: 10px;
   aspect-ratio: 1 / 1;
 }
 #brainCanvas {
@@ -474,11 +474,11 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .brain-hint {
   display: flex;
-  gap: 8px;
-  margin-top: 6px;
+  gap: 10px;
+  margin-top: 8px;
   font-family: var(--mono);
-  font-size: 8.5px;
-  letter-spacing: 0.04em;
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
   color: var(--fg-faint);
 }
 .brain-hint-touch { display: none; }
