@@ -5,7 +5,8 @@
   "description": "Static portfolio + writing archive. The studio and the writing build are local tools only.",
   "scripts": {
     "studio": "node tools/studio.mjs",
-    "build": "node tools/build-writing.mjs",
+    "build": "node tools/build-writing.mjs && node tools/build-brain.mjs",
+    "brain": "node tools/build-brain.mjs",
     "deerblog": "node deerblog/server.mjs",
     "deerblog:reset": "node deerblog/server.mjs --reset"
   },

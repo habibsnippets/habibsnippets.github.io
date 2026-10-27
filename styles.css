@@ -402,7 +402,69 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     linear-gradient(180deg, var(--fade-top) 0%, var(--fade-mid) 35%, var(--bg) 96%);
 }
 
-.hero-inner { position: relative; z-index: 2; }
+/* Two columns: the brain map on the left, the copy on the right.
+   The map is one canvas, so the graph costs a single paint surface
+   rather than 44 positioned DOM nodes on the hero. */
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 370px) minmax(0, 1fr);
+  column-gap: clamp(28px, 4.6vw, 60px);
+  align-content: center;
+}
+.hero-inner > :not(.brain-panel) { grid-column: 2; }
+
+.brain-panel {
+  grid-column: 1;
+  grid-row: 1 / span 5;
+  align-self: center;
+  padding: 14px 14px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(120% 90% at 20% 0%, var(--spot-soft), transparent 62%),
+    var(--card-grad),
+    var(--panel);
+  overflow: hidden;
+}
+
+.brain-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+.brain-title { display: inline-flex; align-items: center; gap: 7px; }
+.brain-meta { color: var(--fg-faint); letter-spacing: 0.06em; }
+
+.brain-canvas-wrap {
+  position: relative;
+  margin-top: 11px;
+  aspect-ratio: 1 / 1;
+}
+#brainCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.brain-hint {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 9px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  color: var(--fg-faint);
+}
 
 .eyebrow {
   display: inline-flex;
@@ -2132,6 +2194,14 @@ html.is-theming *::after {
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
+/* Below a laptop the hero copy needs the full width, so the map steps
+   aside instead of squeezing the headline into three lines. */
+@media (max-width: 960px) {
+  .hero-inner { grid-template-columns: minmax(0, 1fr); }
+  .hero-inner > :not(.brain-panel) { grid-column: 1; }
+  .brain-panel { display: none; }
+}
+
 @media (max-width: 860px) {
   /* Keep navigation reachable on phones: scrollable, no wrapper chrome. */
   .nav-links {
