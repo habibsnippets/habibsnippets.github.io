@@ -402,24 +402,22 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     linear-gradient(180deg, var(--fade-top) 0%, var(--fade-mid) 35%, var(--bg) 96%);
 }
 
-/* Two columns: the brain map on the left, the copy on the right.
-   The map is one canvas, so the graph costs a single paint surface
-   rather than 44 positioned DOM nodes on the hero. */
+/* The hero copy keeps the full container. The brain map sits in the
+   empty top-right corner, a little smaller and faded, so it reads as
+   part of the backdrop until you point at it. */
 .hero-inner {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 370px) minmax(0, 1fr);
-  column-gap: clamp(28px, 4.6vw, 60px);
-  align-content: center;
 }
-.hero-inner > :not(.brain-panel) { grid-column: 2; }
 
 .brain-panel {
-  grid-column: 1;
-  grid-row: 1 / span 5;
-  align-self: center;
-  padding: 14px 14px 12px;
+  position: absolute;
+  top: 0;
+  /* Hug the viewport's right edge rather than the text column, which
+     keeps the headline's last glyphs out from under the panel. */
+  right: calc(20px - (100vw - 1120px) / 2);
+  width: 285px;
+  padding: 12px 12px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
@@ -427,7 +425,11 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     var(--card-grad),
     var(--panel);
   overflow: hidden;
+  opacity: 0.78;
+  transition: opacity 0.3s var(--ease);
 }
+.brain-panel:hover,
+.brain-panel:focus-within { opacity: 1; }
 
 .brain-head {
   display: flex;
@@ -452,19 +454,21 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
   display: block;
   width: 100%;
   height: 100%;
-  touch-action: none;
+  /* A finger can still scroll the page; dragging a node takes over
+     once the gesture starts on the graph. */
+  touch-action: pan-y;
 }
 
 .brain-hint {
   display: flex;
-  justify-content: space-between;
   gap: 10px;
-  margin-top: 9px;
+  margin-top: 8px;
   font-family: var(--mono);
   font-size: 9.5px;
   letter-spacing: 0.05em;
   color: var(--fg-faint);
 }
+.brain-hint-touch { display: none; }
 
 .eyebrow {
   display: inline-flex;
@@ -2194,12 +2198,22 @@ html.is-theming *::after {
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
-/* Below a laptop the hero copy needs the full width, so the map steps
-   aside instead of squeezing the headline into three lines. */
-@media (max-width: 960px) {
-  .hero-inner { grid-template-columns: minmax(0, 1fr); }
-  .hero-inner > :not(.brain-panel) { grid-column: 1; }
-  .brain-panel { display: none; }
+/* Narrow screens: an absolutely pinned box would sit on top of the
+   headline (the h1 runs close to the right edge below ~1200px), so the
+   map moves into the flow after the hero copy, right-aligned. */
+@media (max-width: 1199px) {
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+  }
+  .brain-panel {
+    position: static;
+    order: 1;
+    align-self: flex-end;
+    width: min(76vw, 285px);
+    margin-top: 26px;
+    opacity: 0.86;
+  }
 }
 
 @media (max-width: 860px) {
@@ -2342,6 +2356,9 @@ html.is-theming *::after {
 /* Touch screens never fire hover, so the reveal panels on the Focus cards
    are permanently invisible there — stop their loops from burning frames. */
 @media (hover: none) {
+  .brain-hint-pointer { display: none; }
+  .brain-hint-touch { display: inline; }
+
   .focus-card-interactive .card-anim *,
   .focus-card-interactive .card-anim *::before,
   .focus-card-interactive .card-anim *::after {

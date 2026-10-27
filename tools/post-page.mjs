@@ -13,8 +13,8 @@ import { createRequire } from "node:module";
 import { escapeHtml as esc } from "./md.mjs";
 
 const require = createRequire(import.meta.url);
-export const CSS_V = "15";
-export const JS_V = "12";
+export const CSS_V = "16";
+export const JS_V = "13";
 export const SITE = "https://habibsnippets.github.io";
 export const KATEX_V = require("katex/package.json").version;
 export const KATEX_CSS = `https://cdn.jsdelivr.net/npm/katex@${KATEX_V}/dist/katex.min.css`;

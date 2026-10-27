@@ -1270,9 +1270,13 @@
     });
 
     var RADIUS = { topic: 8.5, project: 5.2, article: 4.4, post: 4.8 };
-    nodes.forEach(function (n) {
-      n.r = RADIUS[n.kind] + Math.min(3.2, Math.sqrt(n.degree) * 0.75);
-    });
+    var scale = 1;
+
+    function sizeNodes() {
+      nodes.forEach(function (n) {
+        n.r = (RADIUS[n.kind] + Math.min(3.2, Math.sqrt(n.degree) * 0.75)) * scale;
+      });
+    }
 
     var links = data.links
       .map(function (l) { return { a: byId[l.source], b: byId[l.target], kind: l.kind }; })
@@ -1323,6 +1327,11 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       cx = W / 2;
       cy = H / 2;
+
+      /* The same graph should not look crowded in the smaller corner
+         box, so nodes and springs scale down with the canvas. */
+      scale = Math.min(1, Math.max(0.72, W / 340));
+      sizeNodes();
     }
 
     /* Deterministic start: the map looks the same on every load. */
@@ -1384,7 +1393,7 @@
         var dx = l.b.x - l.a.x;
         var dy = l.b.y - l.a.y;
         var d = Math.sqrt(dx * dx + dy * dy) || 1;
-        var pull = (d - (REST[l.kind] || 44)) * 0.014;
+        var pull = (d - (REST[l.kind] || 44) * scale) * 0.014;
         var px = (dx / d) * pull;
         var py = (dy / d) * pull;
         l.a.vx += px; l.a.vy += py;
@@ -1496,7 +1505,7 @@
           var x = p.link.a.x + (p.link.b.x - p.link.a.x) * p.t;
           var y = p.link.a.y + (p.link.b.y - p.link.a.y) * p.t;
           ctx.beginPath();
-          ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+          ctx.arc(x, y, 1.5 * scale, 0, Math.PI * 2);
           ctx.fillStyle = colors.post;
           ctx.globalAlpha = 0.85;
           ctx.fill();
@@ -1534,7 +1543,7 @@
       ctx.globalAlpha = 1;
 
       /* Hubs stay labelled; everything else names itself on hover. */
-      ctx.font = "9.5px " + MONO;
+      ctx.font = Math.max(8, 9.5 * scale) + "px " + MONO;
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       nodes.forEach(function (n) {
@@ -1572,13 +1581,16 @@
       }
     }
 
+    /* Fingers need a much larger target than a cursor. */
+    var HIT_PAD = window.matchMedia && window.matchMedia("(pointer: coarse)").matches ? 16 : 9;
+
     function nodeAt(x, y) {
       var best = null;
       var bestD = Infinity;
       for (var i = 0; i < nodes.length; i++) {
         var n = nodes[i];
         var d = Math.sqrt((n.x - x) * (n.x - x) + (n.y - y) * (n.y - y));
-        if (d <= n.r + 9 && d < bestD) { best = n; bestD = d; }
+        if (d <= n.r + HIT_PAD && d < bestD) { best = n; bestD = d; }
       }
       return best;
     }
