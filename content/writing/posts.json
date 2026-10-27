@@ -1,27 +1,5 @@
 [
   {
-    "slug": "hand",
-    "title": "HAND",
-    "date": "24 Oct, 2026",
-    "dateISO": "2026-10-24",
-    "description": "A new activation function for detection models",
-    "words": 1,
-    "minutes": 1,
-    "tag": "engineering",
-    "draft": false
-  },
-  {
-    "slug": "pairwise-learning-increasing-data-efficiency",
-    "title": "Does learning image-to-image relationships produce better representations and predictions than learning from individual images?",
-    "date": "24 Oct, 2026",
-    "dateISO": "2026-10-24",
-    "description": "Pairwise Learning - increasing data efficiency",
-    "words": 106,
-    "minutes": 1,
-    "tag": "engineering",
-    "draft": true
-  },
-  {
     "slug": "continual-learning",
     "title": "Continual Learning",
     "date": "22 Sep, 2026",
