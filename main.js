@@ -1330,7 +1330,7 @@
 
       /* The same graph should not look crowded in the smaller corner
          box, so nodes and springs scale down with the canvas. */
-      scale = Math.min(1, Math.max(0.72, W / 340));
+      scale = Math.min(1, Math.max(0.6, W / 280));
       sizeNodes();
     }
 

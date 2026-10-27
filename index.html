@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=17">
 
 <script type="application/ld+json">
 {
@@ -92,21 +92,21 @@
     <canvas id="viz" aria-hidden="true"></canvas>
     <div class="hero-fade" aria-hidden="true"></div>
 
-    <div class="container hero-inner">
-      <aside class="brain-panel" aria-label="Map of my notes and how they connect">
-        <div class="brain-head">
-          <span class="brain-title"><span class="dot-live" aria-hidden="true"></span>The brain</span>
-          <span class="brain-meta" id="brainMeta">notes · papers · projects</span>
-        </div>
-        <div class="brain-canvas-wrap">
-          <canvas id="brainCanvas" role="img" aria-label="Graph of essays, articles, projects and the topics that connect them. Hover a node to trace its links, click to open it."></canvas>
-        </div>
-        <p class="brain-hint">
-          <span class="brain-hint-pointer">Hover to trace · click to open</span>
-          <span class="brain-hint-touch">Tap a node to open</span>
-        </p>
-      </aside>
+    <aside class="brain-panel" aria-label="Map of my notes and how they connect">
+      <div class="brain-head">
+        <span class="brain-title"><span class="dot-live" aria-hidden="true"></span>The brain</span>
+        <span class="brain-meta" id="brainMeta">notes · papers · projects</span>
+      </div>
+      <div class="brain-canvas-wrap">
+        <canvas id="brainCanvas" role="img" aria-label="Graph of essays, articles, projects and the topics that connect them. Hover a node to trace its links, click to open it."></canvas>
+      </div>
+      <p class="brain-hint">
+        <span class="brain-hint-pointer">Hover to trace · click to open</span>
+        <span class="brain-hint-touch">Tap a node to open</span>
+      </p>
+    </aside>
 
+    <div class="container hero-inner">
       <p class="eyebrow">
         <span class="pulse" aria-hidden="true"></span>
         Computer Vision Engineer
@@ -686,6 +686,6 @@
 
 <script src="brain/brain.js"></script>
 <script src="writing/posts.js"></script>
-<script src="main.js?v=13"></script>
+<script src="main.js?v=14"></script>
 </body>
 </html>

@@ -412,12 +412,10 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .brain-panel {
   position: absolute;
-  top: 0;
-  /* Hug the viewport's right edge rather than the text column, which
-     keeps the headline's last glyphs out from under the panel. */
-  right: calc(20px - (100vw - 1120px) / 2);
-  width: 285px;
-  padding: 12px 12px 10px;
+  top: calc(var(--nav-h) + 24px);
+  right: clamp(20px, 3.5vw, 48px);
+  width: 228px;
+  padding: 10px 10px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background:
@@ -425,29 +423,34 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     var(--card-grad),
     var(--panel);
   overflow: hidden;
-  opacity: 0.78;
-  transition: opacity 0.3s var(--ease);
+  opacity: 0.62;
+  transition: opacity 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease);
+  z-index: 3;
 }
 .brain-panel:hover,
-.brain-panel:focus-within { opacity: 1; }
+.brain-panel:focus-within {
+  opacity: 0.98;
+  border-color: var(--line-hi);
+  transform: translateY(-2px);
+}
 
 .brain-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.13em;
+  font-size: 10px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--fg-dim);
 }
-.brain-title { display: inline-flex; align-items: center; gap: 7px; }
-.brain-meta { color: var(--fg-faint); letter-spacing: 0.06em; }
+.brain-title { display: inline-flex; align-items: center; gap: 6px; }
+.brain-meta { color: var(--fg-faint); letter-spacing: 0.05em; font-size: 9px; }
 
 .brain-canvas-wrap {
   position: relative;
-  margin-top: 11px;
+  margin-top: 8px;
   aspect-ratio: 1 / 1;
 }
 #brainCanvas {
@@ -461,11 +464,11 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
 
 .brain-hint {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
   font-family: var(--mono);
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
+  font-size: 8.5px;
+  letter-spacing: 0.04em;
   color: var(--fg-faint);
 }
 .brain-hint-touch { display: none; }
@@ -2198,21 +2201,9 @@ html.is-theming *::after {
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
-/* Narrow screens: an absolutely pinned box would sit on top of the
-   headline (the h1 runs close to the right edge below ~1200px), so the
-   map moves into the flow after the hero copy, right-aligned. */
-@media (max-width: 1199px) {
-  .hero-inner {
-    display: flex;
-    flex-direction: column;
-  }
+@media (max-width: 1024px) {
   .brain-panel {
-    position: static;
-    order: 1;
-    align-self: flex-end;
-    width: min(76vw, 285px);
-    margin-top: 26px;
-    opacity: 0.86;
+    display: none;
   }
 }
 
