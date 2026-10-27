@@ -497,39 +497,28 @@
         });
       }
 
-      // Populate realistic computer vision detection targets on the right side
+      // Populate realistic computer vision detection targets on the left side
       var isWide = w >= 860;
       targets = [
-        {
-          type: "person",
-          label: "person",
-          baseConf: 0.97,
-          bw: 62,
-          bh: 136,
-          x: isWide ? w * 0.54 : w * 0.48,
-          y: Math.max(60, h * 0.16),
-          detectedByBox: false,
-          detectedByMouse: false
-        },
         {
           type: "bird",
           label: "bird",
           baseConf: 0.94,
           bw: 50,
           bh: 44,
-          x: isWide ? w * 0.73 : w * 0.68,
-          y: Math.max(50, h * 0.12),
+          x: Math.max(20, isWide ? w * 0.10 : w * 0.08),
+          y: Math.max(50, h * 0.11),
           detectedByBox: false,
           detectedByMouse: false
         },
         {
-          type: "car",
-          label: "car",
-          baseConf: 0.95,
-          bw: 114,
-          bh: 54,
-          x: isWide ? w * 0.70 : w * 0.62,
-          y: Math.max(130, h * 0.38),
+          type: "person",
+          label: "person",
+          baseConf: 0.97,
+          bw: 62,
+          bh: 136,
+          x: Math.max(24, isWide ? w * 0.06 : w * 0.05),
+          y: Math.max(160, h * 0.26),
           detectedByBox: false,
           detectedByMouse: false
         },
@@ -539,8 +528,19 @@
           baseConf: 0.98,
           bw: 68,
           bh: 72,
-          x: isWide ? w * 0.85 : w * 0.75,
-          y: Math.max(180, h * 0.60),
+          x: Math.max(30, isWide ? w * 0.28 : w * 0.22),
+          y: Math.max(240, h * 0.40),
+          detectedByBox: false,
+          detectedByMouse: false
+        },
+        {
+          type: "car",
+          label: "car",
+          baseConf: 0.95,
+          bw: 114,
+          bh: 54,
+          x: Math.max(30, isWide ? w * 0.11 : w * 0.08),
+          y: Math.max(340, h * 0.58),
           detectedByBox: false,
           detectedByMouse: false
         },
@@ -550,8 +550,8 @@
           baseConf: 0.96,
           bw: 84,
           bh: 56,
-          x: isWide ? w * 0.54 : w * 0.38,
-          y: Math.max(220, h * 0.70),
+          x: Math.max(30, isWide ? w * 0.05 : w * 0.04),
+          y: Math.max(430, h * 0.78),
           detectedByBox: false,
           detectedByMouse: false
         }
@@ -564,8 +564,8 @@
           baseConf: 0.93,
           bw: 76,
           bh: 68,
-          x: w * 0.86,
-          y: Math.max(70, h * 0.18),
+          x: Math.max(30, w * 0.24),
+          y: Math.max(390, h * 0.68),
           detectedByBox: false,
           detectedByMouse: false
         });
@@ -583,8 +583,8 @@
           state: "tracking",
           targetIdx: 0,
           timer: 160,
-          label: "person",
-          conf: 0.96,
+          label: targets[0].label,
+          conf: targets[0].baseConf,
           phase: 0
         },
         {
@@ -979,21 +979,27 @@
       raf = null;
     }
 
-    canvas.addEventListener("pointermove", function (e) {
-      /* Touch has no cursor: without this a scroll gesture leaves the
-         dashed "cursor" box parked wherever the finger last was. */
+    function onPointerMove(e) {
       if (e.pointerType === "touch") return;
       var r = canvas.getBoundingClientRect();
       mouse.x = e.clientX - r.left;
       mouse.y = e.clientY - r.top;
       mouse.active = true;
-    });
-    canvas.addEventListener("pointerleave", function () {
+    }
+    function onPointerEnd() {
       mouse.active = false;
-    });
-    canvas.addEventListener("pointercancel", function () {
-      mouse.active = false;
-    });
+    }
+
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerleave", onPointerEnd);
+    canvas.addEventListener("pointercancel", onPointerEnd);
+
+    var heroSec = document.querySelector(".hero");
+    if (heroSec) {
+      heroSec.addEventListener("pointermove", onPointerMove);
+      heroSec.addEventListener("pointerleave", onPointerEnd);
+      heroSec.addEventListener("pointercancel", onPointerEnd);
+    }
 
     var resizeTimer;
     window.addEventListener("resize", function () {
@@ -1328,9 +1334,9 @@
       cx = W / 2;
       cy = H / 2;
 
-      /* The same graph should not look crowded in the smaller corner
-         box, so nodes and springs scale down with the canvas. */
-      scale = Math.min(1, Math.max(0.6, W / 280));
+      /* The same graph should not look crowded in the smaller box,
+         so nodes and springs scale down with the canvas. */
+      scale = Math.min(1, Math.max(0.55, W / 260));
       sizeNodes();
     }
 

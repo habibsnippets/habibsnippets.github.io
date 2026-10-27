@@ -402,19 +402,29 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     linear-gradient(180deg, var(--fade-top) 0%, var(--fade-mid) 35%, var(--bg) 96%);
 }
 
-/* The hero copy keeps the full container. The brain map sits in the
-   empty top-right corner, a little smaller and faded, so it reads as
-   part of the backdrop until you point at it. */
+/* The hero copy keeps the full container. The brain map sits
+   next to the main headline, faded, and expands on hover. */
 .hero-inner {
   position: relative;
   z-index: 2;
 }
 
+.hero-headline-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 26px;
+}
+.hero-headline-wrap h1 {
+  margin: 0;
+  flex: 1 1 auto;
+}
+
 .brain-panel {
-  position: absolute;
-  top: calc(var(--nav-h) + 24px);
-  right: clamp(20px, 3.5vw, 48px);
-  width: 228px;
+  position: relative;
+  flex: 0 0 216px;
+  width: 216px;
   padding: 10px 10px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -423,13 +433,13 @@ ul, ol, dl, dd { margin: 0; padding: 0; list-style: none; }
     var(--card-grad),
     var(--panel);
   overflow: hidden;
-  opacity: 0.62;
+  opacity: 0.40;
   transition: opacity 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.3s var(--ease);
   z-index: 3;
 }
 .brain-panel:hover,
 .brain-panel:focus-within {
-  opacity: 0.98;
+  opacity: 0.95;
   border-color: var(--line-hi);
   transform: translateY(-2px);
 }
@@ -2201,13 +2211,17 @@ html.is-theming *::after {
 }
 
 /* ── Responsive ────────────────────────────────────────────── */
-@media (max-width: 1024px) {
+@media (max-width: 860px) {
+  .hero-headline-wrap {
+    display: block;
+  }
+  .hero-headline-wrap h1 {
+    margin-bottom: 24px;
+  }
   .brain-panel {
     display: none;
   }
-}
 
-@media (max-width: 860px) {
   /* Keep navigation reachable on phones: scrollable, no wrapper chrome. */
   .nav-links {
     display: flex;

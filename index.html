@@ -35,7 +35,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=17">
+<link rel="stylesheet" href="styles.css?v=18">
 
 <script type="application/ld+json">
 {
@@ -92,30 +92,32 @@
     <canvas id="viz" aria-hidden="true"></canvas>
     <div class="hero-fade" aria-hidden="true"></div>
 
-    <aside class="brain-panel" aria-label="Map of my notes and how they connect">
-      <div class="brain-head">
-        <span class="brain-title"><span class="dot-live" aria-hidden="true"></span>The brain</span>
-        <span class="brain-meta" id="brainMeta">notes · papers · projects</span>
-      </div>
-      <div class="brain-canvas-wrap">
-        <canvas id="brainCanvas" role="img" aria-label="Graph of essays, articles, projects and the topics that connect them. Hover a node to trace its links, click to open it."></canvas>
-      </div>
-      <p class="brain-hint">
-        <span class="brain-hint-pointer">Hover to trace · click to open</span>
-        <span class="brain-hint-touch">Tap a node to open</span>
-      </p>
-    </aside>
-
     <div class="container hero-inner">
       <p class="eyebrow">
         <span class="pulse" aria-hidden="true"></span>
         Computer Vision Engineer
       </p>
 
-      <h1>
-        Vision systems that <span class="h1-interactive" id="wordSee"><em class="grad-a word-text">see</em><span class="word-icon icon-eye" aria-hidden="true"><svg class="h1-eye-svg" viewBox="0 0 32 20" width="38" height="24"><path class="eye-lid" d="M1 10 C6 2, 26 2, 31 10 C26 18, 6 18, 1 10 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle class="eye-iris" cx="16" cy="10" r="4.8" fill="currentColor"/><circle class="eye-pupil" cx="16" cy="10" r="2.2" fill="var(--bg)"/><circle class="eye-shine" cx="17.6" cy="8.4" r="1.2" fill="#ffffff"/></svg></span></span>.<br>
-        Models that <span class="h1-interactive" id="wordReason"><em class="grad-b word-text">reason</em><span class="word-icon icon-brain" aria-hidden="true"><svg class="h1-brain-svg" viewBox="0 0 28 24" width="36" height="28"><path d="M13 4 C10 2, 5 3, 4 7 C3 9, 3 12, 4 14 C3 16, 4 19, 7 20 C10 21, 12 19, 13 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 4 C18 2, 23 3, 24 7 C25 9, 25 12, 24 14 C25 16, 24 19, 21 20 C18 21, 16 19, 15 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="4" x2="14" y2="19" stroke="currentColor" stroke-width="1.8" stroke-dasharray="1 2.5"/><path d="M7 8 C9 8, 11 9, 11 11 C11 13, 8 13, 7 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 8 C19 8, 17 9, 17 11 C17 13, 20 13, 21 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></span>.
-      </h1>
+      <div class="hero-headline-wrap">
+        <h1>
+          Vision systems that <span class="h1-interactive" id="wordSee"><em class="grad-a word-text">see</em><span class="word-icon icon-eye" aria-hidden="true"><svg class="h1-eye-svg" viewBox="0 0 32 20" width="38" height="24"><path class="eye-lid" d="M1 10 C6 2, 26 2, 31 10 C26 18, 6 18, 1 10 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle class="eye-iris" cx="16" cy="10" r="4.8" fill="currentColor"/><circle class="eye-pupil" cx="16" cy="10" r="2.2" fill="var(--bg)"/><circle class="eye-shine" cx="17.6" cy="8.4" r="1.2" fill="#ffffff"/></svg></span></span>.<br>
+          Models that <span class="h1-interactive" id="wordReason"><em class="grad-b word-text">reason</em><span class="word-icon icon-brain" aria-hidden="true"><svg class="h1-brain-svg" viewBox="0 0 28 24" width="36" height="28"><path d="M13 4 C10 2, 5 3, 4 7 C3 9, 3 12, 4 14 C3 16, 4 19, 7 20 C10 21, 12 19, 13 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 4 C18 2, 23 3, 24 7 C25 9, 25 12, 24 14 C25 16, 24 19, 21 20 C18 21, 16 19, 15 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="4" x2="14" y2="19" stroke="currentColor" stroke-width="1.8" stroke-dasharray="1 2.5"/><path d="M7 8 C9 8, 11 9, 11 11 C11 13, 8 13, 7 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 8 C19 8, 17 9, 17 11 C17 13, 20 13, 21 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></span>.
+        </h1>
+
+        <aside class="brain-panel" aria-label="Map of my notes and how they connect">
+          <div class="brain-head">
+            <span class="brain-title"><span class="dot-live" aria-hidden="true"></span>The brain</span>
+            <span class="brain-meta" id="brainMeta">notes · papers · projects</span>
+          </div>
+          <div class="brain-canvas-wrap">
+            <canvas id="brainCanvas" role="img" aria-label="Graph of essays, articles, projects and the topics that connect them. Hover a node to trace its links, click to open it."></canvas>
+          </div>
+          <p class="brain-hint">
+            <span class="brain-hint-pointer">Hover to trace · click to open</span>
+            <span class="brain-hint-touch">Tap a node to open</span>
+          </p>
+        </aside>
+      </div>
 
       <div class="intro-wrap">
         <div class="intro-avatar">
@@ -686,6 +688,6 @@
 
 <script src="brain/brain.js"></script>
 <script src="writing/posts.js"></script>
-<script src="main.js?v=14"></script>
+<script src="main.js?v=15"></script>
 </body>
 </html>
