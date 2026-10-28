@@ -1,5 +1,15 @@
 [
   {
+    "slug": "new-page-for",
+    "title": "new page from my studio",
+    "date": "28 Oct, 2026",
+    "dateISO": "2026-10-28",
+    "description": "",
+    "words": 2,
+    "minutes": 1,
+    "draft": false
+  },
+  {
     "slug": "testing-my-writing-studio",
     "title": "testing my writing studio",
     "date": "28 Oct, 2026",
