@@ -9,14 +9,6 @@ window.WRITING_POSTS = [
     "minutes": 1
   },
   {
-    "title": "testing my writing studio",
-    "date": "28 Oct, 2026",
-    "iso": "2026-10-28",
-    "url": "/writing/testing-my-writing-studio/",
-    "tag": "engineering",
-    "minutes": 1
-  },
-  {
     "title": "Continual Learning",
     "date": "22 Sep, 2026",
     "iso": "2026-09-22",
