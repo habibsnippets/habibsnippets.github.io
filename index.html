@@ -3,35 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Habeeb — Computer Vision Engineer</title>
-<meta name="description" content="Computer vision engineer. Detection, segmentation and deployment — now working on vision-language models and post-training.">
-<meta name="theme-color" content="#f7f4ef">
-<meta name="color-scheme" content="light">
+<title>Habeeb — AI/ML Engineer</title>
+<meta name="description" content="AI/ML engineer. Detection, segmentation and deployment — now working on vision-language models and post-training.">
+<meta name="theme-color" content="#faf4e6">
+<meta name="color-scheme" content="light dark">
+<script>
+  /* Light is the default; an explicit "dark" choice is what persists.
+     Runs before first paint so the wrong theme never flashes. */
+  (function () {
+    var t = "light";
+    try { t = localStorage.getItem("theme") === "dark" ? "dark" : "light"; } catch (e) {}
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Habeeb — Computer Vision Engineer">
+<meta property="og:title" content="Habeeb — AI/ML Engineer">
 <meta property="og:description" content="Vision systems that see. Models that reason. Projects, essays and notes on computer vision, VLMs and post-training.">
 <meta property="og:url" content="https://habibsnippets.github.io/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@habeebstwt">
-<meta name="twitter:title" content="Habeeb — Computer Vision Engineer">
+<meta name="twitter:title" content="Habeeb — AI/ML Engineer">
 <meta name="twitter:description" content="Vision systems that see. Models that reason.">
 
 <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon.png">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="assets/brand-logo.png">
 
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="home.css?v=2">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=19">
 
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Habeeb",
-  "jobTitle": "ML/AI Engineer",
+  "@type": "Person",  "name": "Habeeb",
+  "jobTitle": "AI/ML Engineer",
   "url": "https://habibsnippets.github.io/",
   "sameAs": [
     "https://github.com/habibsnippets",
@@ -44,238 +54,640 @@
 </head>
 <body>
 
-<main class="page" id="top">
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
 
-  <header>
-    <h1>Habeeb</h1>
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="Home">
+      <img class="brand-logo" src="assets/brand-logo.png" alt="Logo" width="28" height="16">
+      Habeeb
+    </a>
 
-    <p class="tagline">
-      Machine learning engineer. Worked on detection, segmentation and 3D perception
-      systems.
-    </p>
-
-    <nav class="head-links" aria-label="Page">
+    <nav class="nav-links" aria-label="Sections">
+      <a href="#focus">Focus</a>
       <a href="#experience">Experience</a>
-      <span class="sep" aria-hidden="true">·</span>
       <a href="#work">Work</a>
-      <span class="sep" aria-hidden="true">·</span>
       <a href="#writing">Writing</a>
-      <span class="sep" aria-hidden="true">·</span>
+      <a href="#articles">Articles</a>
+      <a href="#notes">Notes</a>
       <a href="#contact">Contact</a>
-      <span class="sep" aria-hidden="true">·</span>
-      <a href="https://github.com/habibsnippets" target="_blank" rel="noopener">GitHub ↗</a>
     </nav>
-  </header>
 
-  <hr>
+    <button class="search-hint" id="searchHint" type="button" aria-label="Search writing">
+      <kbd>/</kbd><span>search</span>
+    </button>
 
-  <section id="about">
-    <h2>About</h2>
-    <p class="intro">
-      I'm Habeeb. Most of my work is computer vision in production: medical imaging
-      in hospitals, perception on autonomous vehicles. A lot of it happens at the edge,
-      squeezing transformer detectors and 3D perception onto hardware like Jetson Orin.
-    </p>
-    <p>
-      Also interested in learning about VLMs and VLAs in my free time. 
-    </p>
-    <p>I write about what I'm learning, mostly the hard way.</p>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light theme" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M18.7 5.3l-1.4 1.4M6.7 17.3l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ───────────────────────── HERO ───────────────────────── -->
+  <section class="hero">
+    <canvas id="viz" aria-hidden="true"></canvas>
+    <div class="hero-fade" aria-hidden="true"></div>
+
+    <div class="container hero-inner">
+      <p class="eyebrow">
+        <span class="pulse" aria-hidden="true"></span>
+        AI/ML Engineer
+      </p>
+
+      <div class="hero-headline-wrap">
+        <h1>
+          Vision systems that <span class="h1-interactive" id="wordSee"><em class="grad-a word-text">see</em><span class="word-icon icon-eye" aria-hidden="true"><svg class="h1-eye-svg" viewBox="0 0 32 20" width="38" height="24"><path class="eye-lid" d="M1 10 C6 2, 26 2, 31 10 C26 18, 6 18, 1 10 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle class="eye-iris" cx="16" cy="10" r="4.8" fill="currentColor"/><circle class="eye-pupil" cx="16" cy="10" r="2.2" fill="var(--bg)"/><circle class="eye-shine" cx="17.6" cy="8.4" r="1.2" fill="#ffffff"/></svg></span></span>.<br>
+          Models that <span class="h1-interactive" id="wordReason"><em class="grad-b word-text">reason</em><span class="word-icon icon-brain" aria-hidden="true"><svg class="h1-brain-svg" viewBox="0 0 28 24" width="36" height="28"><path d="M13 4 C10 2, 5 3, 4 7 C3 9, 3 12, 4 14 C3 16, 4 19, 7 20 C10 21, 12 19, 13 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 4 C18 2, 23 3, 24 7 C25 9, 25 12, 24 14 C25 16, 24 19, 21 20 C18 21, 16 19, 15 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14" y1="4" x2="14" y2="19" stroke="currentColor" stroke-width="1.8" stroke-dasharray="1 2.5"/><path d="M7 8 C9 8, 11 9, 11 11 C11 13, 8 13, 7 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M21 8 C19 8, 17 9, 17 11 C17 13, 20 13, 21 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></span>.
+        </h1>
+
+        <aside class="brain-panel" aria-label="Map of my notes and how they connect">
+          <div class="brain-head">
+            <span class="brain-title"><span class="dot-live" aria-hidden="true"></span>The brain</span>
+            <span class="brain-meta" id="brainMeta">notes · papers · projects</span>
+          </div>
+          <div class="brain-canvas-wrap">
+            <canvas id="brainCanvas" role="img" aria-label="Graph of essays, articles, projects and the topics that connect them. Hover a node to trace its links, click to open it."></canvas>
+          </div>
+          <p class="brain-hint">
+            <span class="brain-hint-pointer">Hover to trace · click to open</span>
+            <span class="brain-hint-touch">Tap a node to open</span>
+          </p>
+        </aside>
+      </div>
+
+      <div class="intro-wrap">
+        <div class="intro-avatar">
+          <div class="intro-avatar-corners" aria-hidden="true"></div>
+          <span class="avatar-tag">habeeb 0.99</span>
+          <div class="intro-avatar-inner">
+            <img src="assets/habeeb.jpg" srcset="assets/habeeb-288.jpg 288w, assets/habeeb.jpg 736w" sizes="96px" alt="Habeeb" width="96" height="96" loading="eager" decoding="async">
+          </div>
+        </div>
+
+        <p class="lede">
+          I'm Habeeb — an AI/ML engineer who ships vision systems into production:
+          medical imaging in hospitals, perception on autonomous vehicles. A lot of that work happens at the
+          edge, squeezing transformer detectors and 3D perception onto hardware that isn't a datacenter.
+          These days my curiosity goes into <span class="hl">vision–language models</span> and
+          <span class="hl">post-training</span>.
+        </p>
+      </div>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#work">
+          Explore projects
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9M8.5 3.5 13 8l-4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn" href="#writing">Read the writing</a>
+      </div>
+
+      <dl class="stats">
+        <div><dt>Projects</dt><dd>4</dd></div>
+        <div><dt>Essays</dt><dd>23</dd></div>
+        <div><dt>Articles</dt><dd>9</dd></div>
+      </dl>
+    </div>
+
+    <a class="scroll-cue" href="#focus" aria-label="Skip to content">
+      <span>scroll</span>
+      <svg viewBox="0 0 12 20" width="12" height="20" aria-hidden="true"><path d="M6 1v16M1.5 12.5 6 17l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
   </section>
 
-  <hr>
+  <!-- ───────────────────────── FOCUS ───────────────────────── -->
+  <section id="focus" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>01 — Focus</p>
+        <h2>Three things I keep coming back to.</h2>
+      </header>
 
-  <section id="experience">
-    <h2>Experience</h2>
+      <div class="focus-grid">
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:0">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <h3>Computer Vision</h3>
+            <p>Detection, segmentation, pose estimation and 3D perception — plus the unglamorous half: latency budgets, quantisation and models that actually survive a real input.</p>
+            <ul class="mini-tags"><li>Detection</li><li>Segmentation</li><li>Pose</li><li>Deployment</li></ul>
+          </div>
+          <div class="card-anim anim-cv" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>CV DETECTOR</span>
+              <span class="anim-telemetry">RT-DETR · 82 FPS</span>
+            </div>
+            <div class="cv-viewport">
+              <div class="cv-grid"></div>
+              <div class="cv-scanline"></div>
+              <!-- Person Box -->
+              <div class="cv-box cv-person">
+                <span class="cv-tag">person 0.98</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+                <svg class="cv-skel" viewBox="0 0 24 40">
+                  <circle cx="12" cy="6" r="3.2"/>
+                  <line x1="12" y1="9.2" x2="12" y2="24"/>
+                  <line x1="12" y1="13" x2="5" y2="20"/>
+                  <line x1="12" y1="13" x2="19" y2="20"/>
+                  <line x1="12" y1="24" x2="6" y2="36"/>
+                  <line x1="12" y1="24" x2="18" y2="36"/>
+                </svg>
+              </div>
+              <!-- Vehicle Box -->
+              <div class="cv-box cv-vehicle">
+                <span class="cv-tag">vehicle 0.94</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+                <svg class="cv-obj-svg cv-vehicle-svg" viewBox="0 0 70 38">
+                  <circle cx="18" cy="30" r="5.5" fill="currentColor"/>
+                  <circle cx="18" cy="30" r="2.2" fill="var(--panel-hi)"/>
+                  <circle cx="52" cy="30" r="5.5" fill="currentColor"/>
+                  <circle cx="52" cy="30" r="2.2" fill="var(--panel-hi)"/>
+                  <path d="M4 27 L6 18 Q 8 16, 16 16 L24 8 Q 26 6, 32 6 L44 6 Q 48 6, 52 14 L62 16 Q 66 17, 66 22 L66 27 Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                  <path d="M26 9 L34 9 L34 15 L19 15 Z" fill="currentColor" opacity="0.35"/>
+                  <path d="M37 9 L44 9 L50 15 L37 15 Z" fill="currentColor" opacity="0.35"/>
+                  <circle cx="64" cy="20" r="1.8" fill="#5eead4"/>
+                  <circle cx="6" cy="20" r="1.8" fill="#f43f5e"/>
+                </svg>
+              </div>
+              <!-- Cat Box -->
+              <div class="cv-box cv-cat">
+                <span class="cv-tag">cat 0.97</span>
+                <span class="cv-reticle tl"></span><span class="cv-reticle tr"></span><span class="cv-reticle bl"></span><span class="cv-reticle br"></span>
+                <svg class="cv-obj-svg cv-cat-svg" viewBox="0 0 34 32">
+                  <path d="M8 29 C6 22, 10 16, 14 14 L12 8 L17 11 L21 11 L25 8 L24 14 C28 17, 30 23, 26 29 Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                  <line x1="12" y1="16" x2="6" y2="15" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="12" y1="18" x2="6" y2="18" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="24" y1="16" x2="30" y2="15" stroke="currentColor" stroke-width="1.2"/>
+                  <line x1="24" y1="18" x2="30" y2="18" stroke="currentColor" stroke-width="1.2"/>
+                  <path d="M25 28 Q 33 24, 30 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <circle cx="16" cy="14" r="1.2" fill="#fcd34d"/>
+                  <circle cx="21" cy="14" r="1.2" fill="#fcd34d"/>
+                </svg>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>LATENCY: 12.1ms</span>
+              <span>OBJECTS: 3 DETECTED</span>
+            </div>
+          </div>
+        </article>
 
-    <table class="log">
-      <thead>
-        <tr>
-          <th scope="col">When</th>
-          <th scope="col">Where</th>
-          <th scope="col">What</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="when">Jun 2026 — Present</td>
-          <td>
-            <span class="place">neo by RNT Health Insights</span>
-            <span class="where">On-site</span>
-          </td>
-          <td>
-            <span class="role">Machine Learning Engineer, Computer Vision</span>
-            Real-time GI endoscopy detection (RT-DETR → RF-DETR), on-device
-            speech-to-report on a Jetson AGX Orin, and multimodal pipelines built
-            for hospital latency budgets. 
-          </td>
-        </tr>
-        <tr>
-          <td class="when">May 2025 — May 2026</td>
-          <td>
-            <span class="place">Flux Auto</span>
-            <span class="where">YC S21 · On-site</span>
-          </td>
-          <td>
-            <span class="role">Deep Learning Engineer</span>
-            3D LiDAR perception for autonomous vehicles — PointNet-family detectors,
-            morphological ground removal, and low-light image enhancement.
-          </td>
-        </tr>
-        <tr>
-          <td class="when">Dec 2023 — Feb 2024</td>
-          <td>
-            <span class="place">SMSS Lab</span>
-            <span class="where">IIT Kanpur · On-site</span>
-          </td>
-          <td>
-            <span class="role">Research Intern</span>
-            Vision algorithms for a robot that detects and reads physical gauges
-            in hazardous field environments.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:1">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 20h10M12 17v3M7.5 9.5h3M13 7.5h3.5M7.5 13h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Vision–Language Models</h3>
+            <p>Where grounding breaks, why VLMs hallucinate so confidently, and whether inference-time signals can catch it before a downstream system trusts it.</p>
+            <ul class="mini-tags"><li>Grounding</li><li>Hallucination</li><li>Evaluation</li></ul>
+          </div>
+          <div class="card-anim anim-vlm" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>VISION–LANGUAGE</span>
+              <span class="anim-telemetry">Qwen2.5-VL · Grounded</span>
+            </div>
+            <div class="vlm-viewport">
+              <div class="vlm-patches">
+                <span class="vlm-patch"></span><span class="vlm-patch active"></span><span class="vlm-patch"></span>
+                <span class="vlm-patch"></span><span class="vlm-patch active"></span><span class="vlm-patch"></span>
+              </div>
+              <div class="vlm-connector">
+                <svg viewBox="0 0 160 30" class="vlm-rays">
+                  <path d="M25 2 Q 80 15, 35 28" class="ray-line r1"/>
+                  <path d="M80 2 Q 80 15, 80 28" class="ray-line r2"/>
+                  <path d="M135 2 Q 80 15, 125 28" class="ray-line r3"/>
+                </svg>
+                <span class="vlm-cross-attn">Cross-Attention · 0.98</span>
+              </div>
+              <div class="vlm-tokens">
+                <span class="vlm-tok">&lt;image&gt;</span>
+                <span class="vlm-tok">"cat"</span>
+                <span class="vlm-tok hl">"on mat"</span>
+                <span class="vlm-tok">[0.42, 0.88]</span>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>ALIGNMENT: 98.4%</span>
+              <span>GROUNDING: LOCKED</span>
+            </div>
+          </div>
+        </article>
 
-    <p class="tools">
-      <span class="k">Tools</span>
-      Python, C++, PyTorch, Hugging Face, OpenCV, CUDA, TensorRT, ONNX, Docker,
-      Jetson, LiDAR, LoRA / QLoRA / DoRA, RLHF / GRPO.
-    </p>
+        <article class="card focus-card focus-card-interactive" data-reveal style="--i:2">
+          <div class="card-content">
+            <div class="focus-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 18V9M10 18V5M16 18v-6M22 18V8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M2 21h20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Post-Training</h3>
+            <p>SFT, preference optimisation and RL — the part that turns a capable base model into one that behaves, refuses what it should, and stays honest about what it saw.</p>
+            <ul class="mini-tags"><li>SFT</li><li>RLHF / PPO</li><li>DPO</li><li>Evals</li></ul>
+          </div>
+          <div class="card-anim anim-post" aria-hidden="true">
+            <div class="anim-head">
+              <span class="anim-badge"><span class="dot-live"></span>POST-TRAINING</span>
+              <span class="anim-telemetry">DPO / GRPO · Align</span>
+            </div>
+            <div class="post-viewport">
+              <div class="post-pairs">
+                <div class="post-pair chosen">
+                  <span class="pair-status">✓ chosen</span>
+                  <span class="pair-reward">+0.94</span>
+                </div>
+                <div class="post-pair rejected">
+                  <span class="pair-status">✕ rejected</span>
+                  <span class="pair-reward">-0.48</span>
+                </div>
+              </div>
+              <div class="post-chart">
+                <svg viewBox="0 0 200 48" class="post-svg">
+                  <line x1="0" y1="12" x2="200" y2="12" stroke="currentColor" stroke-opacity="0.1" stroke-dasharray="2 3"/>
+                  <line x1="0" y1="36" x2="200" y2="36" stroke="currentColor" stroke-opacity="0.1" stroke-dasharray="2 3"/>
+                  <path d="M0 6 Q 60 10, 110 30 T 200 42" class="chart-loss"/>
+                  <path d="M0 42 Q 60 38, 110 16 T 200 6" class="chart-reward"/>
+                  <circle cx="160" cy="9" r="3.2" class="chart-dot"/>
+                </svg>
+                <div class="chart-legend">
+                  <span class="leg-loss">Loss: 0.082 ↘</span>
+                  <span class="leg-reward">Reward: +0.94 ↗</span>
+                </div>
+              </div>
+            </div>
+            <div class="anim-foot">
+              <span>KL-DIV: 0.021</span>
+              <span>STATUS: CONVERGED</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
   </section>
 
-  <hr>
+  <!-- ───────────────────────── EXPERIENCE ───────────────────────── -->
+  <section id="experience" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>02 — Experience</p>
+        <h2>Where the models actually shipped.</h2>
+        <p class="section-sub">Production vision in hospitals and on vehicles, and a research stint teaching a robot to read gauges.</p>
+      </header>
 
-  <section id="work">
-    <h2>Selected work</h2>
+      <ol class="timeline">
+        <li class="timeline-item" data-reveal style="--i:0">
+          <div class="timeline-when">
+            <span>Jun 2026 — Present</span>
+            <span class="when-now"><span class="dot-live" aria-hidden="true"></span>current</span>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/rnt-insights.jpg" alt="neo by RNT Health Insights" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Machine Learning Engineer, Computer Vision</h3>
+                <p class="timeline-org">neo by RNT Health Insights <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Migrated GI endoscopy detection from RT-DETR to RF-DETR to get the accuracy/throughput balance that live decision support during a procedure actually demands.</li>
+              <li>Deployed a fully on-device speech-to-report pipeline (MedASR + Qwen) on a Jetson AGX Orin — clinical documentation automated with patient data never leaving the machine.</li>
+              <li>Engineered embedding-based frame deduplication (DINO / ResNet50 + DBSCAN) to drop redundant endoscopy frames, speeding up training and improving recall on rare anomalies.</li>
+              <li>Optimised multimodal Vision + ASR + LLM pipelines for embedded GPUs to meet hospital latency constraints.</li>
+            </ul>
+          </div>
+        </li>
 
-    <ul class="projects">
-      <li>
-        <p class="project-title">
-          <a href="https://github.com/habibsnippets/mathguard" target="_blank" rel="noopener">mathguard</a>
-          <span class="project-tags">alignment · evals</span>
-        </p>
-        <p class="project-desc">
-          An RLHF-style alignment pipeline for math LLMs. Harm refusal lifted from
-          0% to 88% with a 3.2% GSM8K alignment tax; a DistilBERT reward model
-          blocked all 96 jailbreak attempts against a 1.5B model.
-        </p>
-      </li>
+        <li class="timeline-item" data-reveal style="--i:1">
+          <div class="timeline-when"><span>May 2025 — May 2026</span></div>
+          <div class="timeline-body">
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/flux-auto.jpg" alt="Flux Auto" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Deep Learning Engineer</h3>
+                <p class="timeline-org">Flux Auto <span class="sep">·</span> YC S21 <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Integrated 3D LiDAR models (PointNet, PointNet++, Point Transformer) into the autonomous vehicle stack for object detection where camera-only perception failed under variable lighting.</li>
+              <li>Designed a Progressive Morphological Filter ground-removal pipeline to separate true obstacles from road noise — preventing false positives before they reached braking decisions.</li>
+              <li>Deployed low-light image enhancement to hold camera perception together when LiDAR data was sparse or noisy.</li>
+            </ul>
+          </div>
+        </li>
 
-      <li>
-        <p class="project-title">
-          <a href="https://github.com/habibsnippets/Rasengan-XL" target="_blank" rel="noopener">Rasengan-XL</a>
-          <span class="project-tags">SDXL · LoRA</span>
-        </p>
-        <p class="project-desc">
-          PEFT fine-tunes of SDXL 1.0 — LoRA, QLoRA and DoRA — fitting a
-          2.6B-parameter model on a single 16 GB T4 with 4-bit NF4 and gradient
-          checkpointing.
-        </p>
-      </li>
+        <li class="timeline-item" data-reveal style="--i:2">
+          <div class="timeline-when"><span>Dec 2023 — Feb 2024</span></div>
+          <div class="timeline-body">
+            <div class="timeline-head">
+              <span class="org-logo"><img src="assets/smss-lab.png" alt="SMSS Lab, IIT Kanpur" width="44" height="44" loading="lazy" decoding="async"></span>
+              <div>
+                <h3>Research Intern</h3>
+                <p class="timeline-org">SMSS Lab <span class="sep">·</span> IIT Kanpur <span class="sep">·</span> On-site</p>
+              </div>
+            </div>
+            <ul class="bullets">
+              <li>Built computer vision algorithms on a robotic platform to autonomously detect and read physical gauges in hazardous field environments.</li>
+              <li>Fine-tuned a YOLO keypoint + object detection model on a curated field dataset to localise gauge parameters in real time.</li>
+            </ul>
+          </div>
+        </li>
+      </ol>
 
-      <li>
-        <p class="project-title">
-          <a href="https://github.com/habibsnippets/SocioPostGenerator" target="_blank" rel="noopener">Socio Post Generator</a>
-          <span class="project-tags">LLMs · few-shot</span>
-        </p>
-        <p class="project-desc">
-          A few-shot post generator that reads existing posts for style, tags and
-          language, then asks an LLM to write new ones in the same voice.
-        </p>
-      </li>
+      <div class="toolkit-grid" data-reveal>
+        <article class="card focus-card toolkit-card" style="--i:0">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Languages</h3>
+          <ul class="mini-tags">
+            <li>Python</li><li>C++</li><li>C</li>
+          </ul>
+        </article>
 
-      <li>
-        <p class="project-title">
-          <a href="https://github.com/habibsnippets/PDF2Podcast" target="_blank" rel="noopener">PDF2Podcast</a>
-          <span class="project-tags">Llama 3.2 · TTS</span>
-        </p>
-        <p class="project-desc">
-          Turns a dense PDF into a two-speaker dialogue with Llama-3.2-3B and
-          renders it to audio with Kokoro TTS.
-        </p>
-      </li>
-    </ul>
+        <article class="card focus-card toolkit-card" style="--i:1">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Vision &amp; DL</h3>
+          <ul class="mini-tags">
+            <li>PyTorch</li><li>Hugging Face</li><li>RT-DETR</li><li>RF-DETR</li><li>YOLO</li><li>ResNet</li><li>ViT</li><li>DINO</li><li>OpenCV</li><li>timm</li>
+          </ul>
+        </article>
 
-    <p class="more">
-      <a href="https://github.com/habibsnippets?tab=repositories" target="_blank" rel="noopener">All repositories on GitHub →</a>
-    </p>
+        <article class="card focus-card toolkit-card" style="--i:2">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>3D &amp; LiDAR</h3>
+          <ul class="mini-tags">
+            <li>PointNet</li><li>PointNet++</li><li>Point Transformer</li><li>LiDAR processing</li><li>PCL</li>
+          </ul>
+        </article>
+
+        <article class="card focus-card toolkit-card" style="--i:3">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3v3M18.5 5.5l-2.2 2.2M21 12h-3M18.5 18.5l-2.2-2.2M12 21v-3M5.5 18.5l2.2-2.2M3 12h3M5.5 5.5l2.2 2.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+          </div>
+          <h3>LLMs &amp; GenAI</h3>
+          <ul class="mini-tags">
+            <li>Llama</li><li>Qwen</li><li>LangChain</li><li>RLHF</li><li>GRPO</li><li>LoRA / QLoRA / DoRA</li><li>SDXL</li>
+          </ul>
+        </article>
+
+        <article class="card focus-card toolkit-card" style="--i:4">
+          <div class="focus-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="9" y="9" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Edge &amp; MLOps</h3>
+          <ul class="mini-tags">
+            <li>Jetson AGX Orin</li><li>CUDA</li><li>TensorRT</li><li>ONNX</li><li>Docker</li><li>W&amp;B</li><li>Linux</li>
+          </ul>
+        </article>
+      </div>
+
+    </div>
   </section>
 
-  <hr>
+  <!-- ───────────────────────── WORK ───────────────────────── -->
+  <section id="work" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>03 — Selected work</p>
+        <h2>Projects, and what each one was actually about.</h2>
+        <p class="section-sub">The four builds worth showing — each links straight to the source on GitHub.</p>
+      </header>
 
-  <section id="writing">
-    <h2>Writing</h2>
-    <p class="section-note">
-      Notes on papers, from-scratch builds, and things I got wrong the first time.
-    </p>
 
-    <!-- writing-list:start -->
-    <ul class="writing-list">
-      <li><time datetime="2026-10-28">28 Oct 2026</time><a href="/writing/new-page-for/">new page from my studio</a></li>
-      <li><time datetime="2026-09-22">22 Sep 2026</time><a href="/writing/continual-learning/">Continual Learning</a></li>
-      <li><time datetime="2026-07-13">13 Jul 2026</time><a href="/writing/the-idea-of-chaining/">The Idea of Chaining</a></li>
-      <li><time datetime="2026-07-13">13 Jul 2026</time><a href="/writing/dataloaders-part-1/">dataloaders part 1</a></li>
-      <li><time datetime="2026-04-09">9 Apr 2026</time><a href="/writing/the-t4-ceiling-why-vanilla-vlms-fail-on-video/">The T4 Ceiling: Why Vanilla VLMs Fail on Video</a></li>
-      <li><time datetime="2026-04-02">2 Apr 2026</time><a href="/writing/zero-to-ros2-building-pubsub-from-scratch/">Zero to ROS2 - Building pub/sub from scratch</a></li>
-      <li><time datetime="2026-03-18">18 Mar 2026</time><a href="/writing/cnn-build-weight-init-rabbit-hole/">CNN Build - Weight Init Rabbit Hole</a></li>
-      <li><time datetime="2026-03-17">17 Mar 2026</time><a href="/writing/understanding-zero/">understanding ZeRO!</a></li>
-      <li><time datetime="2026-03-13">13 Mar 2026</time><a href="/writing/math-ai-say-no/">i tried to teach a math ai to say no</a></li>
-      <li><time datetime="2026-03-09">9 Mar 2026</time><a href="/writing/studying-about-deepseek-v3/">DeepSeek V3 Deep Dive</a></li>
-      <li><time datetime="2026-02-23">23 Feb 2026</time><a href="/writing/simplifying-ddp/">simplifying DDP</a></li>
-      <li><time datetime="2026-02-20">20 Feb 2026</time><a href="/writing/ppo-for-llms-why-we-clip-why-we-normalize-and-why-its-still-hard/">PPO for LLMs: Why We Clip, Why We Normalize, and Why It's Still Hard</a></li>
-      <li><time datetime="2026-02-15">15 Feb 2026</time><a href="/writing/bradley-terry-model/">Bradley Terry Model</a></li>
-      <li><time datetime="2026-01-05">5 Jan 2026</time><a href="/writing/from-points-to-token-a-3d-learning-log/">From Points to Token: A 3D Learning Log - Part 1</a></li>
-      <li><time datetime="2025-11-29">29 Nov 2025</time><a href="/writing/engineering-fully-local-retrieval-augmented-generation-systems/">Engineering Fully Local Retrieval-Augmented Generation Systems</a></li>
-      <li><time datetime="2025-11-19">19 Nov 2025</time><a href="/writing/sdxl-something/">SDXL something</a></li>
-      <li><time datetime="2025-10-09">9 Oct 2025</time><a href="/writing/lns/">Log Number System for Low Precision Training</a></li>
-      <li><time datetime="2025-09-29">29 Sep 2025</time><a href="/writing/automatic-differentiation/">Automatic Differentiation</a></li>
-      <li><time datetime="2025-09-18">18 Sep 2025</time><a href="/writing/resnet-so-simple-your-grandma-could-understand/">ResNet, So Simple Your Grandma Could Understand</a></li>
-      <li><time datetime="2025-09-16">16 Sep 2025</time><a href="/writing/wolperts-no-free-lunch-theorem/">Wolpert's No Free Lunch Theorem</a></li>
-      <li><time datetime="2025-03-10">10 Mar 2025</time><a href="/writing/improving-data-quality/">Improving Data Quality</a></li>
-      <li><time datetime="2025-02-22">22 Feb 2025</time><a href="/writing/advanced-keras-techniques/">Advanced Keras Techniques</a></li>
-      <li><time datetime="2025-01-26">26 Jan 2025</time><a href="/writing/data-and-concept-drift/">Data and Concept Drift</a></li>
-    </ul>
-    <!-- writing-list:end -->
+      <div class="work-grid" id="workGrid">
 
-    <p class="more">
-      <a href="https://defygrad.bearblog.dev/" target="_blank" rel="noopener">The more personal ones live on discombobulating →</a>
-    </p>
+        <a class="card work-card" href="https://github.com/habibsnippets/mathguard" target="_blank" rel="noopener" data-cat="post-training" data-reveal style="--i:0">
+          <div class="work-top">
+            <span class="tag">Post-training</span>
+            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>mathguard</h3>
+          <p>An RLHF-style alignment pipeline for math LLMs: harm refusal lifted from 0% to 88% with a 3.2% GSM8K alignment tax. HarmMathBench plus a DistilBERT reward model blocked all 96 jailbreak attempts against a 1.5B model.</p>
+          <div class="work-foot"><span>Safety</span><span>Fine-tuning</span><span>Evals</span></div>
+        </a>
+
+        <a class="card work-card" href="https://github.com/habibsnippets/Rasengan-XL" target="_blank" rel="noopener" data-cat="multimodal" data-reveal style="--i:1">
+          <div class="work-top">
+            <span class="tag">Multimodal</span>
+            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Rasengan-XL</h3>
+          <p>PEFT fine-tune of SDXL 1.0 — LoRA, QLoRA and DoRA — fitting a 2.6B-parameter model on a single 16 GB T4 with 4-bit NF4 and gradient checkpointing, so style transfer runs without enterprise GPUs.</p>
+          <div class="work-foot"><span>SDXL</span><span>LoRA</span><span>Diffusion</span></div>
+        </a>
+
+        <a class="card work-card" href="https://github.com/habibsnippets/SocioPostGenerator" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:2">
+          <div class="work-top">
+            <span class="tag">Systems</span>
+            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Socio Post Generator</h3>
+          <p>PostGen: a few-shot post generator. It reads existing posts, extracts their style, tags and language, then asks an LLM to write new ones in the same voice.</p>
+          <div class="work-foot"><span>Few-shot</span><span>Groq API</span><span>Python</span></div>
+        </a>
+
+        <a class="card work-card" href="https://github.com/habibsnippets/PDF2Podcast" target="_blank" rel="noopener" data-cat="systems" data-reveal style="--i:3">
+          <div class="work-top">
+            <span class="tag">Systems</span>
+            <svg class="ext" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>PDF2Podcast</h3>
+          <p>A document-to-audio pipeline: Llama-3.2-3B rewrites a dense PDF into a two-speaker dialogue — one explains, the other asks what you'd actually ask — rendered to audio with Kokoro TTS.</p>
+          <div class="work-foot"><span>Llama 3.2</span><span>Kokoro TTS</span><span>Python</span></div>
+        </a>
+
+      </div>
+
+
+      <a class="more-link" href="https://github.com/habibsnippets?tab=repositories" target="_blank" rel="noopener" data-reveal>
+        All repositories on GitHub
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
   </section>
 
-  <hr>
+  <!-- ───────────────────────── WRITING ───────────────────────── -->
+  <section id="writing" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>04 — Writing</p>
+        <h2>Learning in public, mostly the hard way.</h2>
+        <p class="section-sub">
+          23 technical writeups — things I rebuilt from scratch, papers I fought with, and the occasional note to myself. The more personal ones stay on <a class="inline-link" href="https://defygrad.bearblog.dev/" target="_blank" rel="noopener">discombobulating</a>.
+        </p>
+      </header>
 
-  <section id="contact">
-    <h2>Contact</h2>
-    <p>Best reached on X or GitHub. I read everything and answer the interesting ones.</p>
+      <div class="writing-tools" data-reveal>
+        <div class="search-wrap">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="m10.5 10.5 3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input id="writingSearch" type="search" placeholder="Search 23 posts…" autocomplete="off" aria-label="Search writing">
+          <kbd class="search-kbd">/</kbd>
+        </div>
+      </div>
 
-    <ul class="contact-list">
-      <li>
-        <span class="k">GitHub</span>
-        <a href="https://github.com/habibsnippets" target="_blank" rel="noopener">github.com/habibsnippets</a>
-      </li>
-      <li>
-        <span class="k">X</span>
-        <a href="https://x.com/habeebstwt" target="_blank" rel="noopener">x.com/habeebstwt</a>
-      </li>
-      <li>
-        <span class="k">Blog</span>
-        <a href="https://defygrad.bearblog.dev/" target="_blank" rel="noopener">defygrad.bearblog.dev</a>
-      </li>
-      <li>
-        <span class="k">Notes</span>
-        <a href="https://docs.google.com/document/d/112uastgZs0fzUoK3QiUlf-Q5fhgEE84KH7q3KQFcrRE/edit?usp=sharing" target="_blank" rel="noopener">Working document — Google Docs</a>
-      </li>
-    </ul>
+      <ol class="post-list" id="postList"></ol>
+
+      <p class="grid-empty" id="postEmpty" hidden>Nothing matches that search.</p>
+
+      <button class="btn btn-quiet show-more" id="showMore" type="button">
+        Show all 23 posts
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M4 6.5 8 10.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
   </section>
 
-  <hr>
+  <!-- ───────────────────────── ARTICLES ───────────────────────── -->
+  <section id="articles" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>05 — Articles</p>
+        <h2>Longer-form threads and write-ups.</h2>
+        <p class="section-sub">Short essays on <a class="inline-link" href="https://x.com/habeebstwt" target="_blank" rel="noopener">X</a>, paper notes on Medium and Notion. Each one opens at the source.</p>
+      </header>
 
-  <footer class="page-foot">
-    <p>© 2026 Habeeb</p>
-    <a href="#top">Back to top ↑</a>
-  </footer>
+      <div class="article-grid">
+        <a class="card article-card" href="https://x.com/habeebstwt/status/2018566118206775762" target="_blank" rel="noopener" data-reveal style="--i:0">
+          <div class="article-top"><span class="badge">X</span><time>03 Feb 2026</time></div>
+          <h3>Visual Grounding Is Front-Loaded</h3>
+          <p>A causal analysis of explanations in vision–language models.</p>
+          <span class="read">Read thread <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://x.com/habeebstwt/status/2016130774563750192" target="_blank" rel="noopener" data-reveal style="--i:1">
+          <div class="article-top"><span class="badge">X</span><time>27 Jan 2026</time></div>
+          <h3>The Cost of Always Looking</h3>
+          <p>What continuous visual attention actually costs a model.</p>
+          <span class="read">Read thread <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://x.com/habeebstwt/status/2011314748944687344" target="_blank" rel="noopener" data-reveal style="--i:2">
+          <div class="article-top"><span class="badge">X</span><time>14 Jan 2026</time></div>
+          <h3>The Reasoning Illusion</h3>
+          <p>Why VLMs are professional liars — and why fluent explanations aren't evidence.</p>
+          <span class="read">Read thread <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://x.com/habeebstwt/status/2026244233133461794" target="_blank" rel="noopener" data-reveal style="--i:3">
+          <div class="article-top"><span class="badge">X</span><time>24 Feb 2026</time></div>
+          <h3>LLM Latency Profiling with vLLM</h3>
+          <p>Where the milliseconds actually go when you serve a model.</p>
+          <span class="read">Read thread <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://habeebchisti.medium.com/the-three-pillars-of-post-training-sft-rlhf-and-constitutional-ai-explained-a0e83093398b" target="_blank" rel="noopener" data-reveal style="--i:4">
+          <div class="article-top"><span class="badge">Medium</span><time>Post-training</time></div>
+          <h3>The Three Pillars of Post-Training</h3>
+          <p>SFT, RLHF and Constitutional AI, explained without the hand-waving.</p>
+          <span class="read">Read on Medium <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://www.notion.so/Retinex-Net-24c494ad66748089938fe8eb4f423b34" target="_blank" rel="noopener" data-reveal style="--i:5">
+          <div class="article-top"><span class="badge">Notion</span><time>Paper note</time></div>
+          <h3>Retinex-Net</h3>
+          <p>Low-light enhancement, decomposed into reflectance and illumination.</p>
+          <span class="read">Open note <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://www.notion.so/Knowledge-Gap-Alignment-1bf494ad667480d0a68ced5f918172be" target="_blank" rel="noopener" data-reveal style="--i:6">
+          <div class="article-top"><span class="badge">Notion</span><time>Paper note</time></div>
+          <h3>Knowledge Gap Alignment</h3>
+          <p>Aligning what a model knows with what it will say.</p>
+          <span class="read">Open note <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://www.notion.so/AlexNet-Krizhevsky-Alex-Ilya-Sutskever-and-Geoffrey-E-Hinton-1b7494ad6674805db9eef1ec713b207c" target="_blank" rel="noopener" data-reveal style="--i:7">
+          <div class="article-top"><span class="badge">Notion</span><time>Paper note</time></div>
+          <h3>AlexNet</h3>
+          <p>Krizhevsky, Sutskever &amp; Hinton — where modern vision actually starts.</p>
+          <span class="read">Open note <span aria-hidden="true">↗</span></span>
+        </a>
+
+        <a class="card article-card" href="https://www.notion.so/Very-Deep-Convolutional-Networks-For-Large-Scale-Image-Recognition-Karen-Simonyan-and-Andrew-Zisser-1b9494ad66748009a83ddd7a8b0a4eb1" target="_blank" rel="noopener" data-reveal style="--i:8">
+          <div class="article-top"><span class="badge">Notion</span><time>Paper note</time></div>
+          <h3>VGG-16</h3>
+          <p>Simonyan &amp; Zisserman — depth, 3×3 kernels, and a very expensive lesson.</p>
+          <span class="read">Open note <span aria-hidden="true">↗</span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── NOTES ───────────────────────── -->
+  <section id="notes" class="section">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>06 — Notes</p>
+        <h2>The working document.</h2>
+      </header>
+
+      <a class="notes-card" href="https://docs.google.com/document/d/112uastgZs0fzUoK3QiUlf-Q5fhgEE84KH7q3KQFcrRE/edit?usp=sharing" target="_blank" rel="noopener" data-reveal>
+        <div class="notes-left">
+          <div class="notes-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 3h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4h4M8 12h7M8 16h7M8 8h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h3>Notes &amp; learning log</h3>
+            <p>The live learning log — paper breakdowns and half-digested notes on CLIP, BLIP, Mask R-CNN, diffusion, world models and continual learning. Messy on purpose; whatever survives ends up as a blog post.</p>
+            <ul class="mini-tags"><li>CLIP / BLIP</li><li>Mask R-CNN</li><li>Diffusion</li><li>World models</li><li>Continual learning</li></ul>
+          </div>
+        </div>
+        <span class="notes-action">
+          Open in Google Docs
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ───────────────────────── CONTACT ───────────────────────── -->
+  <section id="contact" class="section section-last">
+    <div class="container">
+      <header class="section-head" data-reveal>
+        <p class="label"><span class="label-line" aria-hidden="true"></span>07 — Contact</p>
+        <h2>Let's talk vision, post-training, or anything adjacent.</h2>
+        <p class="section-sub">Best reached on X or GitHub. I read everything, and I answer the interesting ones.</p>
+      </header>
+
+      <div class="contact-grid" data-reveal>
+        <a class="contact-tile" href="https://github.com/habibsnippets" target="_blank" rel="noopener">
+          <span class="contact-label">GitHub</span>
+          <span class="contact-value">@habibsnippets</span>
+          <span class="contact-hint">Code, experiments, half-finished things ↗</span>
+        </a>
+
+        <a class="contact-tile" href="https://x.com/habeebstwt" target="_blank" rel="noopener">
+          <span class="contact-label">X / Twitter</span>
+          <span class="contact-value">@habeebstwt</span>
+          <span class="contact-hint">Threads and shorter thoughts ↗</span>
+        </a>
+
+        <a class="contact-tile" href="https://defygrad.bearblog.dev/" target="_blank" rel="noopener">
+          <span class="contact-label">Blog</span>
+          <span class="contact-value">defygrad.bearblog.dev</span>
+          <span class="contact-hint">discombobulating — all writing ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
 
 </main>
 
+<footer class="footer">
+  <div class="container footer-inner">
+    <p>© <span id="year">2026</span> Habeeb</p>
+    <p class="footer-meta">Hand-written HTML, CSS &amp; JS · Hosted on GitHub Pages</p>
+    <a href="#top" class="footer-top">Back to top ↑</a>
+  </div>
+</footer>
+
+
+<script src="brain/brain.js"></script>
+<script src="writing/posts.js"></script>
+<script src="main.js?v=16"></script>
 </body>
 </html>
